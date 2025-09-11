@@ -1,0 +1,131 @@
+---
+name: Branch Naming Validation
+
+# Trigger the workflow on push and pull request events
+'on':
+  push:
+    branches-ignore:
+      - main
+      - master
+      - dev
+      - develop
+      - staging
+      - production
+      - release
+  pull_request:
+    branches:
+      - main
+      - master
+      - dev
+      - develop
+      - staging
+      - production
+
+jobs:
+  validate-branch-name:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check branch naming convention
+        run: |
+          # Get the branch name from the event
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          else
+            BRANCH_NAME="${{ github.ref_name }}"
+          fi
+          
+          echo "Validating branch name: $BRANCH_NAME"
+          
+          # List of excluded branches (protected branches)
+          EXCLUDED_BRANCHES=(
+            "main"
+            "master"
+            "dev"
+            "develop"
+            "staging"
+            "production"
+            "release"
+          )
+          
+          # Check if branch is in excluded list
+          for excluded in "${EXCLUDED_BRANCHES[@]}"; do
+            if [ "$BRANCH_NAME" = "$excluded" ]; then
+              echo "✅ Branch '$BRANCH_NAME' is a protected branch and is excluded from naming validation."
+              exit 0
+            fi
+          done
+          
+          # Define the regex pattern for branch naming convention
+          # Pattern: 타입/이슈번호/설명
+          # Types: feat|feature|fix|bug|bugfix|hot|hotfix|docs|ref|refactor|test|chore|rel|release
+          # Issue number: [0-9]+ or [A-Z]+-[0-9]+
+          # Description: [a-z0-9-]+
+          PATTERN="^(feat|feature|fix|bug|bugfix|hot|hotfix|docs|ref|refactor|test|chore|rel|release)\/([0-9]+|[A-Z]+-[0-9]+)\/[a-z0-9-]+$"
+          
+          # Validate branch name against pattern
+          if echo "$BRANCH_NAME" | grep -qE "$PATTERN"; then
+            echo "✅ Branch name '$BRANCH_NAME' follows the naming convention."
+            echo ""
+            echo "📋 Naming Convention Details:"
+            echo "   Pattern: 타입/이슈번호/설명"
+            echo "   Types: feat|feature, fix|bug|bugfix, hot|hotfix, docs, ref|refactor, test, chore, rel|release"
+            echo "   Issue: Number (123) or Jira-style (ABC-123)"
+            echo "   Description: lowercase alphanumeric with hyphens"
+            echo ""
+            echo "✨ Valid examples:"
+            echo "   • feature/12/shopping-cart"
+            echo "   • feat/35/user-profile-page"
+            echo "   • bugfix/8/login-validation-error"
+            echo "   • fix/27/responsive-layout-fix"
+            echo "   • hotfix/99/security-patch"
+            echo "   • docs/5/api-documentation"
+            echo "   • test/ABC-123/unit-test-coverage"
+          else
+            echo "❌ Branch name '$BRANCH_NAME' does NOT follow the naming convention."
+            echo ""
+            echo "📋 Required Pattern: 타입/이슈번호/설명"
+            echo "   Format: TYPE/ISSUE_NUMBER/description"
+            echo ""
+            echo "🏷️  Allowed Types (full name or abbreviation):"
+            echo "   • feature, feat    - New features"
+            echo "   • bugfix, fix, bug - Bug fixes"
+            echo "   • hotfix, hot      - Urgent fixes"
+            echo "   • release, rel     - Release preparation"
+            echo "   • docs             - Documentation"
+            echo "   • refactor, ref    - Code refactoring"
+            echo "   • test             - Testing"
+            echo "   • chore            - Other tasks"
+            echo ""
+            echo "🔢 Issue Number Format:"
+            echo "   • Simple number: 123, 456"
+            echo "   • Jira-style: ABC-123, DEF-456"
+            echo ""
+            echo "📝 Description Format:"
+            echo "   • Lowercase letters, numbers, and hyphens only"
+            echo "   • No spaces or special characters"
+            echo ""
+            echo "✨ Valid Examples:"
+            echo "   • feature/12/shopping-cart"
+            echo "   • feat/35/user-profile-page"
+            echo "   • bugfix/8/login-validation-error"
+            echo "   • fix/27/responsive-layout-fix"
+            echo "   • hotfix/99/security-patch"
+            echo "   • hot/103/database-connection-timeout"
+            echo "   • docs/5/api-documentation"
+            echo "   • refactor/18/database-optimization"
+            echo "   • test/22/unit-test-coverage"
+            echo "   • chore/31/build-script-update"
+            echo "   • release/45/v2-1-0"
+            echo "   • rel/ABC-123/user-authentication"
+            echo ""
+            echo "🚫 Invalid Examples:"
+            echo "   • feature-12-shopping-cart (wrong separators)"
+            echo "   • Feature/12/shopping-cart (uppercase type)"
+            echo "   • feat/12/Shopping-Cart (uppercase in description)"
+            echo "   • feat/12/shopping_cart (underscore not allowed)"
+            echo "   • new-feature/12/test (invalid type)"
+            echo "   • feat/abc/test (invalid issue number)"
+            echo ""
+            exit 1
+          fi
