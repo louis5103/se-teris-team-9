@@ -2,7 +2,7 @@
 name: Branch Naming Validation
 
 # Trigger the workflow on push and pull request events
-'on':
+on:
   push:
     branches-ignore:
       - main
