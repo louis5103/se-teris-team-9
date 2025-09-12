@@ -61,7 +61,7 @@ jobs:
           # Types: feat|feature|fix|bug|bugfix|hot|hotfix|docs|ref|refactor|test|chore|rel|release
           # Issue number: [0-9]+ or [A-Z]+-[0-9]+
           # Description: [a-z0-9-]+
-          PATTERN="^(feat|feature|fix|bug|bugfix|hot|hotfix|docs|ref|refactor|test|chore|rel|release)\/([0-9]+|[A-Z]+-[0-9]+)\/[a-z0-9-]+$"
+          PATTERN="^(feat|feature|fix|bug|bugfix|hot|hotfix|docs|ref|refactor|test|chore|rel|release)\/([0-9]+|[A-Z]+-[0-9]+)\/[a-z0-9-.]+$"
           
           # Validate branch name against pattern
           if echo "$BRANCH_NAME" | grep -qE "$PATTERN"; then
