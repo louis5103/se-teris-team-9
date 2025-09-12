@@ -37,6 +37,12 @@ jobs:
           
           echo "Validating branch name: $BRANCH_NAME"
           
+          # Check if branch name is empty
+          if [ -z "$BRANCH_NAME" ]; then
+            echo "❌ Branch name is empty or not found."
+            exit 1
+          fi
+          
           # List of excluded branches (protected branches)
           EXCLUDED_BRANCHES=(
             "main"
@@ -60,18 +66,18 @@ jobs:
           # Pattern: 타입/이슈번호/설명
           # Types: feat|feature|fix|bug|bugfix|hot|hotfix|docs|ref|refactor|test|chore|rel|release
           # Issue number: [0-9]+ or [A-Z]+-[0-9]+
-          # Description: [a-z0-9-]+
-          PATTERN="^(feat|feature|fix|bug|bugfix|hot|hotfix|docs|ref|refactor|test|chore|rel|release)\/([0-9]+|[A-Z]+-[0-9]+)\/[a-z0-9-.]+$"
+          # Description: [a-z0-9-]+ (점 제외, 더 안전하게)
+          PATTERN="^(feat|feature|fix|bug|bugfix|hot|hotfix|docs|ref|refactor|test|chore|rel|release)/([0-9]+|[A-Z]+-[0-9]+)/[a-z0-9-]+$"
           
-          # Validate branch name against pattern
-          if echo "$BRANCH_NAME" | grep -qE "$PATTERN"; then
+          # Validate branch name against pattern using bash built-in regex (더 안전함)
+          if [[ "$BRANCH_NAME" =~ $PATTERN ]]; then
             echo "✅ Branch name '$BRANCH_NAME' follows the naming convention."
             echo ""
             echo "📋 Naming Convention Details:"
             echo "   Pattern: 타입/이슈번호/설명"
             echo "   Types: feat|feature, fix|bug|bugfix, hot|hotfix, docs, ref|refactor, test, chore, rel|release"
             echo "   Issue: Number (123) or Jira-style (ABC-123)"
-            echo "   Description: lowercase alphanumeric with hyphens"
+            echo "   Description: lowercase alphanumeric with hyphens only"
             echo ""
             echo "✨ Valid examples:"
             echo "   • feature/12/shopping-cart"
@@ -103,7 +109,7 @@ jobs:
             echo ""
             echo "📝 Description Format:"
             echo "   • Lowercase letters, numbers, and hyphens only"
-            echo "   • No spaces or special characters"
+            echo "   • No spaces, dots, or special characters"
             echo ""
             echo "✨ Valid Examples:"
             echo "   • feature/12/shopping-cart"
@@ -124,8 +130,10 @@ jobs:
             echo "   • Feature/12/shopping-cart (uppercase type)"
             echo "   • feat/12/Shopping-Cart (uppercase in description)"
             echo "   • feat/12/shopping_cart (underscore not allowed)"
+            echo "   • feat/12/shopping.cart (dots not allowed)"
             echo "   • new-feature/12/test (invalid type)"
             echo "   • feat/abc/test (invalid issue number)"
+            echo "   • feat/12/test with spaces (spaces not allowed)"
             echo ""
             exit 1
           fi
