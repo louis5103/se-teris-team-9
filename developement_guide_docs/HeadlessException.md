@@ -94,7 +94,7 @@ docker run --rm \
     tetris-app
 ```
 
-docker-compose.yml 적용 방안 (Linux 기준)
+### docker-compose.yml 적용 방안 (Linux 기준)
 지속적인 관리를 위해 docker-compose.yml에 해당 설정을 명시할 수 있습니다.
 
 ```yml
