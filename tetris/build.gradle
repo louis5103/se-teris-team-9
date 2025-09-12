@@ -8,6 +8,8 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    // 'shadow' 플러그인을 추가하여 모든 의존성을 포함하는 JAR 파일을 만듭니다.
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 repositories {
