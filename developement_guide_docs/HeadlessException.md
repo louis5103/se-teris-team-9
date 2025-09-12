@@ -80,7 +80,8 @@ docker run --rm \
 ```
 
 ### macOS 환경 (XQuartz 설치 필요)
-`export DISPLAY=$(ipconfig getifaddr en0):0`
+```bash
+export DISPLAY=$(ipconfig getifaddr en0):0
 ```
 docker run --rm \
     -e DISPLAY=host.docker.internal:0 \
