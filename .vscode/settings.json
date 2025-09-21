@@ -1,3 +1,6 @@
 {
+    "java.compile.nullAnalysis.mode": "automatic",
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.fontFamily": "monospace",
     "java.configuration.updateBuildConfiguration": "interactive"
 }
