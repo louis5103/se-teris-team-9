@@ -1,0 +1,185 @@
+/*
+ * 🎮 Tetris Game CSS Styles
+ * Modern UI Design for JavaFX + Spring Boot Application
+ */
+
+/* ============================================================================
+   🌈 전체 컨테이너 스타일
+   ============================================================================ */
+.main-container {
+    -fx-background-color: linear-gradient(to bottom, #2c3e50, #34495e);
+    -fx-spacing: 0;
+}
+
+/* ============================================================================
+   🎨 게임 영역 스타일  
+   ============================================================================ */
+.game-area {
+    -fx-background-color: linear-gradient(to bottom, #34495e, #2c3e50);
+    -fx-border-color: #3498db;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.title {
+    -fx-text-fill: #ecf0f1;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 15 0;
+    -fx-alignment: center;
+}
+
+.game-canvas {
+    -fx-border-color: #2980b9;
+    -fx-border-width: 3px;
+    -fx-border-radius: 5px;
+    -fx-background-color: #000000;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+}
+
+/* ============================================================================
+   📊 컨트롤 패널 스타일
+   ============================================================================ */
+.control-panel {
+    -fx-background-color: linear-gradient(to bottom, #ecf0f1, #bdc3c7);
+    -fx-border-color: #95a5a6;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-min-width: 200px;
+    -fx-max-width: 200px;
+}
+
+/* ============================================================================
+   📝 섹션 제목 스타일
+   ============================================================================ */
+.section-title {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-padding: 5 0 5 0;
+}
+
+/* ============================================================================
+   📊 점수 정보 스타일
+   ============================================================================ */
+.score-section {
+    -fx-background-color: rgba(52, 152, 219, 0.1);
+    -fx-border-color: #3498db;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px;
+}
+
+.info-label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-padding: 2 0 2 10;
+}
+
+/* ============================================================================
+   🎮 컨트롤 버튼 스타일
+   ============================================================================ */
+.control-section {
+    -fx-background-color: rgba(46, 204, 113, 0.1);
+    -fx-border-color: #27ae60;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px;
+    -fx-alignment: center;
+}
+
+.control-button {
+    -fx-background-color: linear-gradient(to bottom, #3498db, #2980b9);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8 16 8 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 3, 0, 0, 1);
+}
+
+.control-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #5dade2, #3498db);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.control-button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #2980b9, #21618c);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.control-button:disabled {
+    -fx-background-color: linear-gradient(to bottom, #95a5a6, #7f8c8d);
+    -fx-text-fill: #ecf0f1;
+    -fx-opacity: 0.6;
+    -fx-cursor: default;
+}
+
+/* ============================================================================
+   ⌨️ 도움말 섹션 스타일
+   ============================================================================ */
+.help-section {
+    -fx-background-color: rgba(241, 196, 15, 0.1);
+    -fx-border-color: #f39c12;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px;
+}
+
+.help-label {
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 1 0 1 10;
+    -fx-font-family: "Courier New", monospace;
+}
+
+/* ============================================================================
+   📏 구분선 스타일
+   ============================================================================ */
+.separator .line {
+    -fx-background-color: #bdc3c7;
+    -fx-border-width: 0;
+}
+
+/* ============================================================================
+   🎨 애니메이션 효과
+   ============================================================================ */
+.control-button {
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+/* ============================================================================
+   🌙 다크 모드 지원 (추후 확장 가능)
+   ============================================================================ */
+.root.dark-mode {
+    -fx-background-color: #1a1a1a;
+}
+
+.dark-mode .control-panel {
+    -fx-background-color: linear-gradient(to bottom, #2c3e50, #34495e);
+}
+
+.dark-mode .section-title,
+.dark-mode .info-label,
+.dark-mode .help-label {
+    -fx-text-fill: #ecf0f1;
+}
+
+/* ============================================================================
+   📱 반응형 디자인 (해상도별 대응)
+   ============================================================================ */
+@media screen and (max-width: 1024px) {
+    .control-panel {
+        -fx-min-width: 180px;
+        -fx-max-width: 180px;
+    }
+    
+    .control-button {
+        -fx-pref-width: 100px;
+    }
+}
