@@ -28,10 +28,10 @@ javafx {
     )
 }
 
-// 🚀 메인 애플리케이션 설정 - Spring Boot가 자동 감지
-// application {
-//     mainClass.set("seoultech.se.client.TetrisApplication")
-// }
+// 🚀 메인 애플리케이션 설정
+application {
+    mainClass.set("seoultech.se.client.TetrisApplication")
+}
 
 dependencies {
     // 🎯 핵심 모듈 직접 의존성 (POJO 알고리즘 직접 사용)

@@ -1,52 +1,58 @@
-# 🎮 Tetris Multi-Module Architecture Guide
+# �️ Multi-Module Architecture Guide (Integration Framework)
+
+> **⚠️ 현재 상태**: 테트리스 게임 기능은 제거되었으며, **Spring Boot + JavaFX 통합 아키텍처**만 유지되고 있습니다.
+> 
+> **📚 실행 가이드**: [DEVELOPMENT.md](./DEVELOPMENT.md) 참고
 
 ## 📋 목차
-1. [아키텍처 개요](#1-아키텍처-개요)
-2. [모듈별 상세 구조](#2-모듈별-상세-구조)
-3. [의존성 관계 및 데이터 흐름](#3-의존성-관계-및-데이터-흐름)
-4. [Spring Boot + JavaFX 통합 방식](#4-spring-boot--javafx-통합-방식)
+1. [통합 아키텍처 개요](#1-통합-아키텍처-개요)
+2. [모듈별 역할 및 구조](#2-모듈별-역할-및-구조)
+3. [Spring Boot + JavaFX 통합 방식](#3-spring-boot--javafx-통합-방식)
+4. [의존성 관계 및 데이터 흐름](#4-의존성-관계-및-데이터-흐름)
 5. [Gradle 멀티모듈 빌드 체계](#5-gradle-멀티모듈-빌드-체계)
-6. [모듈 통합 및 배포 프로세스](#6-모듈-통합-및-배포-프로세스)
-7. [개발 워크플로우](#7-개발-워크플로우)
-8. [모듈별 독립 개발 가이드](#8-모듈별-독립-개발-가이드)
-9. [패키지 구조 및 네이밍 컨벤션](#9-패키지-구조-및-네이밍-컨벤션)
-10. [개발 가이드라인](#10-개발-가이드라인)
+6. [개발 워크플로우](#6-개발-워크플로우)
 
 ---
 
-## 1. 아키텍처 개요
+## 1. 통합 아키텍처 개요
 
-### 🏗️ 전체 구조
+### 🏗️ 현재 구조
 ```
-tetris-app (Java 21 LTS)
-├── tetris-core       🎯 순수 Java 도메인 로직
-├── tetris-backend    ⚙️ Spring Boot 서비스 레이어
-└── tetris-client     🖥️ JavaFX + Spring Boot 메인 애플리케이션
+tetris-app (Spring Boot + JavaFX Integration Framework)
+├── tetris-core       🎯 공통 라이브러리 (비즈니스 로직)
+├── tetris-backend    ⚙️ Spring Boot REST API 서버
+└── tetris-client     🖥️ JavaFX + Spring Boot 통합 실행
 ```
 
-### 🎯 설계 철학
-- **관심사의 분리**: 각 모듈은 명확한 책임을 가짐
-- **의존성 역전**: 상위 모듈이 하위 모듈에 의존하는 구조
-- **테스트 가능성**: 순수 Java 로직과 프레임워크 분리
-- **재사용성**: Core 모듈은 다른 UI 프레임워크에서도 사용 가능
+### 🎯 설계 목표
+- **모듈 통합**: Spring Boot DI 컨테이너로 모든 모듈 통합
+- **독립 개발**: 각 모듈별로 독립적인 개발/테스트 가능
+- **하이브리드 실행**: JavaFX GUI + Spring Boot 서비스 레이어
+- **확장성**: 새로운 기능을 각 모듈에 추가 가능한 구조
 
-### 🔄 동작 흐름
-1. **사용자 입력** → JavaFX Controller
-2. **비즈니스 로직 호출** → Spring Service
-3. **도메인 로직 실행** → Core POJO
-4. **결과 반환** → Controller → UI 업데이트
+### 🔄 실행 모드
+1. **통합 실행**: `tetris-client:run` → JavaFX + Spring Boot DI
+2. **백엔드 독립**: `tetris-backend:bootRun` → REST API 서버 
+3. **빌드 시스템**: Gradle 멀티모듈로 전체 관리
 
 ---
 
-## 2. 모듈별 상세 구조
+## 2. 모듈별 역할 및 구조
 
-### 🎯 tetris-core (도메인 층)
+### 🎯 tetris-core (공통 라이브러리)
 
-**역할**: 순수 Java 게임 로직 및 도메인 모델
+**역할**: 모든 모듈에서 공통으로 사용하는 비즈니스 로직
 
-#### 📦 주요 컴포넌트
+#### 📦 현재 구조 (최소한)
 ```java
 seoultech.se.core/
+└── (공통 유틸리티 및 도메인 모델 추가 예정)
+```
+
+**특징:**
+- ✅ 순수 Java 라이브러리 (프레임워크 독립적)
+- ✅ 다른 모듈에서 의존성으로 사용
+- ✅ 단위 테스트 용이
 ├── model/
 │   ├── TetrisBoard.java          // 게임 보드 로직
 │   └── TetrisBlockType.java      // 블록 종류 및 회전
