@@ -1,6 +1,40 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic",
-    "terminal.integrated.defaultProfile.osx": "zsh",
-    "terminal.integrated.fontFamily": "monospace",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    // ======================================================================
+    // 🎯 Tetris Project - 기본 VS Code 설정
+    // ======================================================================
+
+    // Java 21 JDK 경로
+    "java.jdt.ls.java.home": "/Users/imsang-u/Library/Java/JavaVirtualMachines/corretto-21.0.8/Contents/Home",
+    
+    // Lombok 지원을 위한 최소 설정
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -Xmx2G --add-opens java.base/java.lang=ALL-UNNAMED -javaagent:/Users/imsang-u/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.30/f195ee86e6c896ea47a1d39defbe20eb59cd149d/lombok-1.18.30.jar",
+    
+    // Java Runtime 설정
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "/Users/imsang-u/Library/Java/JavaVirtualMachines/corretto-21.0.8/Contents/Home",
+            "default": true
+        }
+    ],
+    
+    // Gradle 프로젝트 지원
+    "java.import.gradle.enabled": true,
+    "java.import.gradle.wrapper.enabled": true,
+    
+    // 기본 Java 설정
+    "java.compile.nullAnalysis.mode": "disabled",
+    "java.saveActions.organizeImports": true,
+    
+    // 에디터 기본 설정
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    
+    // 불필요한 파일 숨기기
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    }
 }
