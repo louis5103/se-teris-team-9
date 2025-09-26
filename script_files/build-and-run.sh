@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 🎮 Tetris Desktop Application - 빌드 & 실행 스크립트
-# Java 21 LTS + JavaFX + Spring Boot
+# Java 21 LTS + JavaFX + Spring Boot (최적화된 설정)
 
 echo "🎮 Tetris Desktop Application - 빌드 & 실행"
 echo "========================================="
@@ -18,26 +18,12 @@ fi
 echo "✅ 빌드 완료!"
 echo ""
 
-# 2. 애플리케이션 실행
+# 2. 애플리케이션 실행 (Gradle 방식 - 권장)
 echo "🚀 애플리케이션 실행 중..."
 echo "========================================="
 
-# JAR 파일 경로
-JAR_FILE="tetris-client/build/libs/tetris-desktop-app-java21-1.0.0-SNAPSHOT.jar"
-
-# JavaFX + Spring Boot 애플리케이션 실행
-java \
-    --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED \
-    --add-opens javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED \
-    --add-opens javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED \
-    --add-opens javafx.base/com.sun.javafx.binding=ALL-UNNAMED \
-    --add-opens javafx.base/com.sun.javafx.event=ALL-UNNAMED \
-    --add-opens java.base/java.lang=ALL-UNNAMED \
-    --add-opens java.base/java.util=ALL-UNNAMED \
-    --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
-    -Dprism.order=sw \
-    -Dprism.text=t2k \
-    -jar "$JAR_FILE"
+# Gradle을 통한 실행 (자동으로 최적화된 JVM args 적용)
+./gradlew :tetris-client:run
 
 echo ""
 echo "========================================="

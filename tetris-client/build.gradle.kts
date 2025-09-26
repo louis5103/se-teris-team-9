@@ -6,9 +6,9 @@
  * - Java 21의 Virtual Threads, 향상된 concurrent 기능 활용
  */
 plugins {
-    id("org.springframework.boot")
-    id("io.spring.dependency-management") 
-    id("org.openjfx.javafxplugin")
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
+    alias(libs.plugins.javafx)
     application  // JavaFX 애플리케이션
 }
 
@@ -34,73 +34,57 @@ application {
 }
 
 dependencies {
-    // 🎯 핵심 모듈 직접 의존성 (POJO 알고리즘 직접 사용)
+    // 🎯 Core & Backend 모듈 의존성
     implementation(project(":tetris-core"))
-    
-    // ⚙️ 백엔드 서비스 의존성 (서비스 레이어)
     implementation(project(":tetris-backend"))
     
-    // 🌱 Spring Boot 핵심 (웹 기능 제외)
-    implementation("org.springframework.boot:spring-boot-starter")
+    // ============================================================================
+    // 🖥️ CLIENT MODULE SPECIFIC DEPENDENCIES
+    // ============================================================================
     
-    // 🎨 JavaFX 21 LTS 핵심 의존성 (기본적인 기능만)
-    implementation("org.openjfx:javafx-controls:21")
-    implementation("org.openjfx:javafx-fxml:21")
+    // 🌱 Spring Boot Bundle (DI container only)
+    implementation(libs.bundles.client.spring)
+    annotationProcessor(libs.client.spring.boot.configuration.processor)
     
-    // ⚙️ 설정 관리
-    implementation("org.springframework.boot:spring-boot-configuration-processor")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    // 🎨 JavaFX Bundle (Desktop UI)
+    implementation(libs.bundles.client.javafx)
     
-    // 🔧 개발 도구 (JavaFX와 충돌할 수 있으므로 주석처리)
-    // developmentOnly("org.springframework.boot:spring-boot-devtools")
+    // 📊 Utility Libraries
+    implementation(libs.common.commons.lang3)
     
-    // 📊 유틸리티 (기본적인 기능만)
-    implementation("org.apache.commons:commons-lang3:3.17.0")
+    // ============================================================================
+    // 🚀 COMMON DEPENDENCIES (모든 모듈 공통)  
+    // ============================================================================
     
-    // 🧪 테스트 (기본적인 기능만)
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // 🛠️ Development Tools
+    compileOnly(libs.common.lombok)
+    annotationProcessor(libs.common.lombok)
+    testCompileOnly(libs.common.lombok)
+    testAnnotationProcessor(libs.common.lombok)
+    
+    // 🧪 Testing Dependencies
+    testImplementation(libs.client.spring.boot.starter.test)
+    testImplementation(libs.bundles.common.testing)
 }
 
-// 🚀 실행 설정 (JavaFX + Java 21 Virtual Threads 최적화)
+// 🚀 실행 설정 (JavaFX + Java 21 최적화 - 단순화됨)
 val javafxJvmArgs = listOf(
-    // JavaFX 모듈 접근 허용
+    // JavaFX 핵심 모듈 접근만 허용 (필수 최소한)
     "--add-opens", "javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
-    "--add-opens", "javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED",
     "--add-opens", "javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED",
-    "--add-opens", "javafx.base/com.sun.javafx.binding=ALL-UNNAMED",
-    "--add-opens", "javafx.base/com.sun.javafx.event=ALL-UNNAMED",
     
-    // Spring Boot 리플렉션 지원
+    // Spring Boot 기본 리플렉션 지원
     "--add-opens", "java.base/java.lang=ALL-UNNAMED",
-    "--add-opens", "java.base/java.util=ALL-UNNAMED",
-    "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED",
-    
-    // Desktop 앱 최적화
-    "-Dprism.order=sw",
-    "-Dprism.text=t2k"
+    "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED"
 )
 
 tasks.run.configure {
     jvmArgs(javafxJvmArgs)
 }
 
-// Spring Boot 실행을 위한 설정
+// Spring Boot 실행을 위한 설정 (단순화됨)
 tasks.bootRun.configure {
     jvmArgs(javafxJvmArgs)
-    
-    // JavaFX 런타임을 명시적으로 추가
-    doFirst {
-        val javaFxVersion = "21"
-        val platform = org.gradle.internal.os.OperatingSystem.current()
-        val osName = when {
-            platform.isLinux -> "linux"
-            platform.isMacOsX -> "mac"
-            platform.isWindows -> "win"
-            else -> throw GradleException("Unsupported OS: ${platform.name}")
-        }
-        
-        systemProperty("javafx.runtime.path", "${gradle.gradleUserHomeDir}/caches/modules-2/files-2.1")
-    }
 }
 
 // 📦 실행 가능한 JAR 설정
@@ -114,23 +98,18 @@ tasks.bootJar {
         attributes(
             "Implementation-Title" to "Tetris Desktop Game (Java 21 LTS)",
             "Implementation-Version" to project.version,
-            "Add-Opens" to "javafx.graphics/com.sun.javafx.application javafx.controls/com.sun.javafx.scene.control.behavior"
+            "Implementation-Vendor" to "SeoulTech SE Team 9"
         )
     }
 }
 
-// 🧪 테스트 설정 (간단하게)
+// 🧪 테스트 설정 (루트에서 상속받아 일관성 확보)
 tasks.test {
     useJUnitPlatform()
     
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
-    
-    // JavaFX 테스트를 위한 기본 설정
+    // JavaFX 테스트를 위한 최소 필수 설정만 추가
     jvmArgs(
-        "--add-opens", "javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
-        "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED"
+        "--add-opens", "javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
     )
 }
 

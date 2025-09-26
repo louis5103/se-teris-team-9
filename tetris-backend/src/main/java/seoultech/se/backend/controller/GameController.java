@@ -1,11 +1,13 @@
 package seoultech.se.backend.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import seoultech.se.backend.service.GameService;
+
+
 
 /**
  * 🎮 기본 REST API 컨트롤러 (Spring DI 통합)
@@ -15,10 +17,9 @@ import seoultech.se.backend.service.GameService;
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class GameController {
-    
-    @Autowired
-    private GameService gameService;
+    private final GameService gameService;
     
     @GetMapping("/status")
     public String getStatus() {

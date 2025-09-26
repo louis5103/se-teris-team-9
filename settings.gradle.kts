@@ -7,6 +7,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
+// 🎯 Version Catalog은 gradle/libs.versions.toml에서 자동 감지됨
+
 // 루트 프로젝트 이름
 rootProject.name = "tetris-app"
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 🎮 Tetris Desktop Application 실행 스크립트
-# Java 21 LTS + JavaFX + Spring Boot
+# Java 21 LTS + JavaFX + Spring Boot (JAR 직접 실행)
 
 echo "🎮 Tetris Desktop Application 시작..."
 echo "========================================="
@@ -20,18 +20,12 @@ echo "✅ JAR 파일 발견: $JAR_FILE"
 echo "🚀 애플리케이션 시작 중..."
 echo ""
 
-# JavaFX + Spring Boot 애플리케이션 실행
+# JavaFX + Spring Boot 애플리케이션 실행 (최적화된 JVM args)
 java \
     --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED \
-    --add-opens javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED \
     --add-opens javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED \
-    --add-opens javafx.base/com.sun.javafx.binding=ALL-UNNAMED \
-    --add-opens javafx.base/com.sun.javafx.event=ALL-UNNAMED \
     --add-opens java.base/java.lang=ALL-UNNAMED \
-    --add-opens java.base/java.util=ALL-UNNAMED \
     --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
-    -Dprism.order=sw \
-    -Dprism.text=t2k \
     -jar "$JAR_FILE"
 
 echo ""

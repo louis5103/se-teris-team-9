@@ -12,11 +12,17 @@ plugins {
 description = "Tetris Core Domain Logic"
 
 dependencies {
-    // 📊 유틸리티 (기본적인 기능만)
-    implementation("org.apache.commons:commons-lang3:3.17.0")
+    // 📊 Utility Libraries
+    implementation(libs.common.commons.lang3)
     
-    // 🧪 테스트 전용 의존성 (기본적인 것들만)
-    testImplementation("org.assertj:assertj-core:3.26.3")
+    // �️ Development Tools (공통 의존성)
+    compileOnly(libs.common.lombok)
+    annotationProcessor(libs.common.lombok)
+    testCompileOnly(libs.common.lombok)
+    testAnnotationProcessor(libs.common.lombok)
+    
+    // 🧪 Testing Dependencies (공통 번들)
+    testImplementation(libs.bundles.common.testing)
 }
 
 // 📦 JAR 생성 설정
@@ -31,10 +37,10 @@ tasks.jar {
     }
 }
 
-// ✅ 테스트 실행 설정
+// ✅ 테스트 실행 설정 (루트에서 상속받아 일관성 확보)
 tasks.test {
     useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
+    
+    // 추가 설정이 필요한 경우에만 여기서 오버라이드
+    // 기본 설정은 루트 build.gradle.kts에서 상속됨
 }

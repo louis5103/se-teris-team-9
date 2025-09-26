@@ -8,8 +8,8 @@
  * - 라이브러리로도 사용 가능 (client 통합시)
  */
 plugins {
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
     `java-library`  // 라이브러리로도 사용됨
     application     // 독립 실행도 가능
 }
@@ -25,26 +25,36 @@ dependencies {
     // 🎯 Core 모듈 의존성
     api(project(":tetris-core"))
     
-    // 🌱 Spring Boot 핵심
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    // ============================================================================
+    // ⚙️ BACKEND MODULE SPECIFIC DEPENDENCIES
+    // ============================================================================
     
-    // 🌐 개발/테스트용 웹 기능 (독립 실행시에만)
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    // 🌱 Spring Boot Core
+    implementation(libs.backend.spring.boot.starter)
     
-    // 🗄️ 데이터베이스 (H2) - 활성화
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    runtimeOnly("com.h2database:h2")
+    // 🌐 Spring Web Bundle (Web + Validation)
+    implementation(libs.bundles.backend.spring.web)
     
-    // ⚙️ 설정 관리
-    implementation("org.springframework.boot:spring-boot-configuration-processor")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    // 🗄️ Data Access Bundle (JPA + H2 Database)  
+    implementation(libs.backend.spring.boot.starter.data.jpa)
+    runtimeOnly(libs.backend.h2.database)
     
-    // 🔧 개발 도구
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    // 🔧 Development Tools Bundle
+    implementation(libs.bundles.backend.development)
+    annotationProcessor(libs.backend.spring.boot.configuration.processor)
     
-    // 🧪 테스트
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+    // ============================================================================
+    // 🚀 COMMON DEPENDENCIES (모든 모듈 공통)
+    // ============================================================================
+    
+    // 🛠️ Development Tools
+    compileOnly(libs.common.lombok)
+    annotationProcessor(libs.common.lombok)
+    testCompileOnly(libs.common.lombok)
+    testAnnotationProcessor(libs.common.lombok)
+    
+    // 🧪 Testing Dependencies
+    testImplementation(libs.backend.spring.boot.starter.test) {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
 }
@@ -62,10 +72,10 @@ tasks.bootJar {
     archiveClassifier.set("boot")  // 구분을 위한 classifier
 }
 
-// 🧪 테스트 설정
+// 🧪 테스트 설정 (루트에서 상속받아 일관성 확보)
 tasks.test {
     useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
+    
+    // 추가 설정이 필요한 경우에만 여기서 오버라이드
+    // 기본 설정은 루트 build.gradle.kts에서 상속됨
 }

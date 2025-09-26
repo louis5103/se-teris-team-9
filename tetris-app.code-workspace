@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "tetris-core"
+		},
+		{
+			"path": "tetris-client"
+		},
+		{
+			"path": "tetris-backend"
+		}
+	],
+	"settings": {
+		"java.import.gradle.enabled": true,
+		"java.import.gradle.wrapper.enabled": true,
+		"java.compile.nullAnalysis.mode": "disabled",
+		"java.saveActions.organizeImports": true,
+		"java.project.explorer.showNonJavaResources": true
+	}
+}
