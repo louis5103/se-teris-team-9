@@ -18,6 +18,7 @@
 		"java.import.gradle.wrapper.enabled": true,
 		"java.compile.nullAnalysis.mode": "disabled",
 		"java.saveActions.organizeImports": true,
-		"java.project.explorer.showNonJavaResources": true
+		"java.project.explorer.showNonJavaResources": true,
+		"terminal.integrated.defaultProfile.osx": "bash"
 	}
 }
