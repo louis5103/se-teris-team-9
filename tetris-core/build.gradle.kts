@@ -37,19 +37,10 @@ tasks.jar {
     }
 }
 
-// ✅ 테스트 실행 설정
+// ✅ 테스트 실행 설정 (루트에서 상속받아 일관성 확보)
 tasks.test {
     useJUnitPlatform()
     
-    // 테스트 로깅 개선
-    testLogging {
-        events("passed", "skipped", "failed")
-        showStandardStreams = false
-        showExceptions = true
-        showCauses = true
-        showStackTraces = true
-    }
-    
-    // 테스트 실행 최적화
-    maxParallelForks = 1
+    // 추가 설정이 필요한 경우에만 여기서 오버라이드
+    // 기본 설정은 루트 build.gradle.kts에서 상속됨
 }

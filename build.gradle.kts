@@ -29,17 +29,22 @@ subprojects {
         mavenCentral()
     }
     
-    // ⚙️ 테스트 설정
+    // ⚙️ 테스트 설정 (모든 모듈 공통)
     tasks.withType<Test> {
         useJUnitPlatform()
         
         // 테스트 실행 환경 설정
         maxHeapSize = "1g"
+        maxParallelForks = 1  // 일관된 병렬 실행 설정
         
-        // 테스트 로깅
+        // 테스트 로깅 (표준화)
         testLogging {
             events("passed", "skipped", "failed")
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            showStandardStreams = false
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
         }
         
         // 실패 시 즉시 중단하지 않고 모든 테스트 실행

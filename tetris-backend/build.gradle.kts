@@ -47,7 +47,7 @@ dependencies {
     // 🚀 COMMON DEPENDENCIES (모든 모듈 공통)
     // ============================================================================
     
-    // �️ Development Tools
+    // 🛠️ Development Tools
     compileOnly(libs.common.lombok)
     annotationProcessor(libs.common.lombok)
     testCompileOnly(libs.common.lombok)
@@ -72,10 +72,10 @@ tasks.bootJar {
     archiveClassifier.set("boot")  // 구분을 위한 classifier
 }
 
-// 🧪 테스트 설정
+// 🧪 테스트 설정 (루트에서 상속받아 일관성 확보)
 tasks.test {
     useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
+    
+    // 추가 설정이 필요한 경우에만 여기서 오버라이드
+    // 기본 설정은 루트 build.gradle.kts에서 상속됨
 }

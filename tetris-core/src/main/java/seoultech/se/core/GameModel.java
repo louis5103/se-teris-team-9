@@ -1,12 +1,6 @@
 package seoultech.se.core;
 
-<<<<<<< HEAD
-/**
- * 기본 모델 클래스 - 팀에서 자유롭게 구현하세요
- */
-public class GameModel {
-    // TODO: 팀에서 필요한 필드와 메서드를 구현하세요
-=======
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,5 +36,4 @@ public class GameModel {
     // - GameModel.builder()
     
     // TODO: 팀에서 필요한 추가 비즈니스 로직을 구현하세요
->>>>>>> 10c280e (git squash feat/24/branches)
 }

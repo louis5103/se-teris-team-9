@@ -42,7 +42,7 @@ dependencies {
     // 🖥️ CLIENT MODULE SPECIFIC DEPENDENCIES
     // ============================================================================
     
-    // � Spring Boot Bundle (DI container only)
+    // 🌱 Spring Boot Bundle (DI container only)
     implementation(libs.bundles.client.spring)
     annotationProcessor(libs.client.spring.boot.configuration.processor)
     
@@ -67,46 +67,24 @@ dependencies {
     testImplementation(libs.bundles.common.testing)
 }
 
-// 🚀 실행 설정 (JavaFX + Java 21 Virtual Threads 최적화)
+// 🚀 실행 설정 (JavaFX + Java 21 최적화 - 단순화됨)
 val javafxJvmArgs = listOf(
-    // JavaFX 모듈 접근 허용
+    // JavaFX 핵심 모듈 접근만 허용 (필수 최소한)
     "--add-opens", "javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
-    "--add-opens", "javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED",
     "--add-opens", "javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED",
-    "--add-opens", "javafx.base/com.sun.javafx.binding=ALL-UNNAMED",
-    "--add-opens", "javafx.base/com.sun.javafx.event=ALL-UNNAMED",
     
-    // Spring Boot 리플렉션 지원
+    // Spring Boot 기본 리플렉션 지원
     "--add-opens", "java.base/java.lang=ALL-UNNAMED",
-    "--add-opens", "java.base/java.util=ALL-UNNAMED",
-    "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED",
-    
-    // Desktop 앱 최적화
-    "-Dprism.order=sw",
-    "-Dprism.text=t2k"
+    "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED"
 )
 
 tasks.run.configure {
     jvmArgs(javafxJvmArgs)
 }
 
-// Spring Boot 실행을 위한 설정
+// Spring Boot 실행을 위한 설정 (단순화됨)
 tasks.bootRun.configure {
     jvmArgs(javafxJvmArgs)
-    
-    // JavaFX 런타임을 명시적으로 추가
-    doFirst {
-        val javaFxVersion = "21"
-        val platform = org.gradle.internal.os.OperatingSystem.current()
-        val osName = when {
-            platform.isLinux -> "linux"
-            platform.isMacOsX -> "mac"
-            platform.isWindows -> "win"
-            else -> throw GradleException("Unsupported OS: ${platform.name}")
-        }
-        
-        systemProperty("javafx.runtime.path", "${gradle.gradleUserHomeDir}/caches/modules-2/files-2.1")
-    }
 }
 
 // 📦 실행 가능한 JAR 설정
@@ -120,23 +98,18 @@ tasks.bootJar {
         attributes(
             "Implementation-Title" to "Tetris Desktop Game (Java 21 LTS)",
             "Implementation-Version" to project.version,
-            "Add-Opens" to "javafx.graphics/com.sun.javafx.application javafx.controls/com.sun.javafx.scene.control.behavior"
+            "Implementation-Vendor" to "SeoulTech SE Team 9"
         )
     }
 }
 
-// 🧪 테스트 설정 (간단하게)
+// 🧪 테스트 설정 (루트에서 상속받아 일관성 확보)
 tasks.test {
     useJUnitPlatform()
     
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
-    
-    // JavaFX 테스트를 위한 기본 설정
+    // JavaFX 테스트를 위한 최소 필수 설정만 추가
     jvmArgs(
-        "--add-opens", "javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
-        "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED"
+        "--add-opens", "javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
     )
 }
 
