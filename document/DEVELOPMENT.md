@@ -22,17 +22,38 @@ brew install openjdk@21
 brew install --cask corretto21
 
 # 환경 변수 설정 (.zshrc 또는 .bash_profile)
-export JAVA_HOME=/Users/$(whoami)/Library/Java/JavaVirtualMachines/corretto-21.0.8/Contents/Home
+# 자동 감지 사용 (권장)
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
 export PATH=$JAVA_HOME/bin:$PATH
+
+# 또는 직접 경로 설정 (버전에 따라 경로가 다를 수 있음)
+# export JAVA_HOME=/Users/$(whoami)/Library/Java/JavaVirtualMachines/corretto-21.0.8/Contents/Home
 ```
 
 #### Windows
 1. [Amazon Corretto 21](https://corretto.aws/downloads/latest/amazon-corretto-21-x64-windows-jdk.msi) 다운로드
-2. 설치 후 시스템 환경 변수에 JAVA_HOME 설정
+2. 설치 후 환경 변수 설정:
+```cmd
+# 시스템 환경 변수에서 설정하거나 명령어로 설정 (설치 경로에 따라 다름)
+set JAVA_HOME=C:\Program Files\Amazon Corretto\jdk21.0.8_10
+set PATH=%JAVA_HOME%\bin;%PATH%
+```
 
 #### Ubuntu/Linux
 ```bash
-# OpenJDK 21 설치
+# Amazon Corretto 21 설치
+sudo apt update
+sudo apt install -y software-properties-common
+wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -
+sudo add-apt-repository 'deb https://apt.corretto.aws stable main'
+sudo apt-get update
+sudo apt-get install -y java-21-amazon-corretto-jdk
+
+# 환경 변수 설정
+export JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
+export PATH=$JAVA_HOME/bin:$PATH
+
+# 또는 OpenJDK 21 설치
 sudo apt update
 sudo apt install openjdk-21-jdk
 
@@ -622,10 +643,26 @@ chore(build): Gradle 설정 업데이트
 2. `Cmd+Shift+P` → `Developer: Reload Window`
 
 #### 포트 충돌 (8080)
-```yml
-# tetris-backend/src/main/resources/application.yml
-server:
-  port: 8081
+서버 포트가 이미 사용 중인 경우 환경변수로 변경:
+
+```bash
+# macOS/Linux
+export SERVER_PORT=8081
+./gradlew :tetris-backend:bootRun
+
+# Windows (PowerShell)
+$env:SERVER_PORT=8081
+./gradlew :tetris-backend:bootRun
+
+# Windows (CMD)
+set SERVER_PORT=8081
+./gradlew :tetris-backend:bootRun
+```
+
+또는 application.properties 파일에서 직접 변경:
+```properties
+# tetris-backend/src/main/resources/application.properties
+server.port=8081
 ```
 
 #### JavaFX 모듈 오류
