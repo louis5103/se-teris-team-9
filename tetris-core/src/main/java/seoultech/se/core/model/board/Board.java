@@ -21,13 +21,12 @@ public class Board {
     private int currentX;
     private int currentY;
 
-    private long score = 0;
-    private int linesCleared = 0;
-    private int level = 1;
+    private final GameState gameState;
 
     public Board() {
         this.boardWidth = BOARD_WIDTH_DEFAULT;
         this.boardHeight = BOARD_HEIGHT_DEFAULT;
+        this.gameState = new GameState();
 
         grid = new Cell[boardHeight][boardWidth];
         for (int row = 0; row < boardHeight; row++) {
@@ -58,7 +57,7 @@ public class Board {
 
         for(int[] offset : kickData) {
             int newX = currentX + offset[0];
-            int newY = currentY + offset[1];
+            int newY = currentY - offset[1];
 
             if(isValidPosition(rotatedTetromino, newX, newY)) {
                 currentTetromino = rotatedTetromino;
@@ -121,7 +120,7 @@ public class Board {
                     int absoluteY = currentY + (row - currentTetromino.getPivotY());
 
                 if (absoluteY < 0) {
-                    // TODO: 실제 게임 오버 처리 로직 호출. boolean isGameOver = true; 제출한더던지.
+                    this.gameState.setGameOver(true);
                     return;
                 }
 
@@ -158,12 +157,12 @@ public class Board {
             }
         }
         if(clearedRowCount > 0) {
-            linesCleared += clearedRowCount;
-            score += calculateScore(clearedRowCount);
-            level = linesCleared / 10 + 1;
+            gameState.addLinesCleared(clearedRowCount);
+            gameState.addScore(calculateScore(clearedRowCount))
         }
     }
     private long calculateScore(int clearedLines) {
+        int level = gameState.getLevel();
         switch (clearedLines) {
             case 1: return 100 * level;
             case 2: return 300 * level;
