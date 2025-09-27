@@ -69,7 +69,7 @@ public class Board {
             }
         }
     }
-    
+
     public void rotateClockwise() {
         rotate(RotationDirection.CLOCKWISE);
     }
@@ -92,6 +92,7 @@ public class Board {
                     if(absoluteY >= 0 && grid[absoluteY][absoluteX].isOccupied()) {
                         return false;
                     }
+                    // TODO: 쌓인 테트로미노와 currentTetromino의 충돌검사
                     if(grid[absoluteY][absoluteX].isOccupied()) {
                         return false;
                     }
@@ -135,6 +136,7 @@ public class Board {
 
                     if(absoluteY >= 0 && absoluteY < boardHeight && absoluteX >= 0 && absoluteX < boardWidth) {
                         grid[absoluteY][absoluteX].setColor(currentTetromino.getColor());
+                        grid[absoluteY][absoluteX].setOccupied(true);
                     }
                 }
             }
@@ -167,7 +169,7 @@ public class Board {
         }
         if(clearedRowCount > 0) {
             gameState.addLinesCleared(clearedRowCount);
-            gameState.addScore(calculateScore(clearedRowCount))
+            gameState.addScore(calculateScore(clearedRowCount));
         }
     }
     private long calculateScore(int clearedLines) {

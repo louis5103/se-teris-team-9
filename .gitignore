@@ -266,21 +266,81 @@ gradle-app.setting
 
 # 개인 환경 설정 파일 (팀원별로 다름)
 gradle.properties.local
+local.properties
 .env
 .env.local
+.env.development
+.env.production
+
+# Gradle 개인 설정 및 캐시
+.gradle/
+**/gradle-app.setting
+gradle-app.setting
+!gradle/wrapper/gradle-wrapper.jar
+
+# Maven 로컬 설정
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Spring Boot 개발자 도구 설정
+.spring-boot-devtools.properties
+
+# Database 파일들 (로컬 개발용)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+h2/
 
 # VS Code 개인 설정
 .vscode/settings.json
 .vscode/launch.json
 .vscode/c_cpp_properties.json
 
-# IDE별 개인 프로젝트 설정
+# IDE별 개인 프로젝트 설정 (하드코딩된 Java Home 경로 충돌 방지)
 .project
 .classpath
 .factorypath
 .settings/
+**/.settings/
 *.iml
 *.ipr
+*.iws
+
+# Eclipse IDE 생성 파일들 (Java Home 관련 설정 포함)
+org.eclipse.buildship.core.prefs
+org.eclipse.jdt.core.prefs
+org.eclipse.jdt.apt.core.prefs
+org.eclipse.core.resources.prefs
+
+# IntelliJ IDEA 설정 파일들 (개인 환경별로 다름)
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries/
+.idea/shelf/
+.idea/libraries/
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/modules/
+.idea/codeStyles/
+.idea/misc.xml
+.idea/gradle.xml
+
+# NetBeans IDE
+nbproject/
+build/
+nbbuild/
+dist/
+nbdist/
+
+# VS Code 개인 설정 (워크스페이스 설정은 유지)
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/extensions.json
 
 # 빌드 및 테스트 결과물 (절대경로 포함)
 **/build/reports/

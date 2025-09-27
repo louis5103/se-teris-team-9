@@ -1,6 +1,5 @@
 package seoultech.se.core.model.board;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,12 +7,11 @@ import seoultech.se.core.model.block.enumType.Color;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class Cell {
     private Color color = Color.NONE;
     private boolean isOccupied = false;
-    
+
 
     // Factory Methods 1~4.
     public static Cell of(Color color) {
