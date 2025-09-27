@@ -3,6 +3,7 @@ package seoultech.se.core.model.board;
 import lombok.Getter;
 import lombok.Setter;
 import seoultech.se.core.model.block.Tetromino;
+import seoultech.se.core.model.block.enumType.RotationDirection;
 import seoultech.se.core.model.block.enumType.RotationState;
 import seoultech.se.core.model.block.enumType.TetrominoType;
 import seoultech.se.core.model.board.enumType.WallKickEventData;
@@ -43,20 +44,21 @@ public class Board {
         currentY = 0;
     }
 
-    public void rotate() {
+    private void rotate(RotationDirection direction) {
         TetrominoType currentType = currentTetromino.getType();
         RotationState fromRotationState = currentTetromino.getRotationState();
 
         if(currentType == TetrominoType.O) {
             return;
         }
-        Tetromino rotatedTetromino = currentTetromino.getRotatedInstance();
+        Tetromino rotatedTetromino = currentTetromino.getRotatedInstance(direction);
         RotationState toRotationState = rotatedTetromino.getRotationState();
 
         int[][] kickData = WallKickEventData.getKickData(currentType, fromRotationState, toRotationState);
 
         for(int[] offset : kickData) {
             int newX = currentX + offset[0];
+            // TODO: y축 방향이 반대라 -로 변경되는게 맞는지 조사.
             int newY = currentY - offset[1];
 
             if(isValidPosition(rotatedTetromino, newX, newY)) {
@@ -66,6 +68,13 @@ public class Board {
                 return;
             }
         }
+    }
+    
+    public void rotateClockwise() {
+        rotate(RotationDirection.CLOCKWISE);
+    }
+    public void rotateCounterClockwise() {
+        rotate(RotationDirection.COUNTER_CLOCKWISE);
     }
 
     private boolean isValidPosition(Tetromino tetromino, int newX, int newY) {
