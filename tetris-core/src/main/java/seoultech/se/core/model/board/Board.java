@@ -3,7 +3,9 @@ package seoultech.se.core.model.board;
 import lombok.Getter;
 import lombok.Setter;
 import seoultech.se.core.model.block.Tetromino;
+import seoultech.se.core.model.block.enumType.RotationState;
 import seoultech.se.core.model.block.enumType.TetrominoType;
+import seoultech.se.core.model.board.enumType.WallKickEventData;
 
 @Getter
 @Setter
@@ -43,19 +45,30 @@ public class Board {
     }
 
     public void rotate() {
-        Tetromino rotatedTetromino = currentTetromino.getRotatedInstance();
+        TetrominoType currentType = currentTetromino.getType();
+        RotationState fromRotationState = currentTetromino.getRotationState();
 
-        // TODO: 월킥 테스트. SRS 데이터 테이블로 교체.
-        int[][] offsets = {{0, 0}, {1, 0}, {-1, 0}, {0, -1}, {-2, 0}, {2, 0}, {0, -2}};
-        for (int[] offset : offsets) {
-            if(isValidPosition(rotatedTetromino, currentX + offset[0], currentY + offset[1])) {
+        if(currentType == TetrominoType.O) {
+            return;
+        }
+        Tetromino rotatedTetromino = currentTetromino.getRotatedInstance();
+        RotationState toRotationState = rotatedTetromino.getRotationState();
+
+        int[][] kickData = WallKickEventData.getKickData(currentType, fromRotationState, toRotationState);
+
+        for(int[] offset : kickData) {
+            int newX = currentX + offset[0];
+            int newY = currentY + offset[1];
+
+            if(isValidPosition(rotatedTetromino, newX, newY)) {
                 currentTetromino = rotatedTetromino;
-                currentX += offset[0];
-                currentY += offset[1];
+                currentX = newX;
+                currentY = newY;
                 return;
             }
         }
     }
+    
     private boolean isValidPosition(Tetromino tetromino, int newX, int newY) {
         int[][] shape = tetromino.getCurrentShape();
 
