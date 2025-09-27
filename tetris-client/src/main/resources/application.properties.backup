@@ -1,20 +1,23 @@
 # ===============================================================================
-# Tetris Client Module - JavaFX Desktop Application Configuration  
-# JavaFX + Spring Boot DI Container Integration (Web Features Disabled)
+# Tetris Client Module - JavaFX Desktop Application Configuration
+# JavaFX + Spring Boot DI Container 통합 설정 (웹 기능 비활성화)
 # ===============================================================================
 
-# Client Application Basic Settings
+# 🖥️ 클라이언트 애플리케이션 기본 설정
 spring.application.name=Tetris Desktop Game
 spring.profiles.active=desktop-client
 
-# Disable Web Application (JavaFX Desktop App)
+# ⚠️ 웹 애플리케이션 비활성화 (JavaFX Desktop 앱이므로)
 spring.main.web-application-type=none
 
-# Spring Boot Banner Settings (Client)
+# 🔧 Spring Boot 배너 설정 (클라이언트용)
 spring.main.banner-mode=console
 spring.banner.location=classpath:banner.txt
 
-# Client Logging Settings
+# 📊 클라이언트 로깅 설정
+logging.level.seoultech.se.client=DEBUG
+logging.level.seoultech.se.backend=INFO
+# 📊 클라이언트 로깅 설정
 logging.level.seoultech.se.client=DEBUG
 logging.level.seoultech.se.backend=INFO
 logging.level.seoultech.se.core=INFO
@@ -22,37 +25,37 @@ logging.level.org.springframework=INFO
 logging.level.javafx=INFO
 logging.pattern.console=%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
 
-# Game Configuration
+# 🎮 클라이언트 게임 설정
 tetris.game.initial-level=1
 tetris.game.max-level=15
 tetris.game.lines-per-level=10
 tetris.game.initial-drop-interval=1000
 
-# Sound Configuration
+# 🎵 사운드 설정
 tetris.sound.enabled=true
 tetris.sound.volume=0.5
 
-# UI Configuration
+# 🎨 UI 설정
 tetris.ui.theme=dark
 tetris.ui.animation.enabled=true
 tetris.ui.show-grid=true
 tetris.ui.show-ghost-piece=true
 
-# Score Configuration
+# 📈 점수 설정
 tetris.score.single-line=100
 tetris.score.double-line=300
 tetris.score.triple-line=500
 tetris.score.tetris-line=800
 
-# Client Save Configuration
+# 💾 클라이언트 저장 설정
 tetris.save.auto-save=true
 tetris.save.location=${user.home}/.tetris/
 
-# JavaFX Specific Settings
+# 📱 JavaFX 특화 설정
 javafx.preloader.enabled=false
 javafx.stage.resizable=false
 javafx.stage.always-on-top=false
 
-# Internationalization
+# 🌍 국제화
 spring.messages.basename=messages
 spring.messages.encoding=UTF-8
