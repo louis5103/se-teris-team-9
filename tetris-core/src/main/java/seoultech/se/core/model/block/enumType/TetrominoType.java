@@ -16,30 +16,30 @@ public enum TetrominoType {
             {0, 1, 0},
             {0, 1, 0},
             {1, 1, 0}
-    }, Color.BLUE, 1, 1), 
+    }, Color.BLUE, 1, 1),
 
     L(new int[][]{
             {0, 1, 0},
             {0, 1, 0},
             {0, 1, 1}
-    }, Color.ORANGE, 1, 1), 
+    }, Color.ORANGE, 1, 1),
 
     O(new int[][]{
             {1, 1},
             {1, 1}
-    }, Color.YELLOW, 0, 0), 
+    }, Color.YELLOW, 0, 0),
 
     S(new int[][]{
             {0, 0, 0},
             {0, 1, 1},
-            {1, 0, 0}
-    }, Color.GREEN, 1, 1), 
+            {1, 1, 0}
+    }, Color.GREEN, 1, 1),
 
     T(new int[][]{
             {0, 1, 0},
             {1, 1, 1},
             {0, 0, 0}
-    }, Color.MAGENTA, 1, 1), 
+    }, Color.MAGENTA, 1, 1),
 
     Z(new int[][]{
             {0, 0, 0},

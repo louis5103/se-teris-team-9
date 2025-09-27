@@ -129,10 +129,10 @@ public class Board {
                     int absoluteX = currentX + (col - currentTetromino.getPivotX());
                     int absoluteY = currentY + (row - currentTetromino.getPivotY());
 
-                if (absoluteY < 0) {
-                    this.gameState.setGameOver(true);
-                    return;
-                }
+                    if (absoluteY < 0) {
+                        this.gameState.setGameOver(true);
+                        return;
+                    }
 
                     if(absoluteY >= 0 && absoluteY < boardHeight && absoluteX >= 0 && absoluteX < boardWidth) {
                         grid[absoluteY][absoluteX].setColor(currentTetromino.getColor());
@@ -169,7 +169,7 @@ public class Board {
         }
         if(clearedRowCount > 0) {
             gameState.addLinesCleared(clearedRowCount);
-            gameState.addScore(calculateScore(clearedRowCount))
+            gameState.addScore(calculateScore(clearedRowCount));
         }
     }
     private long calculateScore(int clearedLines) {
