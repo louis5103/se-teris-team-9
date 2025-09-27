@@ -259,3 +259,39 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,linux,intellij+all,visualstudiocode,gradle,java,ssh,maven
+
+# ===============================================================================
+# Tetris Project - Additional Cross-Platform Ignore Rules
+# ===============================================================================
+
+# 개인 환경 설정 파일 (팀원별로 다름)
+gradle.properties.local
+.env
+.env.local
+
+# VS Code 개인 설정
+.vscode/settings.json
+.vscode/launch.json
+.vscode/c_cpp_properties.json
+
+# IDE별 개인 프로젝트 설정
+.project
+.classpath
+.factorypath
+.settings/
+*.iml
+*.ipr
+
+# 빌드 및 테스트 결과물 (절대경로 포함)
+**/build/reports/
+**/build/test-results/
+**/bin/
+
+# 운영체제별 임시 파일
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# 개발자별 로그 파일
+*.log
+logs/
