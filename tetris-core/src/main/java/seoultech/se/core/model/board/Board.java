@@ -68,7 +68,7 @@ public class Board {
             }
         }
     }
-    
+
     private boolean isValidPosition(Tetromino tetromino, int newX, int newY) {
         int[][] shape = tetromino.getCurrentShape();
 
@@ -82,6 +82,9 @@ public class Board {
                         return false;
                     }
                     if(absoluteY >= 0 && grid[absoluteY][absoluteX].isOccupied()) {
+                        return false;
+                    }
+                    if(grid[absoluteY][absoluteX].isOccupied()) {
                         return false;
                     }
                 }
@@ -116,6 +119,11 @@ public class Board {
                 if(shape[row][col] == 1) {
                     int absoluteX = currentX + (col - currentTetromino.getPivotX());
                     int absoluteY = currentY + (row - currentTetromino.getPivotY());
+
+                if (absoluteY < 0) {
+                    // TODO: 실제 게임 오버 처리 로직 호출. boolean isGameOver = true; 제출한더던지.
+                    return;
+                }
 
                     if(absoluteY >= 0 && absoluteY < boardHeight && absoluteX >= 0 && absoluteX < boardWidth) {
                         grid[absoluteY][absoluteX].setColor(currentTetromino.getColor());
