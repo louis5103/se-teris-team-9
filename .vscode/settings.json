@@ -1,22 +1,21 @@
 {
     // ======================================================================
-    // 🎯 Tetris Project - 기본 VS Code 설정
+    // 🎯 Tetris Project - 공유용 VS Code 설정 (OS 무관)
     // ======================================================================
-
-    // Java 21 JDK 경로
-    "java.jdt.ls.java.home": "/Users/imsang-u/Library/Java/JavaVirtualMachines/corretto-21.0.8/Contents/Home",
-    
-    // Lombok 지원을 위한 최소 설정
-    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -Xmx2G --add-opens java.base/java.lang=ALL-UNNAMED -javaagent:/Users/imsang-u/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.30/f195ee86e6c896ea47a1d39defbe20eb59cd149d/lombok-1.18.30.jar",
-    
-    // Java Runtime 설정
+    "java.jdt.ls.java.home": "${env:JAVA_HOME}",
     "java.configuration.runtimes": [
         {
             "name": "JavaSE-21",
-            "path": "/Users/imsang-u/Library/Java/JavaVirtualMachines/corretto-21.0.8/Contents/Home",
+            "path": "${env:JAVA_HOME}",
             "default": true
         }
     ],
+
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -Xmx2G --add-opens java.base/java.lang=ALL-UNNAMED",
+    
+    // ======================================================================
+    // ⚙️ 프로젝트 공통 설정 (아래는 그대로 유지)
+    // ======================================================================
     
     // Gradle 프로젝트 지원
     "java.import.gradle.enabled": true,

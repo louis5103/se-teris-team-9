@@ -606,10 +606,24 @@ chore: 빌드/설정 변경
 2. IntelliJ: Lombok 플러그인 확인
 
 ### 포트 충돌 (8080)
+서버 포트가 이미 사용 중인 경우:
+
+**환경변수로 변경 (권장):**
 ```bash
-# application.yml에서 포트 변경
-server:
-  port: 8081
+# macOS/Linux
+export SERVER_PORT=8081
+
+# Windows (PowerShell)  
+$env:SERVER_PORT=8081
+
+# Windows (CMD)
+set SERVER_PORT=8081
+```
+
+**또는 설정 파일에서 직접 변경:**
+```properties
+# tetris-backend/src/main/resources/application.properties
+server.port=8081
 ```
 
 ---
