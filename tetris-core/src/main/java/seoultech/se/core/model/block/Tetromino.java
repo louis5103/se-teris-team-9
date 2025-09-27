@@ -57,9 +57,9 @@ public class Tetromino {
             }
             rotatedTetromino.rotationState = this.rotationState.rotateClockwise();
         } else {
-            for (int row=0; row < size; row++) {
+            for (int row = 0; row < size; row++) {
                 for (int col = 0; col < size; col++) {
-                    rotatedShape[col][size - 1 - row] = this.currentShape[row][col];
+                    rotatedShape[size - 1 - col][row] = this.currentShape[row][col];
                 }
             }
             rotatedTetromino.rotationState = this.rotationState.rotateCounterClockwise();
