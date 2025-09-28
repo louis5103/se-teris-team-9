@@ -63,19 +63,31 @@ public class GameController {
     @FXML
     public void initialize() {
         this.board = new Board();
-        this.boardDisplay = new ObjectProperty[BOARD_HEIGHT][BOARD_WIDTH];
+        this.boardDisplay = new SimpleObjectProperty[BOARD_HEIGHT][BOARD_WIDTH];
+        // for (int y = 0; y < BOARD_HEIGHT; y++) {
+        //     ObservableList<Color> row = FXCollections.observableArrayList();
+        //     for (int x = 0; x < BOARD_WIDTH; x++) {
+        //         row.add(Color.WHITE);
+        //     }
+        //     boardDisplay.add(row);
+        // }
         this.nextTetromino = new SimpleObjectProperty<>(null);
-
         scoreText.textProperty().bind(scoreProperty.asString("Score: %d"));
         levelText.textProperty().bind(levelProperty.asString("Level: %d"));
 
-        resetButton.setVisible(false);
         exitButton.setVisible(false);
 
         initBoardUI();
         initNextPieceGridUI();
         initScoreLevelUI();
-        updateUI(); // Set initial state which triggers the listeners
+        // Ensure the scene is available before initializing key handlers
+        Platform.runLater(() -> {
+            javafx.scene.Scene scene = boardGridPane.getScene();
+            if (scene != null) {
+                initKeyHandlers(scene);
+            }
+        });
+        updateUI();
     }
 
     @FXML
@@ -97,7 +109,7 @@ public class GameController {
             initGameLoop();
             mainLoop.play();
             gameState = GameState.RUNNING;
-            startPauseResumeButton.setText("Pause");
+            startPauseResumeButton.setText("Start");
             resetButton.setVisible(true);
         }
     }
@@ -107,9 +119,9 @@ public class GameController {
         if (mainLoop != null) {
             mainLoop.stop();
         }
-        //TODO :  reset board
-        //TODO : reset next piece
-        //TODO : reset score, level
+        // board.reset();
+        scoreProperty.set(0);
+        levelProperty.set(1);
         gameState = GameState.READY;
         startPauseResumeButton.setText("Start");
         startPauseResumeButton.setDisable(false);
@@ -131,12 +143,16 @@ public class GameController {
             KeyCode code = event.getCode();
             if (code == KeyCode.A || code == KeyCode.LEFT) {
                 board.moveLeft();
+                updateUI();
             } else if (code == KeyCode.D || code == KeyCode.RIGHT) {
                 board.moveRight();
+                updateUI();
             } else if (code == KeyCode.S || code == KeyCode.DOWN) {
                 board.moveDown();
+                updateUI();
             } else if (code == KeyCode.W || code == KeyCode.UP) {
                 board.rotateClockwise();
+                updateUI();
             }
             updateUI();
             event.consume();
@@ -147,24 +163,25 @@ public class GameController {
         boardGridPane.getChildren().clear();
         for (int y = 0; y < BOARD_HEIGHT; y++) {
             for (int x = 0; x < BOARD_WIDTH; x++) {
+                boardDisplay[y][x] = new SimpleObjectProperty<>(Color.WHITE);
                 Rectangle tile = new Rectangle(TILE_SIZE, TILE_SIZE);
-                tile.setFill(Color.BLACK);
-                tile.setStroke(Color.DARKGRAY);
+                tile.fillProperty().bind(boardDisplay[y][x]);
+                tile.setStroke(Color.BLACK);
                 boardGridPane.add(tile, x, y);
             }
         }
     }
 
     private void initNextPieceGridUI() {
-        nextPieceGridPane.getChildren().clear();
-        for (int y = 0; y < NEXT_PIECE_GRID_SIZE; y++) {
-            for (int x = 0; x < NEXT_PIECE_GRID_SIZE; x++) {
-                Rectangle tile = new Rectangle(TILE_SIZE, TILE_SIZE);
-                tile.setFill(Color.BLACK);
-                tile.setStroke(Color.DARKGRAY);
-                nextPieceGridPane.add(tile, x, y);
-            }
-        }
+        // nextPieceGridPane.getChildren().clear();
+        // for (int y = 0; y < NEXT_PIECE_GRID_SIZE; y++) {
+        //     for (int x = 0; x < NEXT_PIECE_GRID_SIZE; x++) {
+        //         Rectangle tile = new Rectangle(TILE_SIZE, TILE_SIZE);
+        //         tile.setFill(Color.BLACK);
+        //         tile.setStroke(Color.DARKGRAY);
+        //         nextPieceGridPane.add(tile, x, y);
+        //     }
+        // }
     }
 
     private void initScoreLevelUI() {
@@ -178,25 +195,45 @@ public class GameController {
      */
     private void updateUI() {
         //get board with current piece
-        Cell[][] grid = board.getGridWithPiece();
+        
+        //draw accumulated blocks
+        Cell[][] grid = board.getGrid();
         for (int y = 0; y < BOARD_HEIGHT; y++) {
             for (int x = 0; x < BOARD_WIDTH; x++) {
-                Rectangle tile = (Rectangle) boardGridPane.getChildren().get(y * BOARD_WIDTH + x);
-                tile.setFill(mapCoreColorToFXColor(grid[y][x].getColor()));
+                boardDisplay[y][x].setValue(mapCoreColorToFXColor(grid[y][x].getColor()));
             }
         }
-        
-        //update boardState, nextPieceState, score
-        Tetromino next = board.getNextPiece();
-        this.nextTetromino.set(next);
-        drawNextPiece(next);
 
-        scoreProperty.set(board.getScore());
-        levelProperty.set(board.getLevel());
+        //draw current piece
+        Tetromino currentTetromino = board.getCurrentTetromino();
+        if (currentTetromino != null) {
+            int tetrominoX = board.getCurrentX();
+            int tetrominoY = board.getCurrentY();
+            int[][] shape = currentTetromino.getCurrentShape();
+
+            for (int y = 0; y < shape.length; y++) {
+                for (int x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x] != 0) {
+                        int boardX = tetrominoX + (x - currentTetromino.getPivotX());
+                        int boardY = tetrominoY + (y - currentTetromino.getPivotY());
+                        if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT) {
+                            boardDisplay[boardY][boardX].setValue(mapCoreColorToFXColor(currentTetromino.getColor()));
+                        }
+                    }
+                }
+            }
+        }
+
+        //TODO : update next piece, score, level
+        // Tetromino next = board.getNextPiece();
+        // this.nextTetromino.set(next);
+        // drawNextPiece(next);
+        // scoreProperty.set(board.getScore());
+        // levelProperty.set(board.getLevel());
     }
     
     private void initGameLoop() {
-        mainLoop = new Timeline(new KeyFrame(Duration.millis(500), e -> {
+        mainLoop = new Timeline(new KeyFrame(Duration.millis(1000), e -> {
                 gameTick();
         }));
         mainLoop.setCycleCount(Timeline.INDEFINITE);
@@ -205,6 +242,8 @@ public class GameController {
     private void gameTick() {
         board.moveDown();
         // TODO : change from gamestate to fetching from tetris-core
+        // TODO : check if game over
+        // The board class should provide a method to check if the game is over
         if (gameState != GameState.GAME_OVER) {
             gameOver();
         } else {
@@ -255,17 +294,17 @@ public class GameController {
 
     private Color mapCoreColorToFXColor(seoultech.se.core.model.block.enumType.Color coreColor) {
         if (coreColor == null) {
-            return Color.BLACK;
+            return Color.WHITE;
         }
         switch (coreColor) {
-            case RED: return Color.CYAN;
-            case GREEN: return Color.BLUE;
-            case BLUE: return Color.ORANGE;
+            case RED: return Color.RED;
+            case GREEN: return Color.GREEN;
+            case BLUE: return Color.BLUE;
             case YELLOW: return Color.YELLOW;
-            case CYAN: return Color.GREEN;
-            case MAGENTA: return Color.PURPLE;
-            case ORANGE: return Color.RED;
-            default: return Color.BLACK;
+            case CYAN: return Color.CYAN;
+            case MAGENTA: return Color.MAGENTA;
+            case ORANGE: return Color.ORANGE;
+            default: return Color.WHITE;
         }
     }
 }
