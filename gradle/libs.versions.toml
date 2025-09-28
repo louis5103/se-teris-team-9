@@ -6,7 +6,7 @@
 java = "21"
 gradle = "8.12"
 
-# 🌱 Spring Framework Ecosystem  
+# 🌱 Spring Framework Ecosystem
 spring-boot = "3.5.6"
 spring-dependency-management = "1.1.7"
 
@@ -38,7 +38,7 @@ versions-plugin = "0.53.0"
 # 🛠️ Common Development Tools
 common-lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 
-# 🧪 Common Testing Dependencies  
+# 🧪 Common Testing Dependencies
 common-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 common-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 common-assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
@@ -53,7 +53,7 @@ common-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.re
 # ============================================================================
 # 현재 Core 모듈은 공통 의존성만 사용
 
-# ============================================================================  
+# ============================================================================
 # ⚙️ TETRIS-BACKEND MODULE (Spring Boot service layer)
 # ============================================================================
 
@@ -62,6 +62,7 @@ backend-spring-boot-starter = { module = "org.springframework.boot:spring-boot-s
 backend-spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 backend-spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring-boot" }
 backend-spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
+backend-spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
 backend-spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
 backend-spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools", version.ref = "spring-boot" }
 backend-spring-boot-configuration-processor = { module = "org.springframework.boot:spring-boot-configuration-processor", version.ref = "spring-boot" }
@@ -90,7 +91,7 @@ client-javafx-fxml = { module = "org.openjfx:javafx-fxml", version.ref = "javafx
 # 🧪 Common Testing Bundle (모든 모듈 테스트용)
 common-testing = [
     "common-junit-jupiter",
-    "common-junit-platform-launcher", 
+    "common-junit-platform-launcher",
     "common-assertj-core",
     "common-mockito-core",
     "common-mockito-junit-jupiter"
@@ -124,7 +125,7 @@ backend-development = [
 ]
 
 # ============================================================================
-# 🖥️ CLIENT MODULE BUNDLES  
+# 🖥️ CLIENT MODULE BUNDLES
 # ============================================================================
 
 # 🎨 Client JavaFX Bundle
@@ -147,5 +148,5 @@ spring-dependency-management = { id = "io.spring.dependency-management", version
 # 🎨 JavaFX Plugin
 javafx = { id = "org.openjfx.javafxplugin", version.ref = "javafx-plugin" }
 
-# 🔧 Utility Plugins  
+# 🔧 Utility Plugins
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }
