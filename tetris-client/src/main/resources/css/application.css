@@ -1,0 +1,33 @@
+.root {
+    -fx-background-color: #1a1a1a;
+}
+
+.menu-button {
+    -fx-pref-width: 200px;
+    -fx-pref-height: 50px;
+    -fx-background-color: #333333;
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-family: "Arial Black";
+    -fx-border-color: #555555;
+    -fx-border-width: 2px;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.menu-button:hover {
+    -fx-background-color: #4CAF50;
+    -fx-cursor: hand;
+}
+
+.settings-button {
+    -fx-font-size: 32px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+}
+
+.settings-button:hover {
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.5), 10, 0, 0, 0);
+}

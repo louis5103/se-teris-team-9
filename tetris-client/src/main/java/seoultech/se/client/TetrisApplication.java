@@ -1,14 +1,16 @@
 package seoultech.se.client;
 
+import java.io.IOException;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
@@ -41,22 +43,19 @@ public class TetrisApplication extends Application {
      * 🎨 JavaFX UI 시작
      */
     @Override
-    public void start(Stage primaryStage) {
-        // 기본 UI 구성 (팀에서 자유롭게 수정 가능)
-        VBox root = new VBox(20);
-        root.setStyle("-fx-padding: 20; -fx-alignment: center;");
-        root.getChildren().addAll(
-            new Label("🚀 Spring Boot + JavaFX 통합 완료"),
-            new Label("팀에서 자유롭게 UI를 구현해주세요"),
-            new Label("Spring DI 컨테이너 사용 가능")
-        );
-        
+    public void start(Stage primaryStage) throws IOException{
+        FXMLLoader loader = new FXMLLoader(TetrisApplication.class.getResource("/view/main-view.fxml"));
+        loader.setControllerFactory(springContext::getBean);
+        Parent root = loader.load();
+        // String applicationCss = TetrisApplication.class.getResource("/css/application.css").toExternalForm();
+        // String mainViewCss = TetrisApplication.class.getResource("/css/main-view.css").toExternalForm();
         Scene scene = new Scene(root, 500, 350);
-        primaryStage.setTitle("Tetris Project - Integrated Architecture");
+        // scene.getStylesheets().addAll(applicationCss, mainViewCss);
+        primaryStage.setTitle("Tetris Project");
         primaryStage.setScene(scene);
         primaryStage.show();
         
-        System.out.println("✅ JavaFX UI started with Spring integration");
+        System.out.println("✅ JavaFX UI started with main-view.fxml");
     }
 
     /**
