@@ -3,6 +3,7 @@ package seoultech.se.client.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javafx.application.Platform;
 import seoultech.se.backend.service.GameService;
 
 /**
@@ -27,6 +28,17 @@ public class MainController {
         System.out.println("📊 Service Status: " + gameService.getStatus());
         // TODO: 팀에서 UI 초기화 로직 구현
     }
-    
-    // TODO: 팀에서 필요한 UI 이벤트 핸들러들을 구현하세요
+
+    public void handleSettingsButtonAction() {
+        System.out.println("⚙️ Settings button clicked");
+    }
+
+    public void handleStartButtonAction() {
+        System.out.println("▶️ Start button clicked");
+    }
+
+    public void handleEndButtonAction() {
+        System.out.println("❌ Exit button clicked");
+        Platform.exit();
+    }
 }
