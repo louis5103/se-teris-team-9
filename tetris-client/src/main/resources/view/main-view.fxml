@@ -23,6 +23,7 @@
     <center>
         <VBox alignment="CENTER" spacing="20.0" BorderPane.alignment="CENTER">
             <children>
+                <!-- START 버튼: onAction 메서드가 ActionEvent를 전달합니다 -->
                 <Button fx:id="startButton" onAction="#handleStartButtonAction" styleClass="menu-button" text="START" />
                 <Button fx:id="endButton" onAction="#handleEndButtonAction" styleClass="menu-button" text="END" />
             </children>

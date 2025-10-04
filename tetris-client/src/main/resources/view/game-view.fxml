@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+    테트리스 게임 화면
+    - 왼쪽: 게임 보드 (GridPane)
+    - 오른쪽: 점수, 레벨, 라인 정보
+    - 중앙: 게임 오버 메시지 (평소에는 숨김)
+-->
+<BorderPane xmlns="http://javafx.com/javafx/21" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="seoultech.se.client.controller.GameController"
+            prefHeight="700.0" prefWidth="600.0"
+            styleClass="game-background">
+    
+    <!-- 상단: 제목 -->
+    <top>
+        <Label text="TETRIS" styleClass="game-title">
+            <BorderPane.margin>
+                <Insets top="20.0" />
+            </BorderPane.margin>
+        </Label>
+    </top>
+    
+    <!-- 중앙: 게임 보드와 정보 -->
+    <center>
+        <HBox spacing="40.0" alignment="CENTER" BorderPane.alignment="CENTER">
+            <BorderPane.margin>
+                <Insets top="20.0" bottom="20.0" left="20.0" right="20.0" />
+            </BorderPane.margin>
+            
+            <!-- 게임 보드 -->
+            <VBox alignment="CENTER" spacing="10.0">
+                <!-- 게임 오버 메시지 (평소에는 숨김) -->
+                <Label fx:id="gameOverLabel" 
+                       text="GAME OVER" 
+                       styleClass="game-over-label" 
+                       visible="false"
+                       managed="false"/>
+                
+                <!-- 실제 테트리스 보드 (10x20 그리드) -->
+                <GridPane fx:id="boardGridPane" 
+                         styleClass="game-board"
+                         focusTraversable="true">
+                    <!-- 
+                        이 GridPane은 GameController의 initializeGridPane()에서 
+                        Rectangle들로 채워집니다 (10열 x 20행)
+                    -->
+                </GridPane>
+            </VBox>
+            
+            <!-- 오른쪽: 게임 정보 -->
+            <VBox spacing="30.0" alignment="TOP_CENTER" minWidth="150.0">
+                <!-- 점수 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="SCORE" styleClass="info-label-title"/>
+                    <Label fx:id="scoreLabel" text="0" styleClass="info-label-value"/>
+                </VBox>
+                
+                <!-- 레벨 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="LEVEL" styleClass="info-label-title"/>
+                    <Label fx:id="levelLabel" text="1" styleClass="info-label-value"/>
+                </VBox>
+                
+                <!-- 지운 줄 수 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="LINES" styleClass="info-label-title"/>
+                    <Label fx:id="linesLabel" text="0" styleClass="info-label-value"/>
+                </VBox>
+                
+                <!-- 조작법 안내 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="CONTROLS" styleClass="info-label-title"/>
+                    <VBox spacing="3.0" styleClass="controls-info">
+                        <Label text="← → : Move" styleClass="control-text"/>
+                        <Label text="↓ : Soft Drop" styleClass="control-text"/>
+                        <Label text="↑ : Rotate CW" styleClass="control-text"/>
+                        <Label text="Z : Rotate CCW" styleClass="control-text"/>
+                        <Label text="Space : Hard Drop" styleClass="control-text"/>
+                        <Label text="C : Hold" styleClass="control-text"/>
+                    </VBox>
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+    
+</BorderPane>
