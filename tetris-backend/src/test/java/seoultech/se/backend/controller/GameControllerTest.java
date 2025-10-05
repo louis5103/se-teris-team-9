@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class GameControllerTest {
 
     @Autowired
-    private GameController gameController;
+    private TetrisAppController gameController;
 
     @Test
     void contextLoads() {

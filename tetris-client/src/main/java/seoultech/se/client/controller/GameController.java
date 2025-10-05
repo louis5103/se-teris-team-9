@@ -8,13 +8,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+
 import seoultech.se.core.BoardObserver;
 import seoultech.se.core.command.GameCommand;
-import seoultech.se.core.command.implement.moveCommand.HardDropCommand;
-import seoultech.se.core.command.implement.moveCommand.HoldCommand;
-import seoultech.se.core.command.implement.moveCommand.MoveDownCommand;
-import seoultech.se.core.command.implement.moveCommand.MoveRightCommand;
+import seoultech.se.core.command.implement.moveCommand.*; 
 import seoultech.se.core.model.block.Tetromino;
 import seoultech.se.core.model.block.enumType.RotationDirection;
 import seoultech.se.core.model.block.enumType.TetrominoType;
@@ -28,11 +27,6 @@ import seoultech.se.core.model.board.GameState;
  * BoardObserver의 모든 메서드를 구현합니다.
  * 당장 사용하지 않는 메서드는 로그만 찍거나 비워두었습니다.
  * 나중에 필요한 기능을 구현할 때 해당 메서드를 채우면 됩니다.
- *
- * 구현 우선순위 가이드:
- * ⭐⭐⭐ 필수: 게임의 기본 동작에 필요
- * ⭐⭐ 중요: 게임 경험을 향상시킴
- * ⭐ 선택: 추가 기능 또는 디버그용
  */
 @Component
 public class GameController implements BoardObserver {
@@ -53,8 +47,12 @@ public class GameController implements BoardObserver {
 
     @FXML
     public void initialize() {
+        System.out.println("🎮 GameController initializing...");
+
         board = new Board();
         board.addObserver(this);  // 이 Controller를 Observer로 등록
+
+        System.out.println("📊 Board created: " + board.getBoardWidth() + "x" + board.getBoardHeight());
 
         initializeGridPane();
         updateGameInfoLabels();
@@ -63,22 +61,38 @@ public class GameController implements BoardObserver {
 
         board.spawnNewTetromino();
         startGame();
+
+        System.out.println("✅ GameController initialization complete!");
     }
 
     private void initializeGridPane() {
         int width = board.getBoardWidth();
         int height = board.getBoardHeight();
 
+        System.out.println("🎨 Initializing GridPane with " + width + "x" + height + " cells...");
+
         cellRectangles = new Rectangle[height][width];
 
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
                 Rectangle rect = new Rectangle(CELL_SIZE, CELL_SIZE);
+
+                // ⭐ 중요: 기본 색상을 명시적으로 설정
+                // 이렇게 하면 CSS가 로드되지 않아도 최소한 윤곽선은 보입니다
+                rect.setFill(Color.rgb(26, 26, 26));  // 어두운 회색 (빈 셀)
+                rect.setStroke(Color.rgb(51, 51, 51));  // 약간 밝은 회색 (테두리)
+                rect.setStrokeWidth(0.5);
+
+                // CSS 스타일 클래스 추가
                 rect.getStyleClass().add("board-cell");
+
+                // GridPane에 추가
                 boardGridPane.add(rect, col, row);
                 cellRectangles[row][col] = rect;
             }
         }
+
+        System.out.println("✅ GridPane initialized with " + (width * height) + " cells");
     }
 
     private void setupGameLoop() {
@@ -103,6 +117,7 @@ public class GameController implements BoardObserver {
         boardGridPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
                 newScene.setOnKeyPressed(this::handleKeyPress);
+                System.out.println("⌨️  Keyboard controls enabled");
             }
         });
     }
@@ -146,9 +161,6 @@ public class GameController implements BoardObserver {
 
     // ========== BoardObserver 구현 - 기본 셀/보드 변경 ==========
 
-    /**
-     * ⭐⭐⭐ 필수: 셀이 변경될 때마다 호출됨
-     */
     @Override
     public void onCellChanged(int row, int col, Cell cell) {
         Platform.runLater(() -> {
@@ -156,20 +168,13 @@ public class GameController implements BoardObserver {
         });
     }
 
-    /**
-     * ⭐ 선택: 최적화를 위한 메서드 (여러 셀을 한번에 업데이트)
-     */
     @Override
     public void onMultipleCellsChanged(int[] rows, int[] cols, Cell[][] cells) {
         // TODO: 구현하면 성능 향상 가능
-        // 당장은 onCellChanged가 여러 번 호출되는 것으로 충분
     }
 
     // ========== BoardObserver 구현 - 테트로미노 이동/회전 ==========
 
-    /**
-     * ⭐⭐⭐ 필수: 테트로미노가 이동할 때마다 호출됨
-     */
     @Override
     public void onTetrominoMoved(int x, int y, Tetromino tetromino) {
         Platform.runLater(() -> {
@@ -177,45 +182,26 @@ public class GameController implements BoardObserver {
         });
     }
 
-    /**
-     * ⭐⭐ 중요: 회전 애니메이션이나 사운드 추가 시 사용
-     */
     @Override
     public void onTetrominoRotated(RotationDirection direction, int kickIndex) {
         System.out.println("🔄 Rotated " + direction + " (kick index: " + kickIndex + ")");
-        // TODO: 회전 사운드 재생
-        // TODO: kickIndex가 0이 아니면 Wall Kick 이펙트
     }
 
-    /**
-     * ⭐ 선택: 회전 실패 피드백 (진동, 사운드 등)
-     */
     @Override
     public void onTetrominoRotationFailed(RotationDirection direction) {
         System.out.println("❌ Rotation failed: " + direction);
-        // TODO: 실패 사운드 재생
     }
 
-    /**
-     * ⭐⭐ 중요: 블록 고정 시 사운드/이펙트
-     */
     @Override
     public void onTetrominoLocked(Tetromino tetromino) {
         System.out.println("🔒 Tetromino locked: " + tetromino.getType());
-        // TODO: 고정 사운드 재생
     }
 
-    /**
-     * ⭐ 선택: Lock Delay 구현 시 사용
-     */
     @Override
     public void onTetrominoLockDelayStarted() {
         // TODO: Lock Delay 타이머 UI 표시
     }
 
-    /**
-     * ⭐ 선택: Lock Delay 구현 시 사용
-     */
     @Override
     public void onTetrominoLockDelayReset(int remainingResets) {
         // TODO: 남은 리셋 횟수 표시
@@ -223,9 +209,6 @@ public class GameController implements BoardObserver {
 
     // ========== BoardObserver 구현 - 테트로미노 생성 ==========
 
-    /**
-     * ⭐⭐⭐ 필수: 새 블록이 생성될 때 호출됨
-     */
     @Override
     public void onTetrominoSpawned(Tetromino tetromino) {
         Platform.runLater(() -> {
@@ -234,42 +217,25 @@ public class GameController implements BoardObserver {
         System.out.println("🎲 New tetromino spawned: " + tetromino.getType());
     }
 
-    /**
-     * ⭐⭐ 중요: Next 블록 미리보기 구현 시 사용
-     */
     @Override
     public void onNextQueueUpdated(TetrominoType[] nextPieces) {
         System.out.println("📋 Next queue updated: " + java.util.Arrays.toString(nextPieces));
-        // TODO: Next 블록 UI 업데이트
-        // Platform.runLater(() -> drawNextPieces(nextPieces));
     }
 
     // ========== BoardObserver 구현 - Hold 시스템 ==========
 
-    /**
-     * ⭐⭐ 중요: Hold UI 구현 시 사용
-     */
     @Override
     public void onHoldChanged(TetrominoType heldPiece, TetrominoType previousPiece) {
         System.out.println("💾 Hold changed: " + heldPiece);
-        // TODO: Hold UI 업데이트
-        // Platform.runLater(() -> drawHoldPiece(heldPiece));
     }
 
-    /**
-     * ⭐⭐ 중요: Hold 실패 피드백
-     */
     @Override
     public void onHoldFailed() {
         System.out.println("⚠️ Hold failed (already used this turn)");
-        // TODO: 실패 피드백 (화면 흔들림, 사운드 등)
     }
 
     // ========== BoardObserver 구현 - 라인 클리어 ==========
 
-    /**
-     * ⭐⭐⭐ 필수: 라인 클리어 시 호출됨
-     */
     @Override
     public void onLineCleared(int linesCleared, int[] clearedRows,
                               boolean isTSpin, boolean isTSpinMini, boolean isPerfectClear) {
@@ -280,64 +246,36 @@ public class GameController implements BoardObserver {
 
         if (isPerfectClear) {
             System.out.println("🌟 PERFECT CLEAR!");
-            // TODO: Perfect Clear 애니메이션
         }
-
-        // TODO: 라인 클리어 애니메이션
-        // TODO: 사운드 재생 (SINGLE, DOUBLE, TRIPLE, TETRIS, T-SPIN 별로 다르게)
     }
 
-    /**
-     * ⭐⭐ 중요: 콤보 표시
-     */
     @Override
     public void onCombo(int comboCount) {
         System.out.println("🔥 COMBO x" + comboCount);
-        // TODO: 콤보 UI 표시
-        // Platform.runLater(() -> showComboText(comboCount));
     }
 
-    /**
-     * ⭐⭐ 중요: 콤보 종료
-     */
     @Override
     public void onComboBreak(int finalComboCount) {
         System.out.println("💨 Combo ended: " + finalComboCount);
-        // TODO: 콤보 UI 숨기기
     }
 
-    /**
-     * ⭐⭐ 중요: Back-to-Back 표시
-     */
     @Override
     public void onBackToBack(int backToBackCount) {
         System.out.println("⚡ BACK-TO-BACK x" + backToBackCount);
-        // TODO: B2B UI 표시
     }
 
-    /**
-     * ⭐⭐ 중요: Back-to-Back 종료
-     */
     @Override
     public void onBackToBackBreak(int finalBackToBackCount) {
         System.out.println("💨 B2B ended: " + finalBackToBackCount);
-        // TODO: B2B UI 숨기기
     }
 
     // ========== BoardObserver 구현 - 점수 및 게임 상태 ==========
 
-    /**
-     * ⭐⭐ 중요: 점수 획득 시 이유와 함께 표시
-     */
     @Override
     public void onScoreAdded(long points, String reason) {
         System.out.println("💰 +" + points + " points (" + reason + ")");
-        // TODO: 점수 획득 애니메이션 (화면에 "+100 SINGLE" 같은 텍스트 표시)
     }
 
-    /**
-     * ⭐⭐⭐ 필수: 게임 상태 변경 시 UI 업데이트
-     */
     @Override
     public void onGameStateChanged(GameState gameState) {
         Platform.runLater(() -> {
@@ -349,38 +287,23 @@ public class GameController implements BoardObserver {
         });
     }
 
-    /**
-     * ⭐⭐ 중요: 레벨업 이펙트
-     */
     @Override
     public void onLevelUp(int newLevel) {
         System.out.println("📈 LEVEL UP! Now at level " + newLevel);
-        // TODO: 레벨업 애니메이션/사운드
     }
 
     // ========== BoardObserver 구현 - 게임 진행 ==========
 
-    /**
-     * ⭐⭐ 중요: 일시정지 UI
-     */
     @Override
     public void onGamePaused() {
         System.out.println("⏸️ Game paused");
-        // TODO: 일시정지 오버레이 표시
     }
 
-    /**
-     * ⭐⭐ 중요: 일시정지 해제
-     */
     @Override
     public void onGameResumed() {
         System.out.println("▶️ Game resumed");
-        // TODO: 일시정지 오버레이 숨기기
     }
 
-    /**
-     * ⭐⭐⭐ 필수: 게임 오버 처리
-     */
     @Override
     public void onGameOver(String reason) {
         Platform.runLater(() -> {
@@ -388,47 +311,30 @@ public class GameController implements BoardObserver {
             System.out.println("💀 GAME OVER (" + reason + ")");
             System.out.println("   Final Score: " + board.getGameState().getScore());
             System.out.println("   Lines Cleared: " + board.getGameState().getLinesCleared());
-            // TODO: 게임 오버 화면 표시 (최종 점수, 통계 등)
         });
     }
 
     // ========== BoardObserver 구현 - 멀티플레이어 ==========
 
-    /**
-     * ⭐⭐ 중요: 멀티플레이어 구현 시 사용
-     */
     @Override
     public void onGarbageLinesAdded(int lines, String sourcePlayerId) {
         System.out.println("💥 Received " + lines + " garbage lines from " + sourcePlayerId);
-        // TODO: 쓰레기 라인 경고 UI
     }
 
-    /**
-     * ⭐⭐ 중요: 멀티플레이어 구현 시 사용
-     */
     @Override
     public void onGarbageLinesCleared(int lines) {
         System.out.println("🛡️ Cleared " + lines + " incoming garbage lines");
-        // TODO: 방어 성공 이펙트
     }
 
-    /**
-     * ⭐⭐ 중요: 멀티플레이어 구현 시 사용
-     */
     @Override
     public void onAttackSent(String targetPlayerId, int lines) {
         System.out.println("⚔️ Sent " + lines + " lines to " + targetPlayerId);
-        // TODO: 공격 이펙트
     }
 
     // ========== BoardObserver 구현 - 디버그 ==========
 
-    /**
-     * ⭐ 선택: 개발 중 디버그 정보 표시
-     */
     @Override
     public void onDebugInfoUpdated(String debugInfo) {
-        // 프로덕션에서는 무시
         if (System.getProperty("debug.mode") != null) {
             System.out.println("🐛 " + debugInfo);
         }
@@ -440,13 +346,20 @@ public class GameController implements BoardObserver {
         Rectangle rect = cellRectangles[row][col];
 
         if (cell.isOccupied()) {
+            // 셀이 차있으면 색상 클래스 추가
             String colorClass = getCssColorClass(cell.getColor());
             clearCellColor(rect);
             if (colorClass != null) {
                 rect.getStyleClass().add(colorClass);
             }
+
+            // ⭐ JavaFX Color로도 직접 설정 (CSS가 없어도 보이도록)
+            rect.setFill(getJavaFXColor(cell.getColor()));
+
         } else {
+            // 빈 셀이면 기본 색상으로 되돌림
             clearCellColor(rect);
+            rect.setFill(Color.rgb(26, 26, 26));
         }
     }
 
@@ -485,6 +398,9 @@ public class GameController implements BoardObserver {
                         if (colorClass != null) {
                             rect.getStyleClass().add(colorClass);
                         }
+
+                        // ⭐ JavaFX Color로도 직접 설정
+                        rect.setFill(getJavaFXColor(tetrominoColor));
                     }
                 }
             }
@@ -516,6 +432,23 @@ public class GameController implements BoardObserver {
             case MAGENTA: return "tetromino-magenta";
             case ORANGE:  return "tetromino-orange";
             default:      return null;
+        }
+    }
+
+    /**
+     * ⭐ 새로 추가: Core 모듈의 Color를 JavaFX Color로 변환
+     * CSS가 없어도 블록이 보이도록 하는 안전장치
+     */
+    private Color getJavaFXColor(seoultech.se.core.model.block.enumType.Color color) {
+        switch (color) {
+            case RED:     return Color.rgb(255, 68, 68);     // 밝은 빨강
+            case GREEN:   return Color.rgb(68, 255, 68);     // 밝은 초록
+            case BLUE:    return Color.rgb(68, 68, 255);     // 밝은 파랑
+            case YELLOW:  return Color.rgb(255, 255, 68);    // 밝은 노랑
+            case CYAN:    return Color.rgb(68, 255, 255);    // 밝은 청록
+            case MAGENTA: return Color.rgb(255, 68, 255);    // 밝은 마젠타
+            case ORANGE:  return Color.rgb(255, 136, 68);    // 밝은 주황
+            default:      return Color.rgb(128, 128, 128);   // 회색 (기본값)
         }
     }
 

@@ -17,7 +17,8 @@
             xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="seoultech.se.client.controller.GameController"
             prefHeight="700.0" prefWidth="600.0"
-            styleClass="game-background">
+            styleClass="game-background"
+            stylesheets="@../css/application.css">
     
     <!-- 상단: 제목 -->
     <top>
