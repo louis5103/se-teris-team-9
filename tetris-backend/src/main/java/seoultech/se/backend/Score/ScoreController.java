@@ -20,18 +20,21 @@ public class ScoreController {
 
     private final ScoreService scoreService;
 
+    // player의 점수 기록
     @PostMapping
     public ResponseEntity<ScoreResponseDto> saveNewScore(@RequestBody ScoreRequestDto newScore) {
         ScoreResponseDto responseDto = scoreService.saveNewScore(newScore);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
+    // 점수 목록 가져오기
     @GetMapping
     public ResponseEntity<List<ScoreResponseDto>> getScoreBoard() {
         List<ScoreResponseDto> scoreBoard = scoreService.getScoreBoard();
         return ResponseEntity.ok(scoreBoard);
     }
 
+    // 점수 목록 초기화하기
     @DeleteMapping
     public String deleteScoreBoard() {
         scoreService.deleteScoreBoard();
