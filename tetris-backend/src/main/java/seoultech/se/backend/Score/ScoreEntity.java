@@ -32,4 +32,12 @@ public class ScoreEntity {
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime updatedAt;
+
+    public static ScoreEntity from(ScoreRequestDto score) {
+        ScoreEntity entity = new ScoreEntity();
+        entity.name = score.getName();
+        entity.score = score.getScore();
+        entity.updatedAt = score.getUpdatedAt();
+        return entity;
+    }
 }

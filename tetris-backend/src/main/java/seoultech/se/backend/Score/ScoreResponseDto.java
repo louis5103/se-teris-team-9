@@ -17,6 +17,7 @@ public class ScoreResponseDto {
 
     public ScoreResponseDto(ScoreEntity entity) {
         this.name = entity.getName();
-
+        this.score = entity.getScore();
+        this.updatedAt = entity.getUpdatedAt();
     }
 }
