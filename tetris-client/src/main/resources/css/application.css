@@ -3,16 +3,16 @@
 }
 
 .menu-button {
-    -fx-pref-width: 200px;
-    -fx-pref-height: 50px;
+    -fx-pref-width: 17em;
+    -fx-pref-height: 4em;
     -fx-background-color: #333333;
     -fx-text-fill: white;
-    -fx-font-size: 24px;
+    -fx-font-size: 2em;
     -fx-font-family: "Arial Black";
     -fx-border-color: #555555;
-    -fx-border-width: 2px;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
+    -fx-border-width: 0.18em;
+    -fx-background-radius: 0.8em;
+    -fx-border-radius: 0.8em;
 }
 
 .menu-button:hover {
@@ -21,7 +21,7 @@
 }
 
 .settings-button {
-    -fx-font-size: 32px;
+    -fx-font-size: 2.6em;
     -fx-background-color: transparent;
     -fx-text-fill: #cccccc;
 }
@@ -29,5 +29,5 @@
 .settings-button:hover {
     -fx-text-fill: white;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.5), 10, 0, 0, 0);
+    /* -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.5), 10, 0, 0, 0); */
 }
