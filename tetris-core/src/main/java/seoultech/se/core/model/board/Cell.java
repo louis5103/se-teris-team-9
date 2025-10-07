@@ -24,7 +24,10 @@ public class Cell {
         cell.setOccupied(isOccupied);
         return cell;
     }
-
+    public Cell copy() {
+        return Cell.of(this.color, this.isOccupied);
+    }
+    
     public static Cell empty() {
         return Cell.of(Color.NONE, false);
     }
