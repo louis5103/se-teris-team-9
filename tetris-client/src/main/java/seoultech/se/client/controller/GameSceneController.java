@@ -85,6 +85,7 @@ public class GameSceneController extends BaseController {
         initBoardUI();
         initNextPieceGridUI();
         initScoreLevelUI();
+        board.spawnNewTetromino();
         // Ensure the scene is available before initializing key handlers
         Platform.runLater(() -> {
             javafx.scene.Scene scene = boardGridPane.getScene();
@@ -145,6 +146,7 @@ public class GameSceneController extends BaseController {
             }
             updateUI();
             event.consume();
+            System.out.println("Key pressed: " + code);
         });
     }
 
@@ -219,6 +221,8 @@ public class GameSceneController extends BaseController {
         // drawNextPiece(next);
         // scoreProperty.set(board.getScore());
         // levelProperty.set(board.getLevel());
+
+        System.out.println("UI updated");
     }
     
     private void initGameLoop() {
@@ -234,9 +238,9 @@ public class GameSceneController extends BaseController {
         // TODO : check if game over
         // The board class should provide a method to check if the game is over
         if (gameState != GameState.GAME_OVER) {
-            gameOver();
-        } else {
             updateUI();
+        } else {
+            gameOver();
         }
     }
 
