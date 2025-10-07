@@ -89,7 +89,7 @@
                     </children>
                 </VBox>
                 <Region VBox.vgrow="ALWAYS" />
-                <Button fx:id="startPauseResumeButton" styleClass="menu-button" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleStartPauseResume" text="Pause" />
+                <Button fx:id="startPauseResumeButton" styleClass="menu-button" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleStartPauseResume" text="Start" />
                 <Button fx:id="exitButton" styleClass="menu-button" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleExit" text="Exit" />
             </children>
         </VBox>

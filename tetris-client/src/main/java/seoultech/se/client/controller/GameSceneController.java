@@ -45,9 +45,6 @@ public class GameSceneController extends BaseController {
     private Button startPauseResumeButton;
 
     @FXML
-    private Button resetButton; // Button to reset the game
-
-    @FXML
     private Button exitButton; // Button to exit the game, only accessible when game is paused
 
     // tetris-core logic
@@ -105,37 +102,21 @@ public class GameSceneController extends BaseController {
             mainLoop.pause();
             gameState = GameState.PAUSED;
             startPauseResumeButton.setText("Resume");
-            exitButton.setVisible(true);
+            // exitButton.setVisible(true);
         } else if (gameState == GameState.PAUSED) {
             // Resume the game
             mainLoop.play();
             gameState = GameState.RUNNING;
             startPauseResumeButton.setText("Pause");
-            exitButton.setVisible(false);
+            // exitButton.setVisible(false);
         } else if (gameState == GameState.READY) {
             // Start the game
             initGameLoop();
             mainLoop.play();
             gameState = GameState.RUNNING;
-            startPauseResumeButton.setText("Start");
-            resetButton.setVisible(true);
+            startPauseResumeButton.setText("Pause");
+            // resetButton.setVisible(true);
         }
-    }
-
-    @FXML
-    private void handleReset() {
-        if (mainLoop != null) {
-            mainLoop.stop();
-        }
-        // board.reset();
-        scoreProperty.set(0);
-        // levelProperty.set(1);
-        gameState = GameState.READY;
-        startPauseResumeButton.setText("Start");
-        startPauseResumeButton.setDisable(false);
-        resetButton.setVisible(false);
-        exitButton.setVisible(false);
-        updateUI();
     }
 
     @FXML
