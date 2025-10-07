@@ -1,5 +1,7 @@
 package seoultech.se.client.controller;
 
+import org.springframework.stereotype.Component;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -9,9 +11,11 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -20,8 +24,11 @@ import seoultech.se.core.model.block.Tetromino;
 import seoultech.se.core.model.board.Board;
 import seoultech.se.core.model.board.Cell;
 
+@Component
+public class GameSceneController extends BaseController {
+    @FXML
+    private BorderPane rootPane; // The root pane for the game scene
 
-public class GameController {
     @FXML
     private GridPane boardGridPane; // The UI container for the Tetris board
 
@@ -29,10 +36,10 @@ public class GameController {
     private GridPane nextPieceGridPane; // The UI container for the next piece preview
 
     @FXML
-    private Text scoreText; // UI element to display the score
+    private Label scoreLabel; // UI element to display the score
 
-    @FXML
-    private Text levelText; // UI element to display the level
+    // @FXML
+    // private Text levelText; // UI element to display the level
 
     @FXML
     private Button startPauseResumeButton;
@@ -58,10 +65,11 @@ public class GameController {
     private static final int TILE_SIZE = 30;
     private static final int NEXT_PIECE_GRID_SIZE = 4;
     private final IntegerProperty scoreProperty = new SimpleIntegerProperty(0);
-    private final IntegerProperty levelProperty = new SimpleIntegerProperty(1);
+    // private final IntegerProperty levelProperty = new SimpleIntegerProperty(1);
 
     @FXML
     public void initialize() {
+        super.initialize();
         this.board = new Board();
         this.boardDisplay = new SimpleObjectProperty[BOARD_HEIGHT][BOARD_WIDTH];
         // for (int y = 0; y < BOARD_HEIGHT; y++) {
@@ -72,10 +80,10 @@ public class GameController {
         //     boardDisplay.add(row);
         // }
         this.nextTetromino = new SimpleObjectProperty<>(null);
-        scoreText.textProperty().bind(scoreProperty.asString("Score: %d"));
-        levelText.textProperty().bind(levelProperty.asString("Level: %d"));
+        scoreLabel.textProperty().bind(scoreProperty.asString("Score: %d"));
+        // levelText.textProperty().bind(levelProperty.asString("Level: %d"));
 
-        exitButton.setVisible(false);
+        // exitButton.setVisible(false);
 
         initBoardUI();
         initNextPieceGridUI();
@@ -121,7 +129,7 @@ public class GameController {
         }
         // board.reset();
         scoreProperty.set(0);
-        levelProperty.set(1);
+        // levelProperty.set(1);
         gameState = GameState.READY;
         startPauseResumeButton.setText("Start");
         startPauseResumeButton.setDisable(false);
@@ -185,8 +193,8 @@ public class GameController {
     }
 
     private void initScoreLevelUI() {
-        scoreText.setText("Score: 0");
-        levelText.setText("Level: 1");
+        scoreProperty.set(0);
+        // levelText.setText("Level: 1");
     }
 
     /**

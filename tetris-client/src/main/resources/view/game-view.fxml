@@ -15,12 +15,12 @@
 <BorderPane fx:id="rootPane" prefHeight="700" prefWidth="500" 
             xmlns="http://javafx.com/javafx/21" 
             xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="seoultech.se.client.controller.GameController"
+            fx:controller="seoultech.se.client.controller.GameSceneController"
             stylesheets="@../css/application.css, @../css/game-view.css">
     <center>
         <VBox styleClass="game-box" alignment="CENTER" BorderPane.alignment="CENTER">
             <children>
-                <GridPane fx:id="gameBoard" alignment="CENTER" gridLinesVisible="true" VBox.vgrow="ALWAYS">
+                <GridPane fx:id="boardGridPane" alignment="CENTER" gridLinesVisible="true" VBox.vgrow="ALWAYS">
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
                         <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
@@ -72,7 +72,7 @@
                     <children>
                         <Label fx:id="nextLabel" styleClass="next-label" text="NEXT">
                         </Label>
-                        <GridPane fx:id="nextBlockPane" alignment="CENTER" gridLinesVisible="true">
+                        <GridPane fx:id="nextPieceGridPane" alignment="CENTER" gridLinesVisible="true">
                             <columnConstraints>
                                 <ColumnConstraints hgrow="SOMETIMES" percentWidth="25.0" />
                                 <ColumnConstraints hgrow="SOMETIMES" percentWidth="25.0" />
