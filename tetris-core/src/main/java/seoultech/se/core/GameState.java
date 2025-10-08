@@ -90,7 +90,7 @@ public class GameState {
     public GameState deepCopy() {
         GameState copy = new GameState(boardWidth, boardHeight);
 
-        // grid 낖은 복사 - 각 셀 초기화.
+        // grid 깊은 복사 - 각 셀 초기화.
         for (int row = 0; row < boardHeight; row++) {
             for (int col = 0; col < boardWidth; col++) {
                 copy.grid[row][col] = this.grid[row][col].copy();
