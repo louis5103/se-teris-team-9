@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -17,6 +16,7 @@ import javafx.stage.Stage;
 import seoultech.se.backend.service.GameService;
 import seoultech.se.client.TetrisApplication;
 import seoultech.se.client.config.ApplicationContextProvider;
+import seoultech.se.client.service.NavigationService;
 
 
 /**
@@ -50,11 +50,19 @@ public class MainController extends BaseController {
     }
 
     /**
-     * 설정 버튼 액션 (향후 구현 예정)
+     * 설정 버튼 액션
      */
-    public void handleSettingsButtonAction() {
+    public void handleSettingsButtonAction(ActionEvent event) throws IOException {
         System.out.println("⚙️ Settings button clicked");
-        // TODO: 설정 화면 구현
+        navigationService.navigateTo("/view/setting-view.fxml");
+    }
+
+    /**
+     * SCORE 버튼 액션 (향후 구현 예정)
+     */
+    public void handleScoreButtonAction() {
+        System.out.println("🏆 Score button clicked");
+        // TODO: 점수판 화면 구현
     }
 
     /**
@@ -143,9 +151,5 @@ public class MainController extends BaseController {
         System.out.println("❌ Exit button clicked - Closing application");
         System.out.println("👋 Goodbye!");
         Platform.exit();
-    }
-
-    public void handleSettingsButtonAction(ActionEvent event) throws IOException {
-        navigationService.navigateTo("/view/setting-view.fxml");
     }
 }
