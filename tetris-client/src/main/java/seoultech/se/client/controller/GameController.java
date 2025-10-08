@@ -375,10 +375,18 @@ public class GameController implements BoardObserver {
         }
         
         switch (linesCleared) {
-            case 1 -> message.append("SINGLE");
-            case 2 -> message.append("DOUBLE");
-            case 3 -> message.append("TRIPLE");
-            case 4 -> message.append("TETRIS");
+            case 1:
+                message.append("SINGLE");
+                break;
+            case 2:
+                message.append("DOUBLE");
+                break;
+            case 3:
+                message.append("TRIPLE");
+                break;
+            case 4:
+                message.append("TETRIS");
+                break;
         }
         
         if (isPerfectClear) {
