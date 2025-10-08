@@ -1,16 +1,15 @@
-package seoultech.se.core.model.board;
-
-import lombok.Getter;
-import lombok.Setter;
-import seoultech.se.core.BoardObserver;
-import seoultech.se.core.model.block.Tetromino;
-import seoultech.se.core.model.block.enumType.RotationDirection;
-import seoultech.se.core.model.block.enumType.RotationState;
-import seoultech.se.core.model.block.enumType.TetrominoType;
-import seoultech.se.core.model.board.enumType.WallKickEventData;
+package seoultech.se.core.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Getter;
+import lombok.Setter;
+import seoultech.se.core.GameState;
+import seoultech.se.core.model.enumType.RotationDirection;
+import seoultech.se.core.model.enumType.RotationState;
+import seoultech.se.core.model.enumType.TetrominoType;
+import seoultech.se.core.model.enumType.WallKickEventData;
 
 /**
  * 게임 보드 (Observer 패턴 통합 + 오프라인 싱글 플레이 완전 지원)

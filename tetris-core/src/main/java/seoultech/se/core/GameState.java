@@ -1,8 +1,9 @@
-package seoultech.se.core.model.board;
+package seoultech.se.core;
 
 import lombok.Data;
-import seoultech.se.core.model.block.Tetromino;
-import seoultech.se.core.model.block.enumType.TetrominoType;
+import seoultech.se.core.model.Cell;
+import seoultech.se.core.model.Tetromino;
+import seoultech.se.core.model.enumType.TetrominoType;
 
 @Data
 public class GameState {

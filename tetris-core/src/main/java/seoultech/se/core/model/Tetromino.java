@@ -1,10 +1,10 @@
-package seoultech.se.core.model.block;
+package seoultech.se.core.model;
 
 import lombok.Getter;
-import seoultech.se.core.model.block.enumType.Color;
-import seoultech.se.core.model.block.enumType.RotationDirection;
-import seoultech.se.core.model.block.enumType.RotationState;
-import seoultech.se.core.model.block.enumType.TetrominoType;
+import seoultech.se.core.model.enumType.Color;
+import seoultech.se.core.model.enumType.RotationDirection;
+import seoultech.se.core.model.enumType.RotationState;
+import seoultech.se.core.model.enumType.TetrominoType;
 
 @Getter
 public class Tetromino {

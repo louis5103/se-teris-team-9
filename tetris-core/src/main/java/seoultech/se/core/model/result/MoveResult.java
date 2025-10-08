@@ -1,7 +1,7 @@
-package seoultech.se.core.model.board.engine.result;
+package seoultech.se.core.model.result;
 
 import lombok.Value;
-import seoultech.se.core.model.board.GameState;
+import seoultech.se.core.GameState;
 
 @Value
 public class MoveResult{

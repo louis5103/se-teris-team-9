@@ -1,8 +1,8 @@
-package seoultech.se.core.model.board.engine.result;
+package seoultech.se.core.model.result;
 
 import lombok.Value;
-import seoultech.se.core.model.block.enumType.RotationDirection;
-import seoultech.se.core.model.board.GameState;
+import seoultech.se.core.GameState;
+import seoultech.se.core.model.enumType.RotationDirection;
 
 @Value
 public class RotationResult {

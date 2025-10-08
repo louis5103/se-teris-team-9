@@ -1,10 +1,8 @@
-package seoultech.se.core;
+package seoultech.se.core.model;
 
-import seoultech.se.core.model.block.Tetromino;
-import seoultech.se.core.model.block.enumType.RotationDirection;
-import seoultech.se.core.model.block.enumType.TetrominoType;
-import seoultech.se.core.model.board.Cell;
-import seoultech.se.core.model.board.GameState;
+import seoultech.se.core.GameState;
+import seoultech.se.core.model.enumType.RotationDirection;
+import seoultech.se.core.model.enumType.TetrominoType;
 
 /**
  * Board 상태 변경을 관찰하는 인터페이스 (SRS 테트리스 완전 사양)

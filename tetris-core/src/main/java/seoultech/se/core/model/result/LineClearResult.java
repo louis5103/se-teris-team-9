@@ -1,4 +1,4 @@
-package seoultech.se.core.model.board.engine.result;
+package seoultech.se.core.model.result;
 
 import lombok.Value;
 

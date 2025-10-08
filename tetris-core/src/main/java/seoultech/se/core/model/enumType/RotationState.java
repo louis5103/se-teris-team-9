@@ -1,4 +1,4 @@
-package seoultech.se.core.model.block.enumType;
+package seoultech.se.core.model.enumType;
 
 public enum RotationState {
     SPAWN,
