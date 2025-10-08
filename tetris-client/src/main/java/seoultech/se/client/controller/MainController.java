@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -16,6 +17,7 @@ import javafx.stage.Stage;
 import seoultech.se.backend.service.GameService;
 import seoultech.se.client.TetrisApplication;
 import seoultech.se.client.config.ApplicationContextProvider;
+
 
 /**
  * 🎮 JavaFX 메인 메뉴 컨트롤러 (Spring DI 통합)
@@ -30,10 +32,13 @@ import seoultech.se.client.config.ApplicationContextProvider;
  * 게임 화면의 Controller(GameController)를 Spring Bean으로 생성합니다.
  */
 @Component
-public class MainController {
+public class MainController extends BaseController {
     
     @Autowired
     private GameService gameService;
+
+    @Autowired
+    private NavigationService navigationService;
     
     /**
      * UI 초기화 메서드
@@ -133,9 +138,14 @@ public class MainController {
      * TetrisApplication의 stop() 메서드가 자동으로 호출되어
      * Spring Context도 깨끗하게 종료됩니다.
      */
+
     public void handleEndButtonAction() {
         System.out.println("❌ Exit button clicked - Closing application");
         System.out.println("👋 Goodbye!");
         Platform.exit();
+    }
+
+    public void handleSettingsButtonAction(ActionEvent event) throws IOException {
+        navigationService.navigateTo("/view/setting-view.fxml");
     }
 }

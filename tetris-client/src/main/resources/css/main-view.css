@@ -1,6 +1,26 @@
 .title-label {
-    -fx-font-size: 64px;
+    -fx-padding: 1em 0 1em 0;
+    -fx-font-size: 5.3em;
     -fx-font-family: "Impact";
     -fx-text-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, aqua 0%, red 50%);
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 5, 5);
+    /* -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 5, 5); */
+}
+
+.settings-button {
+    -fx-font-size: 2.6em;
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+}
+
+.settings-button:hover {
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+    /* -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.5), 10, 0, 0, 0); */
+}
+.menu-box {
+    -fx-spacing: 1.6em;
+}
+
+.settings-box {
+    -fx-padding: 0 0 1.6em 1.6em;
 }

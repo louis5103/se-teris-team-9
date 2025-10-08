@@ -5,16 +5,44 @@
 
 /* ========== 메인 메뉴 버튼 ========== */
 .menu-button {
-    -fx-pref-width: 200px;
-    -fx-pref-height: 50px;
+    -fx-pref-width: 17em;
+    -fx-pref-height: 4em;
     -fx-background-color: #333333;
     -fx-text-fill: white;
-    -fx-font-size: 24px;
+    -fx-font-size: 2em;
     -fx-font-family: "Arial Black";
     -fx-border-color: #555555;
-    -fx-border-width: 2px;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
+    -fx-border-width: 0.18em;
+    -fx-background-radius: 0.8em;
+    -fx-border-radius: 0.8em;
+}
+
+.menu-button-middle {
+    -fx-pref-width: 16em;
+    -fx-pref-height: 3em;
+
+    -fx-background-color: #333333;
+    -fx-background-radius: 0.8em;
+
+    -fx-text-fill: white;
+    -fx-font-size: 2em;
+    -fx-font-family: "Arial Black";
+
+    -fx-border-color: #555555;
+    -fx-border-width: 0.18em;
+    -fx-border-radius: 0.8em;
+}
+.menu-button-small {
+    -fx-pref-width: 8em;
+    -fx-pref-height: 2em;
+    -fx-background-color: #333333;
+    -fx-text-fill: white;
+    -fx-font-size: 1.5em;
+    -fx-font-family: "Arial Black";
+    -fx-border-color: #555555;
+    -fx-border-width: 0.18em;
+    -fx-background-radius: 0.8em;
+    -fx-border-radius: 0.8em;
 }
 
 .menu-button:hover {
@@ -22,14 +50,13 @@
     -fx-cursor: hand;
 }
 
-.settings-button {
-    -fx-font-size: 32px;
-    -fx-background-color: transparent;
-    -fx-text-fill: #cccccc;
+.menu-button-middle:hover {
+    -fx-background-color: #4CAF50;
+    -fx-cursor: hand;
 }
 
-.settings-button:hover {
-    -fx-text-fill: white;
+.menu-button-small:hover {
+    -fx-background-color: #4CAF50;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.5), 10, 0, 0, 0);
 }
