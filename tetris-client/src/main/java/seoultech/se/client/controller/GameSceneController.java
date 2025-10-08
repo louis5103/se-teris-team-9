@@ -40,7 +40,7 @@ import seoultech.se.core.model.enumType.TetrominoType;
  *    BoardObserver로서 Event를 받으면, JavaFX UI를 업데이트합니다.
  *    이것은 기존과 동일합니다.
  * 
- * 주목할 점은 이제 GameController가 게임 로직을 전혀 모른다는 것입니다.
+ * 주목할 점은 이제 GameSceneController가 게임 로직을 전혀 모른다는 것입니다.
  * "왼쪽으로 이동할 수 있는가?", "라인이 완성되었는가?" 같은 판단을 하지 않습니다.
  * 단지 사용자가 무엇을 하고 싶어하는지를 Command로 표현하고, 결과를 Event로 받을 뿐입니다.
  * 
@@ -48,7 +48,7 @@ import seoultech.se.core.model.enumType.TetrominoType;
  * 중재는 BoardController가 담당하는 거죠.
  */
 @Component
-public class GameController implements BoardObserver {
+public class GameSceneController implements BoardObserver {
 
     @FXML private GridPane boardGridPane;
     @FXML private GridPane holdGridPane;
