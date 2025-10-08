@@ -7,10 +7,10 @@ import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.RotationDirection;
 import seoultech.se.core.model.enumType.TetrominoType;
 import seoultech.se.core.model.enumType.WallKickEventData;
-import seoultech.se.core.model.result.LineClearResult;
-import seoultech.se.core.model.result.LockResult;
-import seoultech.se.core.model.result.MoveResult;
-import seoultech.se.core.model.result.RotationResult;
+import seoultech.se.core.result.LineClearResult;
+import seoultech.se.core.result.LockResult;
+import seoultech.se.core.result.MoveResult;
+import seoultech.se.core.result.RotationResult;
 
 /**
  * 게임 엔진 클래스

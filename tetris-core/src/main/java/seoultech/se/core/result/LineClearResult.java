@@ -1,4 +1,4 @@
-package seoultech.se.core.model.result;
+package seoultech.se.core.result;
 
 import lombok.Value;
 

@@ -7,18 +7,24 @@ import java.util.Random;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import seoultech.se.core.BoardObserver;
 import seoultech.se.core.GameEngine;
 import seoultech.se.core.GameState;
-import seoultech.se.core.command.*;
-import seoultech.se.core.event.*;
-import seoultech.se.core.model.BoardObserver;
+import seoultech.se.core.command.Direction;
+import seoultech.se.core.command.GameCommand;
+import seoultech.se.core.command.MoveCommand;
+import seoultech.se.core.command.RotateCommand;
+import seoultech.se.core.event.GameEvent;
+import seoultech.se.core.event.GameOverEvent;
+import seoultech.se.core.event.LineClearedEvent;
+import seoultech.se.core.event.ScoreAddedEvent;
+import seoultech.se.core.event.TetrominoMovedEvent;
 import seoultech.se.core.model.Tetromino;
-import seoultech.se.core.model.enumType.RotationDirection;
 import seoultech.se.core.model.enumType.TetrominoType;
-import seoultech.se.core.model.result.LineClearResult;
-import seoultech.se.core.model.result.LockResult;
-import seoultech.se.core.model.result.MoveResult;
-import seoultech.se.core.model.result.RotationResult;
+import seoultech.se.core.result.LineClearResult;
+import seoultech.se.core.result.LockResult;
+import seoultech.se.core.result.MoveResult;
+import seoultech.se.core.result.RotationResult;
 
 /**
  * Command를 받아서 처리하고 Event를 발행하는 컨트롤러
