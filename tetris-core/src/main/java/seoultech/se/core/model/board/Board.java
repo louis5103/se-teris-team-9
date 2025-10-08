@@ -1,42 +1,34 @@
-package seoultech.se.core.model;
+package seoultech.se.core.model.board;
+
+import lombok.Getter;
+import lombok.Setter;
+import seoultech.se.core.BoardObserver;
+import seoultech.se.core.model.block.Tetromino;
+import seoultech.se.core.model.block.enumType.RotationDirection;
+import seoultech.se.core.model.block.enumType.RotationState;
+import seoultech.se.core.model.block.enumType.TetrominoType;
+import seoultech.se.core.model.board.enumType.WallKickEventData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
-import seoultech.se.core.GameState;
-import seoultech.se.core.model.enumType.RotationDirection;
-import seoultech.se.core.model.enumType.RotationState;
-import seoultech.se.core.model.enumType.TetrominoType;
-import seoultech.se.core.model.enumType.WallKickEventData;
-
 /**
- * @deprecated 이 클래스는 더 이상 사용되지 않습니다.
+ * 게임 보드 (Observer 패턴 통합 + 오프라인 싱글 플레이 완전 지원)
  * 
- * 새로운 아키텍처에서는 다음을 사용하세요:
- * - {@link seoultech.se.core.GameEngine} : 게임 로직 처리
- * - {@link seoultech.se.core.GameState} : 게임 상태 관리
- * - BoardController : Observer 패턴 및 Command 처리
+ * 현재 구현된 기능:
+ * - 기본 이동/회전 (SRS Wall Kick 포함)
+ * - 라인 클리어
+ * - 점수 계산
+ * - Observer 알림 시스템
+ * - Hard Drop
  * 
- * 이 클래스는 과거의 단일 책임 원칙을 위반하던 구현입니다.
- * 게임 로직, 상태 관리, Observer 패턴을 모두 하나의 클래스에서 처리했습니다.
- * 
- * 새로운 설계는 관심사를 분리하여:
- * - GameEngine: 순수한 게임 규칙만 처리 (불변 함수)
- * - GameState: 게임 상태를 불변 객체로 관리
- * - BoardController: Command를 받아 Engine을 실행하고 Event를 발행
- * 
- * 이렇게 분리함으로써 테스트가 쉽고, 멀티플레이어 확장이 가능하며,
- * 코드의 의도가 명확해졌습니다.
- * 
- * 이 클래스는 하위 호환성을 위해 유지되지만, 새로운 코드에서는
- * 절대 사용하지 마십시오. 향후 버전에서 제거될 예정입니다.
- * 
- * @see seoultech.se.core.GameEngine
- * @see seoultech.se.core.GameState
+ * TODO: 향후 구현 예정
+ * - Hold 시스템
+ * - 7-bag 랜덤 시스템
+ * - T-Spin 감지
+ * - 콤보/B2B 시스템
+ * - Lock Delay
  */
-@Deprecated(since = "2024-10", forRemoval = true)
 @Getter
 @Setter
 public class Board {
