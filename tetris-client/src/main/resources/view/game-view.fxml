@@ -1,12 +1,4 @@
-<?xml ver<!--
-    테트리스 게임 화면
-    - 왼쪽: 게임 보드 (GridPane)
-    - 오른쪽: 점수, 레벨, 라인 정보
-    - 중앙: 게임 오버 메시지 (평소에는 숨김)
--->
-<BorderPane xmlns="http://javafx.com/javafx" 
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="seoultech.se.client.controller.GameSceneController"" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
@@ -23,7 +15,7 @@
 -->
 <BorderPane xmlns="http://javafx.com/javafx/21" 
             xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="seoultech.se.client.controller.GameController"
+            fx:controller="seoultech.se.client.controller.GameSceneController"
             prefHeight="700.0" prefWidth="600.0"
             styleClass="game-background"
             stylesheets="@../css/application.css">
