@@ -125,8 +125,9 @@ public interface BoardObserver {
      *
      * @param direction 회전 방향 (CLOCKWISE 또는 COUNTER_CLOCKWISE)
      * @param kickIndex 적용된 Wall Kick 인덱스 (0~4)
+     * @param tetromino 회전된 테트로미노 (회전 후의 새로운 상태)
      */
-    void onTetrominoRotated(RotationDirection direction, int kickIndex);
+    void onTetrominoRotated(RotationDirection direction, int kickIndex, Tetromino tetromino);
 
     /**
      * 테트로미노 회전이 실패했을 때 호출됩니다.

@@ -16,9 +16,13 @@ import seoultech.se.core.command.MoveCommand;
 import seoultech.se.core.command.RotateCommand;
 import seoultech.se.core.event.GameEvent;
 import seoultech.se.core.event.GameOverEvent;
+import seoultech.se.core.event.GameStateChangedEvent;
 import seoultech.se.core.event.LineClearedEvent;
 import seoultech.se.core.event.ScoreAddedEvent;
+import seoultech.se.core.event.TetrominoLockedEvent;
 import seoultech.se.core.event.TetrominoMovedEvent;
+import seoultech.se.core.event.TetrominoRotatedEvent;
+import seoultech.se.core.event.TetrominoSpawnedEvent;
 import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.TetrominoType;
 import seoultech.se.core.result.LineClearResult;
@@ -210,8 +214,7 @@ public class BoardController {
      * 성공하면 TetrominoRotatedEvent와 TetrominoMovedEvent를 함께 발생시킵니다.
      * 회전하면서 위치도 바뀔 수 있으니까요.
      * 
-     * 실패하면 TetrominoRotationFailedEvent를 발생시킵니다. 이것은 UI에서
-     * 실패 피드백(사운드, 진동 등)을 주는 데 사용됩니다.
+     * 실패하면 아무 Event도 발생시키지 않습니다. (조용히 무시)
      */
     private List<GameEvent> handleRotateCommand(RotateCommand command) {
         List<GameEvent> events = new ArrayList<>();
@@ -222,18 +225,22 @@ public class BoardController {
             gameState = result.getNewState();
             
             // 회전 성공 Event
-            // TODO: TetrominoRotatedEvent 생성 (현재는 Observer 직접 호출)
+            events.add(new TetrominoRotatedEvent(
+                gameState.getCurrentTetromino(),
+                command.getDirection(),
+                result.getKickIndex(),
+                gameState.getCurrentX(),
+                gameState.getCurrentY()
+            ));
             
-            // 위치 변경 Event
+            // 위치 변경 Event (회전으로 인한 위치 이동)
             events.add(new TetrominoMovedEvent(
                 gameState.getCurrentX(),
                 gameState.getCurrentY(),
                 gameState.getCurrentTetromino()
             ));
-        } else {
-            // 회전 실패 Event
-            // TODO: TetrominoRotationFailedEvent 생성 (현재는 Observer 직접 호출)
         }
+        // 회전 실패는 조용히 무시
 
         return events;
     }
@@ -276,7 +283,7 @@ public class BoardController {
      * HoldCommand를 처리합니다
      * 
      * Hold 기능은 아직 GameEngine에 구현되지 않았습니다.
-     * 따라서 현재는 실패 Event만 발생시킵니다.
+     * 따라서 현재는 빈 리스트를 반환합니다.
      * 
      * TODO: GameEngine에 tryHold() 메서드를 구현하고,
      * 여기서 그것을 호출하여 HoldResult를 Event로 변환해야 합니다.
@@ -356,12 +363,17 @@ public class BoardController {
      * - ScoreAddedEvent: 점수를 얻었다 (있다면)
      * - GameOverEvent: 게임이 끝났다 (게임 오버라면)
      * - TetrominoSpawnedEvent: 새 블록이 생성되었다 (게임 오버가 아니라면)
+     * - GameStateChangedEvent: 게임 상태가 변경되었다
      */
     private List<GameEvent> processLockResult(LockResult result) {
         List<GameEvent> events = new ArrayList<>();
 
         // 1. 블록 고정 Event
-        // TODO: TetrominoLockedEvent 추가
+        events.add(new TetrominoLockedEvent(
+            gameState.getCurrentTetromino(),
+            gameState.getCurrentX(),
+            gameState.getCurrentY()
+        ));
 
         // 2. 게임 오버 체크
         if (result.isGameOver()) {
@@ -372,6 +384,10 @@ public class BoardController {
                 gameState.getLinesCleared(),
                 0 // TODO: 플레이 시간 계산
             ));
+            
+            // GameState 업데이트 Event
+            events.add(new GameStateChangedEvent(gameState));
+            
             return events; // 게임 오버면 여기서 종료
         }
 
@@ -393,27 +409,25 @@ public class BoardController {
                 getScoreReason(clearResult)
             ));
 
-            // Combo Event
-            if (gameState.getComboCount() > 0) {
-                // TODO: ComboEvent 추가
-            }
-
-            // B2B Event
-            if (gameState.getBackToBackCount() > 0) {
-                // TODO: BackToBackEvent 추가
-            }
+            // TODO: Combo Event 추가
+            // TODO: B2B Event 추가
         } else {
             // 라인을 지우지 못했으면 콤보 종료
-            if (gameState.getComboCount() > 0) {
-                // TODO: ComboBreakEvent 추가
-            }
+            // TODO: ComboBreakEvent 추가
         }
 
-        // 4. GameStateChanged Event
-        // TODO: GameStateChangedEvent 추가
+        // 4. GameState 변경 Event
+        events.add(new GameStateChangedEvent(gameState));
 
         // 5. 새 블록 생성
         spawnNewTetromino();
+        events.add(new TetrominoSpawnedEvent(
+            gameState.getCurrentTetromino(),
+            gameState.getCurrentX(),
+            gameState.getCurrentY()
+        ));
+        
+        // 새 블록의 위치 Event
         events.add(new TetrominoMovedEvent(
             gameState.getCurrentX(),
             gameState.getCurrentY(),
@@ -440,8 +454,6 @@ public class BoardController {
         gameState.setCurrentTetromino(newTetromino);
         gameState.setCurrentX(gameState.getBoardWidth() / 2 - 1);
         gameState.setCurrentY(0);
-
-        // TODO: TetrominoSpawnedEvent 추가
     }
 
     private TetrominoType getNextTetrominoType() {
@@ -556,6 +568,31 @@ public class BoardController {
                 }
                 break;
 
+            case TETROMINO_ROTATED:
+                TetrominoRotatedEvent rotatedEvent = (TetrominoRotatedEvent) event;
+                for (BoardObserver observer : observers) {
+                    observer.onTetrominoRotated(
+                        rotatedEvent.getDirection(),
+                        rotatedEvent.getKickIndex(),
+                        rotatedEvent.getTetromino()
+                    );
+                }
+                break;
+
+            case TETROMINO_LOCKED:
+                TetrominoLockedEvent lockedEvent = (TetrominoLockedEvent) event;
+                for (BoardObserver observer : observers) {
+                    observer.onTetrominoLocked(lockedEvent.getTetromino());
+                }
+                break;
+
+            case TETROMINO_SPAWNED:
+                TetrominoSpawnedEvent spawnedEvent = (TetrominoSpawnedEvent) event;
+                for (BoardObserver observer : observers) {
+                    observer.onTetrominoSpawned(spawnedEvent.getTetromino());
+                }
+                break;
+
             case LINE_CLEARED:
                 LineClearedEvent clearedEvent = (LineClearedEvent) event;
                 for (BoardObserver observer : observers) {
@@ -579,20 +616,24 @@ public class BoardController {
                 }
                 break;
 
+            case GAME_STATE_CHANGED:
+                GameStateChangedEvent stateEvent = (GameStateChangedEvent) event;
+                for (BoardObserver observer : observers) {
+                    observer.onGameStateChanged(stateEvent.getGameState());
+                }
+                break;
+
             case GAME_OVER:
                 GameOverEvent gameOverEvent = (GameOverEvent) event;
                 for (BoardObserver observer : observers) {
                     observer.onGameOver(gameOverEvent.getReason());
                 }
-                // GameState 업데이트도 함께 알림
-                for (BoardObserver observer : observers) {
-                    observer.onGameStateChanged(gameState);
-                }
                 break;
 
-            // TODO: 나머지 Event 타입들도 추가
+            // 아직 처리하지 않는 Event 타입들
             default:
-                System.err.println("Unhandled event type: " + event.getType());
+                // 조용히 무시 (나중에 필요하면 추가)
+                break;
         }
     }
 }

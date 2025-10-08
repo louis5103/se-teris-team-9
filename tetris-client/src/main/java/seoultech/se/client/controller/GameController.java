@@ -291,11 +291,11 @@ public class GameController implements BoardObserver {
 
     @Override
     public void onTetrominoRotated(RotationDirection direction, int kickIndex, Tetromino tetromino) {
-        System.out.println("🔄 Rotated " + direction + " (kick index: " + kickIndex + ")");
+        System.out.println("🔄 Rotated " + direction + " (kick index: " + kickIndex + ", tetromino: " + tetromino + ")");
     }
 
     @Override
-    public void onTetrominoRotationFailed(RotationDirection direction, Tetromino tetromino) {
+    public void onTetrominoRotationFailed(RotationDirection direction) {
         System.out.println("❌ Rotation failed: " + direction);
     }
 
@@ -557,4 +557,9 @@ public class GameController implements BoardObserver {
         lastUpdateTime = System.nanoTime();
         gameLoop.start();
     }
+
+
+    // TODO: 나머지 Override
+    
+
 }
