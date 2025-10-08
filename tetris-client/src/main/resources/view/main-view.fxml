@@ -15,6 +15,7 @@
     <center>
         <VBox fx:id="menuBox" styleClass="menu-box" alignment="CENTER" BorderPane.alignment="CENTER">
             <children>
+                <!-- START 버튼: onAction 메서드가 ActionEvent를 전달합니다 -->
                 <Button fx:id="startButton" onAction="#handleStartButtonAction" styleClass="menu-button" text="START" />
                 <Button fx:id="scoreButton" onAction="#handleScoreButtonAction" styleClass="menu-button" text="SCORE" />
                 <Button fx:id="endButton" onAction="#handleEndButtonAction" styleClass="menu-button" text="END" />

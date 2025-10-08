@@ -19,16 +19,6 @@
 		"java.compile.nullAnalysis.mode": "disabled",
 		"java.saveActions.organizeImports": true,
 		"java.project.explorer.showNonJavaResources": true,
-		"terminal.integrated.defaultProfile.osx": "bash",
-		"files.eol": "\n",
-		"files.insertFinalNewline": true,
-		"files.trimTrailingWhitespace": true,
-		"files.encoding": "utf8",
-		"files.autoGuessEncoding": true,
-		"java.clean.workspace": true,
-		"spring-boot.ls.problem.application-properties.unknown-property": "ignore",
-		"java.configuration.runtimes": [],
-		"java.jdt.ls.vmargs": "-Dfile.encoding=UTF-8 -Dconsole.encoding=UTF-8",
-		"java.server.launchMode": "Standard"
+		"terminal.integrated.defaultProfile.osx": "bash"
 	}
 }

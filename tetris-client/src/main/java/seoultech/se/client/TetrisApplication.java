@@ -16,7 +16,7 @@ import seoultech.se.client.service.SettingsService;
 
 /**
  * 🎮 JavaFX + Spring Boot 통합 애플리케이션
- * 
+ *
  * JavaFX를 메인으로 하고 Spring Boot를 DI 컨테이너로 사용하는 통합 구조
  * - init()에서 Spring Boot 컨텍스트 초기화
  * - JavaFX UI와 Spring Boot 서비스 레이어 연동
@@ -24,7 +24,7 @@ import seoultech.se.client.service.SettingsService;
  */
 @SpringBootApplication(scanBasePackages = {"seoultech.se.backend", "seoultech.se.client"})
 public class TetrisApplication extends Application {
-    
+
     private ConfigurableApplicationContext springContext;
 
     /**
@@ -35,7 +35,7 @@ public class TetrisApplication extends Application {
         // JavaFX와 Spring Boot 통합 초기화
         System.setProperty("java.awt.headless", "false");
         System.setProperty("spring.main.web-application-type", "none");
-        
+
         springContext = SpringApplication.run(TetrisApplication.class);
         System.out.println("✅ Spring Boot context initialized with JavaFX");
     }
@@ -56,7 +56,7 @@ public class TetrisApplication extends Application {
         primaryStage.setTitle("Tetris Project");
         primaryStage.setScene(scene);
         primaryStage.show();
-        
+
         System.out.println("✅ JavaFX UI started with main-view.fxml");
     }
 

@@ -1,9 +1,9 @@
-package seoultech.se.core.model.board;
+package seoultech.se.core.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import seoultech.se.core.model.block.enumType.Color;
+import seoultech.se.core.model.enumType.Color;
 
 @Getter
 @Setter
@@ -24,7 +24,10 @@ public class Cell {
         cell.setOccupied(isOccupied);
         return cell;
     }
-
+    public Cell copy() {
+        return Cell.of(this.color, this.isOccupied);
+    }
+    
     public static Cell empty() {
         return Cell.of(Color.NONE, false);
     }

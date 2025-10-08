@@ -1,97 +1,122 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="rootPane" prefHeight="700" prefWidth="500" 
-            xmlns="http://javafx.com/javafx/21" 
+<!--
+    테트리스 게임 화면
+    - 왼쪽: 게임 보드 (GridPane)
+    - 오른쪽: 점수, 레벨, 라인 정보
+    - 중앙: 게임 오버 메시지 (평소에는 숨김)
+-->
+<BorderPane xmlns="http://javafx.com/javafx/21" 
             xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="seoultech.se.client.controller.GameSceneController"
-            stylesheets="@../css/application.css, @../css/game-view.css">
+            fx:controller="seoultech.se.client.controller.GameController"
+            prefHeight="700.0" prefWidth="600.0"
+            styleClass="game-background"
+            stylesheets="@../css/application.css">
+    
+    <!-- 상단: 제목 -->
+    <top>
+        <Label text="TETRIS" styleClass="game-title">
+            <BorderPane.margin>
+                <Insets top="20.0" />
+            </BorderPane.margin>
+        </Label>
+    </top>
+    
+    <!-- 중앙: 게임 보드와 정보 -->
     <center>
-        <VBox styleClass="game-box" alignment="CENTER" BorderPane.alignment="CENTER">
-            <children>
-                <GridPane fx:id="boardGridPane" alignment="CENTER" gridLinesVisible="true" VBox.vgrow="ALWAYS">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
+        <HBox spacing="40.0" alignment="CENTER" BorderPane.alignment="CENTER">
+            <BorderPane.margin>
+                <Insets top="20.0" bottom="20.0" left="20.0" right="20.0" />
+            </BorderPane.margin>
+            
+            <!-- 왼쪽: Hold 영역 -->
+            <VBox spacing="10.0" alignment="TOP_CENTER" minWidth="120.0">
+                <Label text="HOLD" styleClass="info-label-title"/>
+                <GridPane fx:id="holdGridPane" 
+                         styleClass="preview-board"
+                         prefWidth="120.0" 
+                         prefHeight="120.0">
                 </GridPane>
-                <StackPane fx:id="scorePane" styleClass="score-pane">
-                    <children>
-                        <Label fx:id="scoreLabel" styleClass="score-label" text="Score: 0" StackPane.alignment="CENTER_LEFT">
-                        </Label>
-                    </children>
-                </StackPane>
-            </children>
-        </VBox>
-    </center>
-    <right>
-        <VBox fx:id="rightBox" styleClass="right-box" prefWidth="150.0" BorderPane.alignment="CENTER">
-            <children>
-                <VBox alignment="CENTER" styleClass="next-block-box">
-                    <children>
-                        <Label fx:id="nextLabel" styleClass="next-label" text="NEXT">
-                        </Label>
-                        <GridPane fx:id="nextPieceGridPane" alignment="CENTER" gridLinesVisible="true">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" percentWidth="25.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" percentWidth="25.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" percentWidth="25.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" percentWidth="25.0" />
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints percentHeight="25.0" vgrow="SOMETIMES" />
-                                <RowConstraints percentHeight="25.0" vgrow="SOMETIMES" />
-                                <RowConstraints percentHeight="25.0" vgrow="SOMETIMES" />
-                                <RowConstraints percentHeight="25.0" vgrow="SOMETIMES" />
-                            </rowConstraints>
-                        </GridPane>
-                    </children>
+            </VBox>
+            
+            <!-- 게임 보드 -->
+            <VBox alignment="CENTER" spacing="10.0">
+                <!-- 게임 오버 메시지 (평소에는 숨김) -->
+                <Label fx:id="gameOverLabel" 
+                       text="GAME OVER" 
+                       styleClass="game-over-label" 
+                       visible="false"
+                       managed="false"/>
+                
+                <!-- Combo/B2B 알림 (평소에는 숨김) -->
+                <Label fx:id="comboLabel" 
+                       text="" 
+                       styleClass="combo-label" 
+                       visible="false"
+                       managed="false"/>
+                
+                <!-- 실제 테트리스 보드 (10x20 그리드) -->
+                <GridPane fx:id="boardGridPane" 
+                         styleClass="game-board"
+                         focusTraversable="true">
+                    <!-- 
+                        이 GridPane은 GameController의 initializeGridPane()에서 
+                        Rectangle들로 채워집니다 (10열 x 20행)
+                    -->
+                </GridPane>
+            </VBox>
+            
+            <!-- 오른쪽: 게임 정보 -->
+            <VBox spacing="30.0" alignment="TOP_CENTER" minWidth="150.0">
+                <!-- Next 영역 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="NEXT" styleClass="info-label-title"/>
+                    <GridPane fx:id="nextGridPane" 
+                             styleClass="preview-board"
+                             prefWidth="120.0" 
+                             prefHeight="120.0">
+                    </GridPane>
                 </VBox>
-                <Region VBox.vgrow="ALWAYS" />
-                <Button fx:id="startPauseResumeButton" styleClass="menu-button" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleStartPauseResume" text="Start" />
-                <Button fx:id="exitButton" styleClass="menu-button" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleExit" text="Exit" />
-            </children>
-        </VBox>
-    </right>
+                
+                <!-- 점수 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="SCORE" styleClass="info-label-title"/>
+                    <Label fx:id="scoreLabel" text="0" styleClass="info-label-value"/>
+                </VBox>
+                
+                <!-- 레벨 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="LEVEL" styleClass="info-label-title"/>
+                    <Label fx:id="levelLabel" text="1" styleClass="info-label-value"/>
+                </VBox>
+                
+                <!-- 지운 줄 수 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="LINES" styleClass="info-label-title"/>
+                    <Label fx:id="linesLabel" text="0" styleClass="info-label-value"/>
+                </VBox>
+                
+                <!-- 조작법 안내 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="CONTROLS" styleClass="info-label-title"/>
+                    <VBox spacing="3.0" styleClass="controls-info">
+                        <Label text="← → : Move" styleClass="control-text"/>
+                        <Label text="↓ : Soft Drop" styleClass="control-text"/>
+                        <Label text="↑ : Rotate CW" styleClass="control-text"/>
+                        <Label text="Z : Rotate CCW" styleClass="control-text"/>
+                        <Label text="Space : Hard Drop" styleClass="control-text"/>
+                        <Label text="C : Hold" styleClass="control-text"/>
+                        <Label text="P : Pause" styleClass="control-text"/>
+                    </VBox>
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
 </BorderPane>
