@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -17,6 +16,7 @@ import javafx.stage.Stage;
 import seoultech.se.backend.service.GameService;
 import seoultech.se.client.TetrisApplication;
 import seoultech.se.client.config.ApplicationContextProvider;
+import seoultech.se.client.service.NavigationService;
 
 
 /**
@@ -50,11 +50,19 @@ public class MainController extends BaseController {
     }
 
     /**
-     * 설정 버튼 액션 (향후 구현 예정)
+     * 설정 버튼 액션
      */
-    public void handleSettingsButtonAction() {
+    public void handleSettingsButtonAction(ActionEvent event) throws IOException {
         System.out.println("⚙️ Settings button clicked");
-        // TODO: 설정 화면 구현
+        navigationService.navigateTo("/view/setting-view.fxml");
+    }
+
+    /**
+     * SCORE 버튼 액션 (향후 구현 예정)
+     */
+    public void handleScoreButtonAction() {
+        System.out.println("🏆 Score button clicked");
+        // TODO: 점수판 화면 구현
     }
 
     /**
@@ -105,11 +113,29 @@ public class MainController extends BaseController {
             // @FXML로 표시된 필드들이 UI 요소와 연결됩니다
             Parent gameRoot = loader.load();
             
+            // 창 크기 변경 전 현재 위치와 크기 저장
+            double currentX = stage.getX();
+            double currentY = stage.getY();
+            double currentWidth = stage.getWidth();
+            double currentHeight = stage.getHeight();
+            
             // 5단계: 새로운 Scene 생성 및 Stage에 설정
             // Scene은 UI 요소들의 컨테이너이자 하나의 화면을 의미합니다
             Scene gameScene = new Scene(gameRoot);
             stage.setScene(gameScene);
             stage.setTitle("Tetris - Playing");
+            stage.setResizable(false);  // 창 크기 조절 불가 유지
+            
+            // 새 Scene 크기 가져오기
+            stage.sizeToScene();  // Scene 크기에 맞게 Stage 크기 조정
+            double newWidth = stage.getWidth();
+            double newHeight = stage.getHeight();
+            
+            // 중앙 위치 유지: 크기 변화만큼 위치를 조정하여 중심점 유지
+            double deltaX = (newWidth - currentWidth) / 2;
+            double deltaY = (newHeight - currentHeight) / 2;
+            stage.setX(currentX - deltaX);
+            stage.setY(currentY - deltaY);
             
             // 6단계: 로드 완료!
             // GameController의 initialize() 메서드가 이미 호출되었고
@@ -143,9 +169,5 @@ public class MainController extends BaseController {
         System.out.println("❌ Exit button clicked - Closing application");
         System.out.println("👋 Goodbye!");
         Platform.exit();
-    }
-
-    public void handleSettingsButtonAction(ActionEvent event) throws IOException {
-        navigationService.navigateTo("/view/setting-view.fxml");
     }
 }

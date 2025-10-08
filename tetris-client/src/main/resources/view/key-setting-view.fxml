@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700" prefWidth="500.0" stylesheets="@../css/application.css, @../css/key-setting-view.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seoultech.se.client.controller.KeySettingSceneController">
+<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700" prefWidth="500.0" stylesheets="@../css/application.css, @../css/key-setting-view.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seoultech.se.client.controller.KeySettingSceneController">
    <top>
       <Label styleClass="title-label" text="Key" BorderPane.alignment="CENTER" />
    </top>
@@ -37,8 +37,9 @@
       </GridPane>
    </center>
    <bottom>
-      <HBox fx:id="bottomBox" alignment="CENTER_RIGHT" styleClass="bottom-box">
+      <HBox fx:id="bottomBox" alignment="CENTER_RIGHT" spacing="10" styleClass="bottom-box">
          <children>
+            <Button fx:id="resetButton" onAction="#handleResetButton" styleClass="menu-button-small" text="Reset" />
             <Button fx:id="backButton" onAction="#handleBackButton" styleClass="menu-button-small" text="Back" />
          </children>
       </HBox>

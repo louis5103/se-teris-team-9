@@ -1,5 +1,8 @@
 package seoultech.se.client.controller;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javafx.animation.AnimationTimer;
@@ -10,6 +13,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import seoultech.se.client.model.GameAction;
+import seoultech.se.client.service.KeyMappingService;
 import seoultech.se.core.BoardObserver;
 import seoultech.se.core.GameState;
 import seoultech.se.core.command.Direction;
@@ -59,6 +64,9 @@ public class GameController implements BoardObserver {
     @FXML private Label gameOverLabel;
     @FXML private Label comboLabel;
 
+    @Autowired
+    private KeyMappingService keyMappingService;
+
     private BoardController boardController;
     private Rectangle[][] cellRectangles;
     private Rectangle[][] holdCellRectangles;
@@ -83,6 +91,14 @@ public class GameController implements BoardObserver {
     @FXML
     public void initialize() {
         System.out.println("🎮 GameController initializing...");
+
+        // KeyMappingService 확인
+        if (keyMappingService != null) {
+            System.out.println("✅ KeyMappingService is ready");
+            keyMappingService.printCurrentMappings();
+        } else {
+            System.err.println("❌ KeyMappingService is null!");
+        }
 
         // BoardController 생성 및 Observer 등록
         boardController = new BoardController();
@@ -201,69 +217,62 @@ public class GameController implements BoardObserver {
     /**
      * 키 입력을 Command로 변환하고 실행합니다
      * 
-     * 이 메서드의 구조가 매우 깔끔해졌습니다.
-     * 각 키에 대해 Command를 생성하고, 그것을 executeCommand()로 보내기만 하면 됩니다.
+     * KeyMappingService를 사용하여 사용자 정의 키 매핑을 지원합니다.
+     * 이를 통해 각 사용자는 자신이 원하는 키로 게임을 플레이할 수 있습니다.
      * 
-     * 기존 방식과 비교해보세요:
+     * 흐름:
+     * 1. KeyCode → KeyMappingService → GameAction
+     * 2. GameAction → Command 생성
+     * 3. Command → BoardController → 실행
      * 
-     * 기존:
-     * ```java
-     * case LEFT:
-     *     boardController.moveLeft();
-     *     break;
-     * ```
-     * 
-     * 새로운:
-     * ```java
-     * case LEFT:
-     *     command = new MoveCommand(Direction.LEFT);
-     *     break;
-     * ```
-     * 
-     * 차이가 작아 보이지만, 이것이 가져오는 변화는 엄청납니다.
-     * Command 객체는 직렬화할 수 있고, 저장할 수 있고, 네트워크로 보낼 수 있습니다.
-     * 반면 메서드 호출은 그 자리에서 즉시 실행될 뿐입니다.
-     * 
-     * Command 패턴을 사용하면 이 입력을 기록해서 리플레이를 만들 수도 있고,
-     * 네트워크로 보내서 다른 플레이어와 대전할 수도 있습니다.
+     * 멀티플레이어에서는 각 클라이언트가 독립적인 키 설정을 가질 수 있습니다.
      */
     private void handleKeyPress(KeyEvent event) {
         if (boardController.getGameState().isGameOver()) {
             return;
         }
 
+        // KeyMappingService로 키를 GameAction으로 변환
+        Optional<GameAction> actionOpt = keyMappingService.getAction(event.getCode());
+        
+        if (actionOpt.isEmpty()) {
+            return; // 매핑되지 않은 키는 무시
+        }
+        
+        GameAction action = actionOpt.get();
         GameCommand command = null;
 
-        switch (event.getCode()) {
-            case LEFT:
+        // GameAction에 따라 Command 생성
+        switch (action) {
+            case MOVE_LEFT:
                 command = new MoveCommand(Direction.LEFT);
                 break;
                 
-            case RIGHT:
+            case MOVE_RIGHT:
                 command = new MoveCommand(Direction.RIGHT);
                 break;
                 
-            case DOWN:
+            case MOVE_DOWN:
                 command = new MoveCommand(Direction.DOWN);
                 break;
                 
-            case UP:
+            case ROTATE_CLOCKWISE:
                 command = new RotateCommand(RotationDirection.CLOCKWISE);
                 break;
                 
-            case Z:
+            case ROTATE_COUNTER_CLOCKWISE:
                 command = new RotateCommand(RotationDirection.COUNTER_CLOCKWISE);
                 break;
                 
-            case SPACE:
+            case HARD_DROP:
                 command = new HardDropCommand();
                 break;
                 
-            case C:
+            case HOLD:
                 command = new HoldCommand();
                 break;
                 
-            case P:
+            case PAUSE_RESUME:
                 // Pause/Resume 토글
                 if (boardController.getGameState().isPaused()) {
                     command = new seoultech.se.core.command.ResumeCommand();
@@ -273,7 +282,6 @@ public class GameController implements BoardObserver {
                 break;
                 
             default:
-                // 다른 키는 무시
                 break;
         }
 
