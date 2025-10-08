@@ -1,5 +1,8 @@
 package seoultech.se.client.controller;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javafx.animation.AnimationTimer;
@@ -10,6 +13,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import seoultech.se.client.model.GameAction;
+import seoultech.se.client.service.KeyMappingService;
 import seoultech.se.core.BoardObserver;
 import seoultech.se.core.GameState;
 import seoultech.se.core.command.Direction;
@@ -59,6 +64,9 @@ public class GameSceneController implements BoardObserver {
     @FXML private Label gameOverLabel;
     @FXML private Label comboLabel;
 
+    @Autowired
+    private KeyMappingService keyMappingService;
+    
     private BoardController boardController;
     private Rectangle[][] cellRectangles;
     private Rectangle[][] holdCellRectangles;
@@ -201,88 +209,95 @@ public class GameSceneController implements BoardObserver {
     /**
      * 키 입력을 Command로 변환하고 실행합니다
      * 
-     * 이 메서드의 구조가 매우 깔끔해졌습니다.
-     * 각 키에 대해 Command를 생성하고, 그것을 executeCommand()로 보내기만 하면 됩니다.
+     * KeyMappingService를 통한 동적 키 매핑:
      * 
-     * 기존 방식과 비교해보세요:
-     * 
-     * 기존:
-     * ```java
-     * case LEFT:
-     *     boardController.moveLeft();
-     *     break;
-     * ```
-     * 
-     * 새로운:
+     * 기존 방식 (하드코딩):
      * ```java
      * case LEFT:
      *     command = new MoveCommand(Direction.LEFT);
      *     break;
      * ```
      * 
-     * 차이가 작아 보이지만, 이것이 가져오는 변화는 엄청납니다.
-     * Command 객체는 직렬화할 수 있고, 저장할 수 있고, 네트워크로 보낼 수 있습니다.
-     * 반면 메서드 호출은 그 자리에서 즉시 실행될 뿐입니다.
+     * 새로운 방식 (사용자 설정):
+     * ```java
+     * Optional<GameAction> action = keyMappingService.getAction(keyCode);
+     * if (action.isPresent()) {
+     *     command = createCommandFromAction(action.get());
+     * }
+     * ```
      * 
-     * Command 패턴을 사용하면 이 입력을 기록해서 리플레이를 만들 수도 있고,
-     * 네트워크로 보내서 다른 플레이어와 대전할 수도 있습니다.
+     * 장점:
+     * 1. 사용자가 키를 자유롭게 변경 가능
+     * 2. WASD ↔ 화살표 등 다양한 레이아웃 지원
+     * 3. 멀티플레이어에서 각 클라이언트가 독립적인 키 설정 사용
+     * 4. 키 설정이 영구 저장됨 (Java Preferences)
+     * 
+     * 멀티플레이어 시나리오:
+     * - Player A: WASD 사용 → MoveCommand 생성
+     * - Player B: 화살표 사용 → MoveCommand 생성
+     * - 서버는 동일한 Command 처리 (키 설정 무관)
      */
     private void handleKeyPress(KeyEvent event) {
         if (boardController.getGameState().isGameOver()) {
             return;
         }
 
-        GameCommand command = null;
-
-        switch (event.getCode()) {
-            case LEFT:
-                command = new MoveCommand(Direction.LEFT);
-                break;
-                
-            case RIGHT:
-                command = new MoveCommand(Direction.RIGHT);
-                break;
-                
-            case DOWN:
-                command = new MoveCommand(Direction.DOWN);
-                break;
-                
-            case UP:
-                command = new RotateCommand(RotationDirection.CLOCKWISE);
-                break;
-                
-            case Z:
-                command = new RotateCommand(RotationDirection.COUNTER_CLOCKWISE);
-                break;
-                
-            case SPACE:
-                command = new HardDropCommand();
-                break;
-                
-            case C:
-                command = new HoldCommand();
-                break;
-                
-            case P:
-                // Pause/Resume 토글
-                if (boardController.getGameState().isPaused()) {
-                    command = new seoultech.se.core.command.ResumeCommand();
-                } else {
-                    command = new seoultech.se.core.command.PauseCommand();
-                }
-                break;
-                
-            default:
-                // 다른 키는 무시
-                break;
+        // KeyMappingService를 통해 KeyCode → GameAction 변환
+        Optional<GameAction> actionOpt = keyMappingService.getAction(event.getCode());
+        
+        if (actionOpt.isEmpty()) {
+            return; // 매핑되지 않은 키는 무시
         }
+        
+        GameAction action = actionOpt.get();
+        GameCommand command = createCommandFromAction(action);
 
         // Command가 생성되었으면 실행
         if (command != null) {
             boardController.executeCommand(command);
         }
-
-        event.consume();
+    }
+    
+    /**
+     * GameAction을 GameCommand로 변환
+     * 
+     * 이 메서드는 추상적인 게임 액션을 구체적인 Command 객체로 변환합니다.
+     * 
+     * @param action 게임 액션
+     * @return 해당하는 Command 객체 (또는 null)
+     */
+    private GameCommand createCommandFromAction(GameAction action) {
+        switch (action) {
+            case MOVE_LEFT:
+                return new MoveCommand(Direction.LEFT);
+                
+            case MOVE_RIGHT:
+                return new MoveCommand(Direction.RIGHT);
+                
+            case MOVE_DOWN:
+                return new MoveCommand(Direction.DOWN);
+                
+            case ROTATE_CLOCKWISE:
+                return new RotateCommand(RotationDirection.CLOCKWISE);
+                
+            case ROTATE_COUNTER_CLOCKWISE:
+                return new RotateCommand(RotationDirection.COUNTER_CLOCKWISE);
+                
+            case HARD_DROP:
+                return new HardDropCommand();
+                
+            case HOLD:
+                return new HoldCommand();
+                
+            case PAUSE:
+                return new seoultech.se.core.command.PauseCommand();
+                
+            case RESUME:
+                return new seoultech.se.core.command.ResumeCommand();
+                
+            default:
+                return null;
+        }
     }
 
     // ========== BoardObserver 구현 ==========
