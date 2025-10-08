@@ -30,7 +30,7 @@ import seoultech.se.core.model.enumType.TetrominoType;
  *
  *     // 나머지는 빈 구현
  *     public void onCombo(int comboCount) {
- *         // TODO: 나중에 구현
+ *         // 나중에 구현
  *     }
  * }
  */

@@ -41,7 +41,6 @@ public class Tetromino {
     }
 
     // Method to get a new Tetromino instance with rotated shape
-    // TODO: RotationState 타입에 따라 회전 구현.
     public Tetromino getRotatedInstance(RotationDirection direction) {
         if (this.type == TetrominoType.O) return this;
 

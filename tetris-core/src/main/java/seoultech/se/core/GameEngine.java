@@ -44,7 +44,6 @@ public class GameEngine {
         return MoveResult.failed(state, "[GameEngine] (Method: tryMoveRight) Cannot move right : Blocked or out of bounds");
     }
 
-    //TODO: JavaDoc 설명 구현.
     /**
      * 아래로 이동을 시도합니다
      * 
@@ -140,6 +139,87 @@ public class GameEngine {
         // 2. 즉시 고정.
         return lockTetromino(droppedState);
     }
+    
+    // ========== Hold 기능 ==========
+    
+    /**
+     * Hold 기능을 실행합니다
+     * 
+     * Hold는 현재 테트로미노를 보관하고, 보관된 블록이 있으면 그것을 꺼내오는 기능입니다.
+     * 
+     * 규칙:
+     * 1. 한 턴에 한 번만 사용 가능 (holdUsedThisTurn 플래그로 체크)
+     * 2. Hold가 비어있으면: 현재 블록 보관 + Next에서 새 블록 가져오기
+     * 3. Hold에 블록이 있으면: 현재 블록과 Hold 블록 교체
+     * 
+     * @param state 현재 게임 상태
+     * @return HoldResult (성공/실패, 변경된 상태)
+     */
+    public static seoultech.se.core.result.HoldResult tryHold(GameState state) {
+        // 이미 이번 턴에 Hold를 사용했는지 확인
+        if (state.isHoldUsedThisTurn()) {
+            return seoultech.se.core.result.HoldResult.failure("Hold already used this turn");
+        }
+        
+        GameState newState = state.deepCopy();
+        TetrominoType currentType = newState.getCurrentTetromino().getType();
+        TetrominoType previousHeld = newState.getHeldPiece();
+        
+        if (previousHeld == null) {
+            // Hold가 비어있음: 현재 블록을 보관하고 Next에서 새 블록 가져오기
+            newState.setHeldPiece(currentType);
+            
+            // Next Queue에서 새 블록 가져오기
+            TetrominoType nextType = newState.getNextQueue()[0];
+            Tetromino newTetromino = new Tetromino(nextType);
+            
+            // 새 블록 스폰
+            newState.setCurrentTetromino(newTetromino);
+            newState.setCurrentX(newState.getBoardWidth() / 2 - 1);
+            newState.setCurrentY(0);
+            
+            // Next Queue 업데이트 (첫 번째 제거하고 새로운 블록 추가)
+            updateNextQueue(newState);
+            
+        } else {
+            // Hold에 블록이 있음: 현재 블록과 교체
+            newState.setHeldPiece(currentType);
+            
+            // Hold된 블록을 꺼내서 현재 블록으로 설정
+            Tetromino heldTetromino = new Tetromino(previousHeld);
+            newState.setCurrentTetromino(heldTetromino);
+            newState.setCurrentX(newState.getBoardWidth() / 2 - 1);
+            newState.setCurrentY(0);
+        }
+        
+        // Hold 사용 플래그 설정
+        newState.setHoldUsedThisTurn(true);
+        
+        return seoultech.se.core.result.HoldResult.success(newState, previousHeld, currentType);
+    }
+    
+    /**
+     * Next Queue를 업데이트합니다
+     * 첫 번째 블록을 제거하고 새로운 블록을 추가합니다
+     * 
+     * 주의: 이 메서드는 임시 구현입니다. 
+     * 실제 7-bag 시스템은 BoardController에서 관리되므로,
+     * Hold 기능에서만 제한적으로 사용됩니다.
+     * 향후 리팩토링 시 제거될 수 있습니다.
+     */
+    private static void updateNextQueue(GameState state) {
+        TetrominoType[] queue = state.getNextQueue();
+        TetrominoType[] newQueue = new TetrominoType[queue.length];
+        
+        // 한 칸씩 앞으로 당기기
+        System.arraycopy(queue, 1, newQueue, 0, queue.length - 1);
+        
+        // 마지막에 새로운 블록 추가 (단순 랜덤 - 7-bag은 BoardController에서 처리)
+        TetrominoType[] allTypes = TetrominoType.values();
+        newQueue[queue.length - 1] = allTypes[(int)(Math.random() * allTypes.length)];
+        
+        state.setNextQueue(newQueue);
+    }
 
     // ========== 테트로미노 고정 ==========
     
@@ -199,7 +279,7 @@ public class GameEngine {
 
             // B2B 업데이트 
             boolean isDifficult = clearResult.getLinesCleared() == 4 || clearResult.isTSpin();
-            if(isDifficult && newState.isLastClearedWasDifficult()) {
+            if(isDifficult && newState.isLastClearWasDifficult()) {
                 newState.setBackToBackCount(newState.getBackToBackCount() + 1);
             } else if (isDifficult) {
                 newState.setBackToBackCount(1);
@@ -264,7 +344,7 @@ public class GameEngine {
         // Perfect clear 체크
         boolean isPerfectClear = checkPerfectClear(state);
 
-        // TODO: T-Spin 감지 구현 필요
+        // T-Spin 감지 (현재 미구현, 향후 확장 가능)
         boolean isTSpin = false;
         boolean isTSpinMini = false;
 

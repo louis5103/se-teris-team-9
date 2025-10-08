@@ -51,18 +51,29 @@ import seoultech.se.core.model.enumType.TetrominoType;
 public class GameController implements BoardObserver {
 
     @FXML private GridPane boardGridPane;
+    @FXML private GridPane holdGridPane;
+    @FXML private GridPane nextGridPane;
     @FXML private Label scoreLabel;
     @FXML private Label levelLabel;
     @FXML private Label linesLabel;
     @FXML private Label gameOverLabel;
+    @FXML private Label comboLabel;
 
     private BoardController boardController;
     private Rectangle[][] cellRectangles;
+    private Rectangle[][] holdCellRectangles;
+    private Rectangle[][] nextCellRectangles;
     private AnimationTimer gameLoop;
     private long lastUpdateTime = 0;
     private long dropInterval = 500_000_000L; // 0.5초 (나노초 단위)
+    
+    // 시각 효과용 타이머
+    private AnimationTimer comboFadeTimer;
+    private long comboShowTime = 0;
+    private static final long COMBO_DISPLAY_DURATION = 2_000_000_000L; // 2초
 
     private static final double CELL_SIZE = 30.0;
+    private static final double PREVIEW_CELL_SIZE = 20.0;
 
     /**
      * FXML이 로드된 후 자동으로 호출됩니다
@@ -81,9 +92,11 @@ public class GameController implements BoardObserver {
         System.out.println("📊 Board created: " + gameState.getBoardWidth() + "x" + gameState.getBoardHeight());
 
         initializeGridPane(gameState);
+        initializePreviewPanes();
         updateGameInfoLabels();
         setupGameLoop();
         setupKeyboardControls();
+        setupComboFadeTimer();
         startGame();
 
         System.out.println("✅ GameController initialization complete!");
@@ -249,6 +262,19 @@ public class GameController implements BoardObserver {
             case C:
                 command = new HoldCommand();
                 break;
+                
+            case P:
+                // Pause/Resume 토글
+                if (boardController.getGameState().isPaused()) {
+                    command = new seoultech.se.core.command.ResumeCommand();
+                } else {
+                    command = new seoultech.se.core.command.PauseCommand();
+                }
+                break;
+                
+            default:
+                // 다른 키는 무시
+                break;
         }
 
         // Command가 생성되었으면 실행
@@ -279,7 +305,7 @@ public class GameController implements BoardObserver {
 
     @Override
     public void onMultipleCellsChanged(int[] rows, int[] cols, Cell[][] cells) {
-        // TODO: 나중에 성능 최적화를 위해 구현
+        // 대량 셀 업데이트 (필요시 성능 최적화 구현)
     }
 
     @Override
@@ -291,86 +317,102 @@ public class GameController implements BoardObserver {
 
     @Override
     public void onTetrominoRotated(RotationDirection direction, int kickIndex, Tetromino tetromino) {
-        System.out.println("🔄 Rotated " + direction + " (kick index: " + kickIndex + ", tetromino: " + tetromino + ")");
+        // 회전 애니메이션 효과는 나중에 추가 가능
+        Platform.runLater(() -> drawCurrentTetromino());
     }
 
     @Override
     public void onTetrominoRotationFailed(RotationDirection direction) {
-        System.out.println("❌ Rotation failed: " + direction);
+        // 실패 사운드나 시각 효과 추가 가능
     }
 
     @Override
     public void onTetrominoLocked(Tetromino tetromino) {
-        System.out.println("🔒 Tetromino locked: " + tetromino.getType());
+        // 블록 고정 애니메이션 효과 추가 가능
     }
 
     @Override
     public void onTetrominoLockDelayStarted() {
-        // TODO: Lock Delay UI
+        // Lock Delay 시각적 표시 (예: 블록 깜빡임)
     }
 
     @Override
     public void onTetrominoLockDelayReset(int remainingResets) {
-        // TODO: Lock Delay UI
+        // Lock Delay 리셋 횟수 표시
     }
 
     @Override
     public void onTetrominoSpawned(Tetromino tetromino) {
-        System.out.println("🎲 New tetromino spawned: " + tetromino.getType());
+        Platform.runLater(() -> drawCurrentTetromino());
     }
 
     @Override
     public void onNextQueueUpdated(TetrominoType[] nextPieces) {
-        // TODO: Next Queue UI
-        System.out.println("📋 Next queue updated");
+        if (nextPieces != null && nextPieces.length > 0) {
+            // 첫 번째 Next 블록만 표시
+            drawNextPiece(nextPieces[0]);
+        }
     }
 
     @Override
     public void onHoldChanged(TetrominoType heldPiece, TetrominoType previousPiece) {
-        System.out.println("💾 Hold changed: " + heldPiece);
+        drawHoldPiece(heldPiece);
     }
 
     @Override
     public void onHoldFailed() {
-        System.out.println("⚠️ Hold failed (already used this turn)");
+        // Hold 실패 시각 효과 (예: Hold 영역 깜빡임)
+        showComboMessage("⚠️ Hold already used!");
     }
 
     @Override
     public void onLineCleared(int linesCleared, int[] clearedRows,
                               boolean isTSpin, boolean isTSpinMini, boolean isPerfectClear) {
-        String clearType = isTSpin ? "T-SPIN " : "";
-        if (isTSpinMini) clearType += "MINI ";
-
-        System.out.println("✨ Line cleared: " + clearType + linesCleared + " lines");
-
+        StringBuilder message = new StringBuilder();
+        
+        if (isTSpin) {
+            message.append(isTSpinMini ? "T-SPIN MINI " : "T-SPIN ");
+        }
+        
+        switch (linesCleared) {
+            case 1 -> message.append("SINGLE");
+            case 2 -> message.append("DOUBLE");
+            case 3 -> message.append("TRIPLE");
+            case 4 -> message.append("TETRIS");
+        }
+        
         if (isPerfectClear) {
-            System.out.println("🌟 PERFECT CLEAR!");
+            message.append("\n🌟 PERFECT CLEAR!");
+        }
+        
+        if (message.length() > 0) {
+            showComboMessage(message.toString());
         }
     }
 
     @Override
     public void onCombo(int comboCount) {
-        System.out.println("🔥 COMBO x" + comboCount);
+        showComboMessage("🔥 COMBO x" + comboCount);
     }
 
     @Override
     public void onComboBreak(int finalComboCount) {
-        System.out.println("💨 Combo ended: " + finalComboCount);
+        // Combo 종료는 메시지 표시 안 함
     }
 
     @Override
     public void onBackToBack(int backToBackCount) {
-        System.out.println("⚡ BACK-TO-BACK x" + backToBackCount);
+        showComboMessage("⚡ BACK-TO-BACK x" + backToBackCount);
     }
 
     @Override
     public void onBackToBackBreak(int finalBackToBackCount) {
-        System.out.println("💨 B2B ended: " + finalBackToBackCount);
+        // B2B 종료는 메시지 표시 안 함
     }
 
     @Override
     public void onScoreAdded(long points, String reason) {
-        System.out.println("💰 +" + points + " points (" + reason + ")");
+        // 점수는 onGameStateChanged에서 자동 업데이트됨
     }
 
     @Override
@@ -386,17 +428,23 @@ public class GameController implements BoardObserver {
 
     @Override
     public void onLevelUp(int newLevel) {
-        System.out.println("📈 LEVEL UP! Now at level " + newLevel);
+        showComboMessage("📈 LEVEL UP!\nLevel " + newLevel);
     }
 
     @Override
     public void onGamePaused() {
-        System.out.println("⏸️ Game paused");
+        pauseGame();
+        showComboMessage("⏸️ PAUSED\nPress P to resume");
     }
 
     @Override
     public void onGameResumed() {
-        System.out.println("▶️ Game resumed");
+        resumeGame();
+        // 메시지 숨김
+        Platform.runLater(() -> {
+            comboLabel.setVisible(false);
+            comboLabel.setManaged(false);
+        });
     }
 
     @Override
@@ -538,8 +586,172 @@ public class GameController implements BoardObserver {
             default:      return Color.rgb(128, 128, 128);
         }
     }
+    
+    /**
+     * TetrominoType에 따른 JavaFX Color 반환
+     */
+    private Color getColorForType(TetrominoType type) {
+        return switch(type) {
+            case I -> Color.rgb(68, 255, 255);    // CYAN
+            case O -> Color.rgb(255, 255, 68);    // YELLOW
+            case T -> Color.rgb(255, 68, 255);    // MAGENTA
+            case S -> Color.rgb(68, 255, 68);     // GREEN
+            case Z -> Color.rgb(255, 68, 68);     // RED
+            case J -> Color.rgb(68, 68, 255);     // BLUE
+            case L -> Color.rgb(255, 136, 68);    // ORANGE
+        };
+    }
 
     // ========== 게임 제어 ==========
+    
+    /**
+     * Hold와 Next 미리보기 영역 초기화
+     */
+    private void initializePreviewPanes() {
+        // Hold 영역 초기화 (4x4 그리드)
+        holdCellRectangles = new Rectangle[4][4];
+        initializePreviewGrid(holdGridPane, holdCellRectangles, 4, 4);
+        
+        // Next 영역 초기화 (4x4 그리드)
+        nextCellRectangles = new Rectangle[4][4];
+        initializePreviewGrid(nextGridPane, nextCellRectangles, 4, 4);
+    }
+    
+    /**
+     * 미리보기 그리드 초기화 헬퍼 메서드
+     */
+    private void initializePreviewGrid(GridPane gridPane, Rectangle[][] rectangles, int rows, int cols) {
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                Rectangle rect = new Rectangle(PREVIEW_CELL_SIZE, PREVIEW_CELL_SIZE);
+                rect.setFill(Color.rgb(26, 26, 26));
+                rect.setStroke(Color.rgb(51, 51, 51));
+                rect.setStrokeWidth(0.5);
+                gridPane.add(rect, col, row);
+                rectangles[row][col] = rect;
+            }
+        }
+    }
+    
+    /**
+     * Combo 표시 페이드아웃 타이머 설정
+     */
+    private void setupComboFadeTimer() {
+        comboFadeTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                if (comboLabel.isVisible() && now - comboShowTime > COMBO_DISPLAY_DURATION) {
+                    Platform.runLater(() -> {
+                        comboLabel.setVisible(false);
+                        comboLabel.setManaged(false);
+                    });
+                    stop();
+                }
+            }
+        };
+    }
+    
+    /**
+     * Combo/B2B 메시지 표시
+     */
+    private void showComboMessage(String message) {
+        Platform.runLater(() -> {
+            comboLabel.setText(message);
+            comboLabel.setVisible(true);
+            comboLabel.setManaged(true);
+            comboShowTime = System.nanoTime();
+            comboFadeTimer.start();
+        });
+    }
+    
+    /**
+     * Hold 영역에 테트로미노 그리기
+     */
+    private void drawHoldPiece(TetrominoType type) {
+        Platform.runLater(() -> {
+            // 모든 셀 초기화
+            for (int row = 0; row < 4; row++) {
+                for (int col = 0; col < 4; col++) {
+                    holdCellRectangles[row][col].setFill(Color.rgb(26, 26, 26));
+                }
+            }
+            
+            if (type != null) {
+                // 테트로미노 모양 가져오기
+                int[][] shape = getTetrominoShape(type);
+                Color color = getColorForType(type);
+                
+                // 중앙 정렬을 위한 오프셋 계산
+                int offsetX = (4 - shape[0].length) / 2;
+                int offsetY = (4 - shape.length) / 2;
+                
+                // 테트로미노 그리기
+                for (int row = 0; row < shape.length; row++) {
+                    for (int col = 0; col < shape[row].length; col++) {
+                        if (shape[row][col] == 1) {
+                            int gridRow = row + offsetY;
+                            int gridCol = col + offsetX;
+                            if (gridRow >= 0 && gridRow < 4 && gridCol >= 0 && gridCol < 4) {
+                                holdCellRectangles[gridRow][gridCol].setFill(color);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Next 영역에 테트로미노 그리기
+     */
+    private void drawNextPiece(TetrominoType type) {
+        Platform.runLater(() -> {
+            // 모든 셀 초기화
+            for (int row = 0; row < 4; row++) {
+                for (int col = 0; col < 4; col++) {
+                    nextCellRectangles[row][col].setFill(Color.rgb(26, 26, 26));
+                }
+            }
+            
+            if (type != null) {
+                // 테트로미노 모양 가져오기
+                int[][] shape = getTetrominoShape(type);
+                Color color = getColorForType(type);
+                
+                // 중앙 정렬을 위한 오프셋 계산
+                int offsetX = (4 - shape[0].length) / 2;
+                int offsetY = (4 - shape.length) / 2;
+                
+                // 테트로미노 그리기
+                for (int row = 0; row < shape.length; row++) {
+                    for (int col = 0; col < shape[row].length; col++) {
+                        if (shape[row][col] == 1) {
+                            int gridRow = row + offsetY;
+                            int gridCol = col + offsetX;
+                            if (gridRow >= 0 && gridRow < 4 && gridCol >= 0 && gridCol < 4) {
+                                nextCellRectangles[gridRow][gridCol].setFill(color);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * 테트로미노 타입에 따른 기본 모양 반환
+     */
+    private int[][] getTetrominoShape(TetrominoType type) {
+        return switch(type) {
+            case I -> new int[][] {{1, 1, 1, 1}};
+            case O -> new int[][] {{1, 1}, {1, 1}};
+            case T -> new int[][] {{0, 1, 0}, {1, 1, 1}};
+            case S -> new int[][] {{0, 1, 1}, {1, 1, 0}};
+            case Z -> new int[][] {{1, 1, 0}, {0, 1, 1}};
+            case J -> new int[][] {{1, 0, 0}, {1, 1, 1}};
+            case L -> new int[][] {{0, 0, 1}, {1, 1, 1}};
+        };
+    }
 
     public void startGame() {
         gameOverLabel.setVisible(false);
@@ -557,9 +769,5 @@ public class GameController implements BoardObserver {
         lastUpdateTime = System.nanoTime();
         gameLoop.start();
     }
-
-
-    // TODO: 나머지 Override
-    
 
 }

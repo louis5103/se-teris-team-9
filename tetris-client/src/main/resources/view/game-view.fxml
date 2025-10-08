@@ -36,12 +36,29 @@
                 <Insets top="20.0" bottom="20.0" left="20.0" right="20.0" />
             </BorderPane.margin>
             
+            <!-- 왼쪽: Hold 영역 -->
+            <VBox spacing="10.0" alignment="TOP_CENTER" minWidth="120.0">
+                <Label text="HOLD" styleClass="info-label-title"/>
+                <GridPane fx:id="holdGridPane" 
+                         styleClass="preview-board"
+                         prefWidth="120.0" 
+                         prefHeight="120.0">
+                </GridPane>
+            </VBox>
+            
             <!-- 게임 보드 -->
             <VBox alignment="CENTER" spacing="10.0">
                 <!-- 게임 오버 메시지 (평소에는 숨김) -->
                 <Label fx:id="gameOverLabel" 
                        text="GAME OVER" 
                        styleClass="game-over-label" 
+                       visible="false"
+                       managed="false"/>
+                
+                <!-- Combo/B2B 알림 (평소에는 숨김) -->
+                <Label fx:id="comboLabel" 
+                       text="" 
+                       styleClass="combo-label" 
                        visible="false"
                        managed="false"/>
                 
@@ -58,6 +75,16 @@
             
             <!-- 오른쪽: 게임 정보 -->
             <VBox spacing="30.0" alignment="TOP_CENTER" minWidth="150.0">
+                <!-- Next 영역 -->
+                <VBox spacing="5.0" alignment="CENTER">
+                    <Label text="NEXT" styleClass="info-label-title"/>
+                    <GridPane fx:id="nextGridPane" 
+                             styleClass="preview-board"
+                             prefWidth="120.0" 
+                             prefHeight="120.0">
+                    </GridPane>
+                </VBox>
+                
                 <!-- 점수 -->
                 <VBox spacing="5.0" alignment="CENTER">
                     <Label text="SCORE" styleClass="info-label-title"/>
@@ -86,6 +113,7 @@
                         <Label text="Z : Rotate CCW" styleClass="control-text"/>
                         <Label text="Space : Hard Drop" styleClass="control-text"/>
                         <Label text="C : Hold" styleClass="control-text"/>
+                        <Label text="P : Pause" styleClass="control-text"/>
                     </VBox>
                 </VBox>
             </VBox>

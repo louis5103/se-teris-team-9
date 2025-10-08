@@ -41,10 +41,12 @@ public class GameState {
     // Lock Delay 관련 정보
     private boolean isLockDelayActive;
     private int lockDelayResets;
+    
+    // 게임 상태
+    private boolean isPaused;
 
 
     // 생성자
-    // TODO: 빈보드 생성시에 필드 초기화 설정 여부 고려.
     public GameState(int width, int height) {
         this.boardWidth = width;
         this.boardHeight = height;
@@ -77,9 +79,11 @@ public class GameState {
         this.holdUsedThisTurn = false;
 
         // Lock Delay 초기화
-        // TODO: Lock Delay 기본값 설정 고려.
         this.isLockDelayActive = false;
         this.lockDelayResets = 0;
+        
+        // 게임 상태 초기화
+        this.isPaused = false;
     }
     
     // 깊은 복사.

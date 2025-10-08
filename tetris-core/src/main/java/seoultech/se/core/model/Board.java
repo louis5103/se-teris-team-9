@@ -60,7 +60,7 @@ public class Board {
     public Board() {
         this.boardWidth = BOARD_WIDTH_DEFAULT;
         this.boardHeight = BOARD_HEIGHT_DEFAULT;
-        this.gameState = new GameState();
+        this.gameState = new GameState(BOARD_WIDTH_DEFAULT, BOARD_HEIGHT_DEFAULT);
 
         grid = new Cell[boardHeight][boardWidth];
         for (int row = 0; row < boardHeight; row++) {
@@ -374,7 +374,7 @@ public class Board {
     
     private void notifyTetrominoRotated(RotationDirection direction, int kickIndex) {
         for (BoardObserver observer : observers) {
-            observer.onTetrominoRotated(direction, kickIndex);
+            observer.onTetrominoRotated(direction, kickIndex, currentTetromino);
         }
     }
     

@@ -14,6 +14,9 @@ import seoultech.se.core.command.Direction;
 import seoultech.se.core.command.GameCommand;
 import seoultech.se.core.command.MoveCommand;
 import seoultech.se.core.command.RotateCommand;
+import seoultech.se.core.event.BackToBackEvent;
+import seoultech.se.core.event.ComboBreakEvent;
+import seoultech.se.core.event.ComboEvent;
 import seoultech.se.core.event.GameEvent;
 import seoultech.se.core.event.GameOverEvent;
 import seoultech.se.core.event.GameStateChangedEvent;
@@ -72,9 +75,13 @@ public class BoardController {
     // 7-bag 시스템을 위한 상태
     private List<TetrominoType> currentBag = new ArrayList<>();
     private int bagIndex = 0;
+    
+    // 플레이 시간 추적
+    private long gameStartTime;
 
     public BoardController(){
         this.gameState = new GameState(10, 20);
+        this.gameStartTime = System.currentTimeMillis();
         initializeNextQueue();
     }
 
@@ -282,17 +289,53 @@ public class BoardController {
     /**
      * HoldCommand를 처리합니다
      * 
-     * Hold 기능은 아직 GameEngine에 구현되지 않았습니다.
-     * 따라서 현재는 빈 리스트를 반환합니다.
-     * 
-     * TODO: GameEngine에 tryHold() 메서드를 구현하고,
-     * 여기서 그것을 호출하여 HoldResult를 Event로 변환해야 합니다.
+     * Hold 기능은 현재 블록을 보관하고 보관된 블록이 있으면 교체합니다.
+     * 한 턴에 한 번만 사용 가능합니다.
      */
     private List<GameEvent> handleHoldCommand() {
         List<GameEvent> events = new ArrayList<>();
         
-        // TODO: GameEngine.tryHold() 구현 후 연동
-        // 현재는 Hold 불가능으로 처리
+        seoultech.se.core.result.HoldResult result = GameEngine.tryHold(gameState);
+        
+        if (result.isSuccess()) {
+            gameState = result.getNewState();
+            
+            // Hold 변경 Event
+            events.add(new seoultech.se.core.event.HoldChangedEvent(
+                result.getNewHeldPiece(),
+                result.getPreviousHeldPiece()
+            ));
+            
+            // 테트로미노 스폰 Event (새 블록 또는 교체된 블록)
+            events.add(new TetrominoSpawnedEvent(
+                gameState.getCurrentTetromino(),
+                gameState.getCurrentX(),
+                gameState.getCurrentY()
+            ));
+            
+            // 위치 이동 Event
+            events.add(new TetrominoMovedEvent(
+                gameState.getCurrentX(),
+                gameState.getCurrentY(),
+                gameState.getCurrentTetromino()
+            ));
+            
+            // Next Queue 업데이트 Event (Hold가 비어있던 경우)
+            if (result.getPreviousHeldPiece() == null) {
+                events.add(new seoultech.se.core.event.NextQueueUpdatedEvent(
+                    gameState.getNextQueue()
+                ));
+            }
+            
+            // GameState 변경 Event
+            events.add(new GameStateChangedEvent(gameState));
+            
+        } else {
+            // Hold 실패 Event
+            events.add(new seoultech.se.core.event.HoldFailedEvent(
+                result.getFailureReason()
+            ));
+        }
         
         return events;
     }
@@ -300,14 +343,19 @@ public class BoardController {
     /**
      * PauseCommand를 처리합니다
      * 
-     * 일시정지는 GameState의 플래그만 바꾸면 됩니다.
+     * 일시정지는 GameState의 플래그만 바꿉니다.
      * 실제 게임 루프 중단은 GameController에서 처리합니다.
      */
     private List<GameEvent> handlePauseCommand() {
         List<GameEvent> events = new ArrayList<>();
         
-        // TODO: GameState에 isPaused 플래그 추가 필요
-        // gameState.setPaused(true);
+        if (!gameState.isPaused()) {
+            GameState newState = gameState.deepCopy();
+            newState.setPaused(true);
+            gameState = newState;
+            
+            events.add(new seoultech.se.core.event.GamePausedEvent());
+        }
         
         return events;
     }
@@ -320,8 +368,13 @@ public class BoardController {
     private List<GameEvent> handleResumeCommand() {
         List<GameEvent> events = new ArrayList<>();
         
-        // TODO: GameState에 isPaused 플래그 추가 필요
-        // gameState.setPaused(false);
+        if (gameState.isPaused()) {
+            GameState newState = gameState.deepCopy();
+            newState.setPaused(false);
+            gameState = newState;
+            
+            events.add(new seoultech.se.core.event.GameResumedEvent());
+        }
         
         return events;
     }
@@ -377,12 +430,13 @@ public class BoardController {
 
         // 2. 게임 오버 체크
         if (result.isGameOver()) {
+            long playTimeMillis = System.currentTimeMillis() - gameStartTime;
             events.add(new GameOverEvent(
                 result.getGameOverReason(),
                 gameState.getScore(),
                 gameState.getLevel(),
                 gameState.getLinesCleared(),
-                0 // TODO: 플레이 시간 계산
+                playTimeMillis
             ));
             
             // GameState 업데이트 Event
@@ -409,11 +463,20 @@ public class BoardController {
                 getScoreReason(clearResult)
             ));
 
-            // TODO: Combo Event 추가
-            // TODO: B2B Event 추가
+            // Combo Event
+            if (gameState.getComboCount() > 0) {
+                events.add(new ComboEvent(gameState.getComboCount()));
+            }
+            
+            // Back-to-Back Event
+            if (gameState.getBackToBackCount() > 0) {
+                events.add(new BackToBackEvent(gameState.getBackToBackCount()));
+            }
         } else {
             // 라인을 지우지 못했으면 콤보 종료
-            // TODO: ComboBreakEvent 추가
+            if (gameState.getComboCount() > 0) {
+                events.add(new ComboBreakEvent(gameState.getComboCount()));
+            }
         }
 
         // 4. GameState 변경 Event
@@ -508,7 +571,6 @@ public class BoardController {
         }
         
         gameState.setNextQueue(queue);
-        // TODO: NextQueueUpdatedEvent 추가
     }
 
     // ========== 헬퍼 메서드들 ==========
