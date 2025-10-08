@@ -1,40 +1,40 @@
 .title-label {
-    -fx-padding: 1em 0 0.5em 0;
-    -fx-font-size: 6em;
+    -fx-padding: 0.5em 0 0.3em 0;
+    -fx-font-size: 3em;
     -fx-font-family: "Impact";
     -fx-text-fill:  rgb(90, 170, 170) 0%;
-    /* -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 5, 5); */
 }
 
 .center-box {
     -fx-border-color: #606060;
     -fx-border-width: 0 0 0 1px;
-    -fx-padding: 1em 1em 3em 1em;
-    -fx-spacing: 1.7em;
+    -fx-padding: 1em 2em 1em 2em;
+    -fx-spacing: 1.2em;
 }
 
 .sound-box {
-    -fx-spacing: 1.6em;
-    -fx-padding: 0.5em 1em 0.5em 4em;
+    -fx-spacing: 1em;
+    -fx-padding: 0.3em 0.5em 0.3em 2em;
 }
 
 .radio-box {
-    -fx-spacing: 1.6em;
-    -fx-padding: 0.5em 1em 0.5em 4em;
+    -fx-spacing: 0.8em;
+    -fx-padding: 0.3em 0.5em 0.3em 2em;
 }
 
 .setting-label {
     -fx-text-fill: white;
-    -fx-font-size: 1.5em;
+    -fx-font-size: 16px;
     -fx-font-family: "System Bold";
+    -fx-min-width: 100px;
 }
 
 .radio-label {
     -fx-text-fill: white;
-    -fx-font-size: 1em;
+    -fx-font-size: 14px;
     -fx-font-family: "System";
 }
 
 .sound-slider {
-    -fx-pref-width: 16em;
+    -fx-pref-width: 200px;
 }

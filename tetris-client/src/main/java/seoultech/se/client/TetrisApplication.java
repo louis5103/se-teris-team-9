@@ -51,10 +51,17 @@ public class TetrisApplication extends Application {
         FXMLLoader loader = new FXMLLoader(TetrisApplication.class.getResource("/view/main-view.fxml"));
         loader.setControllerFactory(springContext::getBean);
         Parent root = loader.load();
-        Scene scene = new Scene(root, settingsService.stageWidthProperty().get(), settingsService.stageHeightProperty().get());
+        
+        double width = settingsService.stageWidthProperty().get();
+        double height = settingsService.stageHeightProperty().get();
+        
+        Scene scene = new Scene(root, width, height);
         
         primaryStage.setTitle("Tetris Project");
+        primaryStage.setWidth(width);
+        primaryStage.setHeight(height);
         primaryStage.setScene(scene);
+        primaryStage.centerOnScreen();
         primaryStage.show();
 
         System.out.println("✅ JavaFX UI started with main-view.fxml");

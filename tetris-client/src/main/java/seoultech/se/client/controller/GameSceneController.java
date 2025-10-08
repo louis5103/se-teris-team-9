@@ -91,6 +91,14 @@ public class GameSceneController implements BoardObserver {
     @FXML
     public void initialize() {
         System.out.println("🎮 GameController initializing...");
+        
+        // KeyMappingService 초기화 확인 및 현재 매핑 출력
+        if (keyMappingService != null) {
+            System.out.println("✅ KeyMappingService is ready");
+            keyMappingService.printCurrentMappings();
+        } else {
+            System.err.println("❌ CRITICAL: KeyMappingService is null!");
+        }
 
         // BoardController 생성 및 Observer 등록
         boardController = new BoardController();
@@ -242,17 +250,77 @@ public class GameSceneController implements BoardObserver {
             return;
         }
 
+        // KeyMappingService null 체크 (방어 코드)
+        if (keyMappingService == null) {
+            System.err.println("❌ KeyMappingService is not available! Using fallback.");
+            handleDefaultKeyPress(event);
+            return;
+        }
+
         // KeyMappingService를 통해 KeyCode → GameAction 변환
         Optional<GameAction> actionOpt = keyMappingService.getAction(event.getCode());
         
         if (actionOpt.isEmpty()) {
-            return; // 매핑되지 않은 키는 무시
+            // 매핑되지 않은 키는 무시 (디버그 로그)
+            // System.out.println("⚠️ No mapping for key: " + event.getCode());
+            return;
         }
         
         GameAction action = actionOpt.get();
         GameCommand command = createCommandFromAction(action);
 
         // Command가 생성되었으면 실행
+        if (command != null) {
+            boardController.executeCommand(command);
+        }
+    }
+    
+    /**
+     * KeyMappingService를 사용할 수 없을 때의 폴백 핸들러
+     * 
+     * 기본 키 매핑으로 동작합니다:
+     * - 화살표 키로 이동
+     * - UP으로 회전
+     * - SPACE로 하드 드롭
+     * - C로 Hold
+     * - ESC로 일시정지
+     */
+    private void handleDefaultKeyPress(KeyEvent event) {
+        GameCommand command = null;
+        
+        switch (event.getCode()) {
+            case LEFT:
+                command = new MoveCommand(Direction.LEFT);
+                break;
+            case RIGHT:
+                command = new MoveCommand(Direction.RIGHT);
+                break;
+            case DOWN:
+                command = new MoveCommand(Direction.DOWN);
+                break;
+            case UP:
+                command = new RotateCommand(RotationDirection.CLOCKWISE);
+                break;
+            case Z:
+                command = new RotateCommand(RotationDirection.COUNTER_CLOCKWISE);
+                break;
+            case SPACE:
+                command = new HardDropCommand();
+                break;
+            case C:
+                command = new HoldCommand();
+                break;
+            case ESCAPE:
+                if (boardController.getGameState().isPaused()) {
+                    command = new seoultech.se.core.command.ResumeCommand();
+                } else {
+                    command = new seoultech.se.core.command.PauseCommand();
+                }
+                break;
+            default:
+                break;
+        }
+        
         if (command != null) {
             boardController.executeCommand(command);
         }

@@ -26,8 +26,20 @@ public class NavigationService {
         FXMLLoader loader = new FXMLLoader(TetrisApplication.class.getResource(fxmlPath));
         loader.setControllerFactory(springContext::getBean);
         Parent root = loader.load();
-        Scene scene = new Scene(root, settingsService.stageWidthProperty().get(), settingsService.stageHeightProperty().get());
+        
+        Scene scene = new Scene(root);
         stage.setScene(scene);
+        
+        // 게임 화면은 더 큰 크기가 필요하므로 sizeToScene() 사용
+        if (fxmlPath.contains("game-view")) {
+            stage.sizeToScene();
+        } else {
+            // 다른 화면들은 기본 크기 유지
+            stage.setWidth(settingsService.stageWidthProperty().get());
+            stage.setHeight(settingsService.stageHeightProperty().get());
+        }
+        
+        stage.centerOnScreen();
         stage.show();
     }
 }

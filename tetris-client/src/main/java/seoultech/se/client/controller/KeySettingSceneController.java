@@ -40,6 +40,9 @@ public class KeySettingSceneController extends BaseController {
     private KeyMappingService keyMappingService;
     
     @FXML
+    private javafx.scene.layout.BorderPane rootPane;
+    
+    @FXML
     private Button leftButton;
     @FXML
     private Button rightButton;
