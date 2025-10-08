@@ -1,38 +1,59 @@
 package seoultech.se.core.command;
 
+/**
+ * Command의 종류를 나타내는 열거형
+ * 
+ * 이 enum은 모든 가능한 게임 명령의 타입을 정의합니다.
+ * JSON 직렬화/역직렬화시 Command를 구분하는 식별자로 사용됩니다.
+ * 
+ * 예를 들어 서버가 클라이언트로부터 JSON을 받으면:
+ * {"type": "MOVE", "direction": "LEFT"}
+ * 
+ * type 필드를 보고 이것이 MoveCommand임을 알 수 있고,
+ * direction 필드를 읽어서 MoveCommand 객체를 생성합니다.
+ */
 public enum CommandType {
-    // ========== 기본 이동 ==========
-    MOVE_LEFT,
-    MOVE_RIGHT,
-    MOVE_DOWN,
-
-    SOFT_DROP,
+    /**
+     * 블록 이동 명령
+     * MoveCommand에 대응됩니다
+     */
+    MOVE,
+    
+    /**
+     * 블록 회전 명령
+     * RotateCommand에 대응됩니다
+     */
+    ROTATE,
+    
+    /**
+     * 하드 드롭 명령 (블록을 즉시 바닥까지 떨어뜨림)
+     * HardDropCommand에 대응됩니다
+     */
     HARD_DROP,
-
-    // ========== 유저 기능 ==========
+    
+    /**
+     * Hold 명령 (현재 블록을 저장하고 다음 블록으로 교체)
+     * HoldCommand에 대응됩니다
+     */
     HOLD,
-    SONIC_DROP,
-
-
-    // ========== 회전 ==========
-    ROTATE_CLOCKWISE,
-    ROTATE_COUNTER_CLOCKWISE,
-
-    // ========== 시스템 게임 제어 ==========
+    
+    /**
+     * 게임 일시정지 명령
+     * PauseCommand에 대응됩니다
+     */
     PAUSE,
+    
+    /**
+     * 게임 재개 명령
+     * ResumeCommand에 대응됩니다
+     */
     RESUME,
-    RESTART,
-
-    // ========== 서버 전용 커맨드 (클라이언트는 직접 호출 불가) ==========
-    SPAWN_TETROMINO,     // (서버가 7-bag에서 선택)
-    ADD_GARBAGE_LINES,   // 쓰레기 라인 추가 (멀티플레이어 공격)
-    CLEAR_GARBAGE_LINES, // 쓰레기 라인 제거 (방어)
-
-    // ========== 디버그/치트 커맨드 (개발용) ==========
-    DEBUG_SPAWN_SPECIFIC_TETROMINO,  // 특정 블록 강제 생성
-    DEBUG_CLEAR_BOARD,               // 보드 전체 초기화
-    DEBUG_FILL_LINES                 // 테스트용 라인 채우기
-
-    // TICK
-    //
+    
+    /**
+     * 소프트 드롭 명령 (블록을 빠르게 내림)
+     * 
+     * 참고: 현재는 DOWN 방향의 MoveCommand로 처리되지만,
+     * 나중에 점수 계산을 다르게 하려면 별도 Command로 분리할 수 있습니다
+     */
+    SOFT_DROP
 }

@@ -227,7 +227,7 @@ public class GameEngine {
         for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
             boolean isFullLine = true;
 
-            for(int col = 0; col < state.getBoardWidth(); coll++) {
+            for(int col = 0; col < state.getBoardWidth(); col++) {
                 if(!state.getGrid()[row][col].isOccupied()) {
                     isFullLine = false;
                     break;
@@ -270,7 +270,7 @@ public class GameEngine {
 
         // 점수 계산
         long score = calculateScore(linesCleared, isTSpin, isTSpinMini, isPerfectClear,
-                state.getBackToBackCount(), state.getComboCount()
+                state.getLevel(), state.getComboCount(), state.getBackToBackCount()
         );
 
         if(isTSpin) {

@@ -11,6 +11,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import seoultech.se.core.GameState;
+import seoultech.se.core.command.*;
 import seoultech.se.core.model.BoardObserver;
 import seoultech.se.core.model.Cell;
 import seoultech.se.core.model.Tetromino;
@@ -19,13 +20,27 @@ import seoultech.se.core.model.enumType.TetrominoType;
 
 /**
  * JavaFX UI를 제어하는 컨트롤러
- * 역할:
-    * - 사용자 입력을 받아서 BoardController에 전달
-    * - BoardObserver로서 게임 이벤트를 받아서 UI 업데이트
-    * - 게임 루프(AnimationTimer) 관리
  * 
- * 게임 로직이나 상태 관리는 하지 않음.
-    * BoardController와 GameEngine 몫.
+ * 이 클래스의 역할이 더 명확해졌습니다. 이제 다음 세 가지 일만 합니다:
+ * 
+ * 1. 사용자 입력을 Command로 변환
+ *    키보드 이벤트를 받아서 적절한 Command 객체를 생성합니다.
+ *    예: LEFT 키 → MoveCommand(Direction.LEFT)
+ * 
+ * 2. Command를 BoardController에 전달
+ *    생성한 Command를 executeCommand()로 보냅니다.
+ *    (나중에는 GameService로 보내게 될 것입니다)
+ * 
+ * 3. Event를 받아서 UI 업데이트
+ *    BoardObserver로서 Event를 받으면, JavaFX UI를 업데이트합니다.
+ *    이것은 기존과 동일합니다.
+ * 
+ * 주목할 점은 이제 GameController가 게임 로직을 전혀 모른다는 것입니다.
+ * "왼쪽으로 이동할 수 있는가?", "라인이 완성되었는가?" 같은 판단을 하지 않습니다.
+ * 단지 사용자가 무엇을 하고 싶어하는지를 Command로 표현하고, 결과를 Event로 받을 뿐입니다.
+ * 
+ * 이것이 바로 관심사의 분리입니다. UI는 UI 일만, 게임 로직은 GameEngine이,
+ * 중재는 BoardController가 담당하는 거죠.
  */
 @Component
 public class GameController implements BoardObserver {
@@ -45,14 +60,9 @@ public class GameController implements BoardObserver {
     private static final double CELL_SIZE = 30.0;
 
     /**
-     * FXML이 로드된 후 자동으로 호출.
+     * FXML이 로드된 후 자동으로 호출됩니다
      * 
-     * 초기화 순서:
-     * 1. BoardController 생성
-     * 2. 이 Controller를 Observer로 등록
-     * 3. UI 초기화
-     * 4. 게임 루프 설정
-     * 5. 게임 시작
+     * 초기화 순서는 동일하지만, 이제 Command 기반으로 동작합니다.
      */
     @FXML
     public void initialize() {
@@ -76,6 +86,8 @@ public class GameController implements BoardObserver {
 
     /**
      * GridPane을 초기화하고 모든 셀의 Rectangle을 생성합니다
+     * 
+     * 이 부분은 변경사항이 없습니다. UI 초기화는 게임 로직과 무관하니까요.
      */
     private void initializeGridPane(GameState gameState) {
         int width = gameState.getBoardWidth();
@@ -89,7 +101,7 @@ public class GameController implements BoardObserver {
             for (int col = 0; col < width; col++) {
                 Rectangle rect = new Rectangle(CELL_SIZE, CELL_SIZE);
 
-                // 기본 색상 설정 (CSS가 없어도 보이도록)
+                // 기본 색상 설정
                 rect.setFill(Color.rgb(26, 26, 26));
                 rect.setStroke(Color.rgb(51, 51, 51));
                 rect.setStrokeWidth(0.5);
@@ -109,8 +121,18 @@ public class GameController implements BoardObserver {
     /**
      * 게임 루프를 설정합니다
      * 
-     * 이 루프는 일정 시간마다 블록을 한 칸 아래로 내립니다.
-     * 레벨이 올라가면 dropInterval이 짧아져서 속도가 빨라집니다.
+     * 이제 게임 루프에서도 Command를 사용합니다!
+     * 기존에는 `boardController.moveDown()`을 직접 호출했지만,
+     * 이제는 `MoveCommand(Direction.DOWN)`을 생성해서 보냅니다.
+     * 
+     * 왜 이렇게 바꿨나요?
+     * 
+     * 일관성 때문입니다. 사용자가 DOWN 키를 눌러서 내려가는 것이나,
+     * 게임 루프에서 자동으로 내려가는 것이나, 본질적으로 같은 행동입니다.
+     * 둘 다 "블록을 아래로 이동"하고 싶은 거니까요.
+     * 
+     * 같은 행동이면 같은 Command를 사용하는 것이 맞습니다.
+     * 이렇게 하면 코드가 단순해지고, 버그가 줄어듭니다.
      */
     private void setupGameLoop() {
         gameLoop = new AnimationTimer() {
@@ -124,7 +146,10 @@ public class GameController implements BoardObserver {
                 }
 
                 if (now - lastUpdateTime >= dropInterval) {
-                    boardController.moveDown();
+                    // Command 패턴 사용!
+                    // 기존: boardController.moveDown();
+                    // 새로운: boardController.executeCommand(new MoveCommand(Direction.DOWN));
+                    boardController.executeCommand(new MoveCommand(Direction.DOWN));
                     lastUpdateTime = now;
                 }
             }
@@ -134,8 +159,17 @@ public class GameController implements BoardObserver {
     /**
      * 키보드 입력을 처리합니다
      * 
-     * 키 입력을 BoardController의 메서드 호출로 변환합니다.
-     * 이것이 입력 레이어와 도메인 레이어 사이의 번역입니다.
+     * 이것이 가장 크게 바뀐 부분입니다!
+     * 이제 키 입력을 받으면 적절한 Command 객체를 생성합니다.
+     * 
+     * 각 키마다 어떤 Command를 만들어야 하는지 명확합니다:
+     * - LEFT/RIGHT/DOWN: MoveCommand with Direction
+     * - UP/Z: RotateCommand with RotationDirection
+     * - SPACE: HardDropCommand
+     * - C: HoldCommand
+     * 
+     * 이 매핑은 매우 직관적입니다. 키보드의 물리적 입력을
+     * 게임의 논리적 의도로 변환하는 거죠.
      */
     private void setupKeyboardControls() {
         boardGridPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -146,41 +180,90 @@ public class GameController implements BoardObserver {
         });
     }
 
+    /**
+     * 키 입력을 Command로 변환하고 실행합니다
+     * 
+     * 이 메서드의 구조가 매우 깔끔해졌습니다.
+     * 각 키에 대해 Command를 생성하고, 그것을 executeCommand()로 보내기만 하면 됩니다.
+     * 
+     * 기존 방식과 비교해보세요:
+     * 
+     * 기존:
+     * ```java
+     * case LEFT:
+     *     boardController.moveLeft();
+     *     break;
+     * ```
+     * 
+     * 새로운:
+     * ```java
+     * case LEFT:
+     *     command = new MoveCommand(Direction.LEFT);
+     *     break;
+     * ```
+     * 
+     * 차이가 작아 보이지만, 이것이 가져오는 변화는 엄청납니다.
+     * Command 객체는 직렬화할 수 있고, 저장할 수 있고, 네트워크로 보낼 수 있습니다.
+     * 반면 메서드 호출은 그 자리에서 즉시 실행될 뿐입니다.
+     * 
+     * Command 패턴을 사용하면 이 입력을 기록해서 리플레이를 만들 수도 있고,
+     * 네트워크로 보내서 다른 플레이어와 대전할 수도 있습니다.
+     */
     private void handleKeyPress(KeyEvent event) {
         if (boardController.getGameState().isGameOver()) {
             return;
         }
 
+        GameCommand command = null;
+
         switch (event.getCode()) {
             case LEFT:
-                boardController.moveLeft();
+                command = new MoveCommand(Direction.LEFT);
                 break;
+                
             case RIGHT:
-                boardController.moveRight();
+                command = new MoveCommand(Direction.RIGHT);
                 break;
+                
             case DOWN:
-                boardController.moveDown();
+                command = new MoveCommand(Direction.DOWN);
                 break;
+                
             case UP:
-                boardController.rotateClockwise();
+                command = new RotateCommand(RotationDirection.CLOCKWISE);
                 break;
+                
             case Z:
-                boardController.rotateCounterClockwise();
+                command = new RotateCommand(RotationDirection.COUNTER_CLOCKWISE);
                 break;
+                
             case SPACE:
-                boardController.hardDrop();
+                command = new HardDropCommand();
                 break;
+                
             case C:
-                boardController.hold();
+                command = new HoldCommand();
                 break;
+        }
+
+        // Command가 생성되었으면 실행
+        if (command != null) {
+            boardController.executeCommand(command);
         }
 
         event.consume();
     }
 
     // ========== BoardObserver 구현 ==========
-    // 이 메서드들은 BoardController로부터 이벤트를 받습니다
-    // 각 이벤트를 JavaFX UI 업데이트로 변환합니다
+    // 
+    // 이 부분은 변경사항이 거의 없습니다.
+    // BoardController가 Event를 발행하면, 이 메서드들이 호출되어 UI를 업데이트합니다.
+    // 
+    // 기존 방식과의 유일한 차이는, 이제 Event 객체에서 정보를 추출한다는 점입니다.
+    // 하지만 BoardObserver 인터페이스가 Event를 직접 받지 않고 개별 파라미터로 받기 때문에,
+    // BoardController에서 Event를 풀어서 전달합니다.
+    //
+    // 나중에 BoardObserver를 리팩토링하면 더 깔끔해질 것입니다.
 
     @Override
     public void onCellChanged(int row, int col, Cell cell) {
@@ -202,12 +285,12 @@ public class GameController implements BoardObserver {
     }
 
     @Override
-    public void onTetrominoRotated(RotationDirection direction, int kickIndex) {
+    public void onTetrominoRotated(RotationDirection direction, int kickIndex, Tetromino tetromino) {
         System.out.println("🔄 Rotated " + direction + " (kick index: " + kickIndex + ")");
     }
 
     @Override
-    public void onTetrominoRotationFailed(RotationDirection direction) {
+    public void onTetrominoRotationFailed(RotationDirection direction, Tetromino tetromino) {
         System.out.println("❌ Rotation failed: " + direction);
     }
 
@@ -291,7 +374,6 @@ public class GameController implements BoardObserver {
             updateGameInfoLabels();
 
             // 레벨에 따라 낙하 속도 조정
-            // 레벨이 높을수록 빠르게 떨어집니다
             dropInterval = Math.max(100_000_000L,
                                    500_000_000L - (gameState.getLevel() * 50_000_000L));
         });
@@ -346,10 +428,9 @@ public class GameController implements BoardObserver {
     }
 
     // ========== UI 업데이트 헬퍼 메서드들 ==========
+    //
+    // 이 부분들도 변경사항이 없습니다. UI 렌더링은 게임 로직과 독립적이니까요.
 
-    /**
-     * 하나의 셀을 업데이트합니다
-     */
     private void updateCellRectangle(int row, int col, Cell cell) {
         Rectangle rect = cellRectangles[row][col];
 
@@ -366,12 +447,6 @@ public class GameController implements BoardObserver {
         }
     }
 
-    /**
-     * 현재 테트로미노를 화면에 그립니다
-     * 
-     * 이 메서드는 onTetrominoMoved 이벤트가 발생할 때마다 호출됩니다.
-     * 전체 보드를 다시 그려서 이전 위치의 테트로미노를 지웁니다.
-     */
     private void drawCurrentTetromino() {
         GameState gameState = boardController.getGameState();
         
@@ -418,9 +493,6 @@ public class GameController implements BoardObserver {
         }
     }
 
-    /**
-     * 점수, 레벨, 라인 수 레이블을 업데이트합니다
-     */
     private void updateGameInfoLabels() {
         GameState state = boardController.getGameState();
         scoreLabel.setText(String.valueOf(state.getScore()));
