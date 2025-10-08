@@ -48,7 +48,7 @@ public class MainController extends BaseController {
         Platform.exit();
     }
 
-    public void handleSettingsButtonAction(){
-        System.out.println("⚙️ Settings button clicked");
+    public void handleSettingsButtonAction(ActionEvent event) throws IOException {
+        navigationService.navigateTo("/view/setting-view.fxml");
     }
 }
