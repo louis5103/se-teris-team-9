@@ -18,6 +18,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
+import seoultech.se.client.config.ApplicationContextProvider;
 import seoultech.se.client.model.Setting;
 import seoultech.se.client.repository.SettingsRepository;
 import seoultech.se.client.service.NavigationService;
@@ -46,6 +47,7 @@ public class CustomSettingSceneController extends BaseController {
     @FXML
     public void initialize() {
         super.initialize();
+        this.settingsService = ApplicationContextProvider.getApplicationContext().getBean(seoultech.se.client.service.SettingsService.class);
         loadSettings();
     }
 
@@ -89,12 +91,31 @@ public class CustomSettingSceneController extends BaseController {
             setting.setSelected(true);
             button.getStyleClass().add("custom-setting-button-selected");
             selectedSetting = setting;
+
+            applySettings(setting);
             
             // Save the changes
             settingsRepository.saveSettings(settings);
         });
 
         return button;
+    }
+
+    private void applySettings(Setting setting) {
+        Map<String, String> configs = setting.getConfigurations();
+        if (configs != null) {
+            double soundVolume = Double.parseDouble(configs.getOrDefault("soundVolume", "80"));
+            settingsService.soundVolumeProperty().set(soundVolume);
+            settingsService.colorModeProperty().set(configs.getOrDefault("colorMode", "colorModeDefault"));
+            settingsService.screenSizeProperty().set(configs.getOrDefault("screenSize", "screenSizeM"));
+            settingsService.stageHeightProperty().set(Double.parseDouble(configs.getOrDefault("stageHeight", "700")));
+            settingsService.stageWidthProperty().set(Double.parseDouble(configs.getOrDefault("stageWidth", "500")));
+            double width = Double.parseDouble(configs.getOrDefault("stageWidth", "500"));
+            double height = Double.parseDouble(configs.getOrDefault("stageHeight", "700"));
+            settingsService.saveSettings();
+            settingsService.applyResolution(width, height);
+        }
+        
     }
 
     @FXML

@@ -14,7 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
-import seoultech.se.client.service.NavigationService;
+import seoultech.se.client.config.ApplicationContextProvider;
 import seoultech.se.client.service.*;
 
 @Component
@@ -58,6 +58,8 @@ public class SettingSceneController extends BaseController {
     @Override
     public void initialize() {
         super.initialize();
+
+        this.settingsService = ApplicationContextProvider.getApplicationContext().getBean(seoultech.se.client.service.SettingsService.class);
 
         loadSettingsToUI();
 
