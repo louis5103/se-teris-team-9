@@ -36,6 +36,7 @@ public class SettingsRepository {
         List<Setting> settings = new ArrayList<>();
         Set<String> settingNames = new HashSet<>();
 
+        // First pass: Create settings with their basic properties
         for (String key : properties.stringPropertyNames()) {
             if (key.endsWith(".name")) {
                 String baseName = key.substring(0, key.length() - 5);
@@ -44,6 +45,18 @@ public class SettingsRepository {
                 
                 Setting setting = new Setting(name);
                 setting.setSelected(selected);
+                
+                // Load configurations for this setting
+                Map<String, String> configs = new HashMap<>();
+                for (String propKey : properties.stringPropertyNames()) {
+                    if (propKey.startsWith(baseName + ".config.")) {
+                        String configKey = propKey.substring((baseName + ".config.").length());
+                        String configValue = properties.getProperty(propKey);
+                        configs.put(configKey, configValue);
+                    }
+                }
+                setting.setConfigurations(configs);
+                
                 settings.add(setting);
                 settingNames.add(name);
             }
@@ -59,8 +72,8 @@ public class SettingsRepository {
             properties.setProperty(baseKey + ".name", setting.getName());
             properties.setProperty(baseKey + ".selected", String.valueOf(setting.isSelected()));
             
-            // Save configurations
-            Map<String, String> configs = setting.getConfigurations();
+            // Save all configurations
+            Map<String, String> configs = new HashMap<>(setting.getConfigurations()); // Create a copy
             for (Map.Entry<String, String> entry : configs.entrySet()) {
                 properties.setProperty(baseKey + ".config." + entry.getKey(), entry.getValue());
             }

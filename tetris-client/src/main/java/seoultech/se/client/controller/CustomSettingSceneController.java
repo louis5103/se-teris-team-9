@@ -2,7 +2,9 @@ package seoultech.se.client.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -76,6 +78,7 @@ public class CustomSettingSceneController extends BaseController {
         button.setOnAction(event -> {
             // Deselect all settings first
             settings.forEach(s -> s.setSelected(false));
+            
             settingContainer.getChildren().forEach(node -> {
                 if (node instanceof Button) {
                     node.getStyleClass().remove("custom-setting-button-selected");
