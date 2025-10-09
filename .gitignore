@@ -311,10 +311,14 @@ h2/
 *.iws
 
 # Eclipse IDE 생성 파일들 (Java Home 관련 설정 포함)
-org.eclipse.buildship.core.prefs
-org.eclipse.jdt.core.prefs
-org.eclipse.jdt.apt.core.prefs
-org.eclipse.core.resources.prefs
+**/org.eclipse.buildship.core.prefs
+**/org.eclipse.jdt.core.prefs
+**/org.eclipse.jdt.apt.core.prefs
+**/org.eclipse.core.resources.prefs
+
+# Eclipse 빌드 출력 폴더
+bin/
+**/bin/
 
 # IntelliJ IDEA 설정 파일들 (개인 환경별로 다름)
 .idea/workspace.xml

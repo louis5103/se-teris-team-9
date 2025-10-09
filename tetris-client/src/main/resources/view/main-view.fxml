@@ -1,41 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="mainPane" prefHeight="600.0" prefWidth="400.0" 
-            xmlns="http://javafx.com/javafx/21" 
-            xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="seoultech.se.client.controller.MainController"
-            stylesheets="@../css/application.css, @../css/main-view.css">
+<BorderPane fx:id="rootPane" maxHeight="700.0" maxWidth="500.0" minHeight="700.0" minWidth="500.0" prefHeight="700.0" prefWidth="500.0" stylesheets="@../css/application.css, @../css/main-view.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seoultech.se.client.controller.MainController">
     <top>
         <Label fx:id="titleLabel" styleClass="title-label" text="TETRIS" BorderPane.alignment="CENTER">
-            <BorderPane.margin>
-                <Insets top="50.0" />
-            </BorderPane.margin>
         </Label>
     </top>
 
     <center>
-        <VBox alignment="CENTER" spacing="20.0" BorderPane.alignment="CENTER">
+        <VBox fx:id="menuBox" styleClass="menu-box" alignment="CENTER" BorderPane.alignment="CENTER">
             <children>
+                <!-- START 버튼: onAction 메서드가 ActionEvent를 전달합니다 -->
                 <Button fx:id="startButton" onAction="#handleStartButtonAction" styleClass="menu-button" text="START" />
+                <Button fx:id="scoreButton" onAction="#handleScoreButtonAction" styleClass="menu-button" text="SCORE" />
                 <Button fx:id="endButton" onAction="#handleEndButtonAction" styleClass="menu-button" text="END" />
             </children>
         </VBox>
     </center>
     
     <bottom>
-        <HBox alignment="BOTTOM_RIGHT" BorderPane.alignment="BOTTOM_LEFT">
+        <HBox fx:id="settingsBox" styleClass="settings-box" alignment="BOTTOM_RIGHT">
             <children>
                 <Button fx:id="settingsButton" onAction="#handleSettingsButtonAction" styleClass="settings-button" text="⚙️">
-                    <HBox.margin>
-                        <Insets bottom="20.0" left="20.0" />
-                    </HBox.margin>
                 </Button>
             </children>
         </HBox>

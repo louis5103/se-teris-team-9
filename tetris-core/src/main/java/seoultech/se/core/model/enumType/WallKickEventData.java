@@ -1,11 +1,11 @@
-package seoultech.se.core.model.board.enumType;
+package seoultech.se.core.model.enumType;
 
 import java.util.Map;
 
+import seoultech.se.core.model.enumType.RotationState;
+import seoultech.se.core.model.enumType.TetrominoType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import seoultech.se.core.model.block.enumType.RotationState;
-import seoultech.se.core.model.block.enumType.TetrominoType;
 
 @Getter
 @RequiredArgsConstructor

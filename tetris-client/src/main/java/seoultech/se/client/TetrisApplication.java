@@ -12,10 +12,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import seoultech.se.client.service.SettingsService;
 
 /**
  * 🎮 JavaFX + Spring Boot 통합 애플리케이션
- * 
+ *
  * JavaFX를 메인으로 하고 Spring Boot를 DI 컨테이너로 사용하는 통합 구조
  * - init()에서 Spring Boot 컨텍스트 초기화
  * - JavaFX UI와 Spring Boot 서비스 레이어 연동
@@ -23,7 +24,7 @@ import javafx.stage.Stage;
  */
 @SpringBootApplication(scanBasePackages = {"seoultech.se.backend", "seoultech.se.client"})
 public class TetrisApplication extends Application {
-    
+
     private ConfigurableApplicationContext springContext;
 
     /**
@@ -34,7 +35,7 @@ public class TetrisApplication extends Application {
         // JavaFX와 Spring Boot 통합 초기화
         System.setProperty("java.awt.headless", "false");
         System.setProperty("spring.main.web-application-type", "none");
-        
+
         springContext = SpringApplication.run(TetrisApplication.class);
         System.out.println("✅ Spring Boot context initialized with JavaFX");
     }
@@ -44,17 +45,19 @@ public class TetrisApplication extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws IOException{
+        SettingsService settingsService = springContext.getBean(SettingsService.class);
+        settingsService.setPrimaryStage(primaryStage);
+
         FXMLLoader loader = new FXMLLoader(TetrisApplication.class.getResource("/view/main-view.fxml"));
         loader.setControllerFactory(springContext::getBean);
         Parent root = loader.load();
-        // String applicationCss = TetrisApplication.class.getResource("/css/application.css").toExternalForm();
-        // String mainViewCss = TetrisApplication.class.getResource("/css/main-view.css").toExternalForm();
-        Scene scene = new Scene(root, 500, 350);
-        // scene.getStylesheets().addAll(applicationCss, mainViewCss);
+        Scene scene = new Scene(root, settingsService.stageWidthProperty().get(), settingsService.stageHeightProperty().get());
+        
         primaryStage.setTitle("Tetris Project");
         primaryStage.setScene(scene);
+        primaryStage.setResizable(false);  // 창 크기 조절 불가
         primaryStage.show();
-        
+
         System.out.println("✅ JavaFX UI started with main-view.fxml");
     }
 
