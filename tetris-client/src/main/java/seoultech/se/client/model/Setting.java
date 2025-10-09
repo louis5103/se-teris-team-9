@@ -12,6 +12,7 @@ public class Setting {
     public Setting(String name) {
         this.name = name;
         this.isSelected = false;
+        this.key = generateKey(name);
         this.configurations = new HashMap<>();
     }
 
@@ -19,6 +20,12 @@ public class Setting {
     public boolean isSelected() { return isSelected; }
     public void setSelected(boolean selected) { isSelected = selected; }
     public String getKey() { return key; }
+
+    private String generateKey(String name){
+        return name.toLowerCase()
+                .replaceAll("\\s+", "_")
+                .replaceAll("[^a-z0-9_]", "");
+    }
 
     public Map<String, String> getConfigurations() {
         return configurations;

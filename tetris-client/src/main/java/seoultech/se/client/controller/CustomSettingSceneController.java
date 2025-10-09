@@ -63,6 +63,7 @@ public class CustomSettingSceneController extends BaseController {
 
     public void addSetting(Setting setting) {
         settings.add(setting);
+        settingsRepository.saveSettings(settings);
         Button button = createSettingButton(setting);
         settingContainer.getChildren().add(button);
     }
@@ -73,20 +74,21 @@ public class CustomSettingSceneController extends BaseController {
         button.setMaxWidth(Double.MAX_VALUE);
         
         button.setOnAction(event -> {
-            // Deselect previously selected button
+            // Deselect all settings first
+            settings.forEach(s -> s.setSelected(false));
             settingContainer.getChildren().forEach(node -> {
                 if (node instanceof Button) {
                     node.getStyleClass().remove("custom-setting-button-selected");
                 }
             });
 
-            // Select current button
-            if (selectedSetting != setting) {
-                button.getStyleClass().add("custom-setting-button-selected");
-                selectedSetting = setting;
-            } else {
-                selectedSetting = null;
-            }
+            // Select current setting
+            setting.setSelected(true);
+            button.getStyleClass().add("custom-setting-button-selected");
+            selectedSetting = setting;
+            
+            // Save the changes
+            settingsRepository.saveSettings(settings);
         });
 
         return button;
