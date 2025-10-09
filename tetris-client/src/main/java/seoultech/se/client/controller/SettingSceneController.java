@@ -23,12 +23,10 @@ public class SettingSceneController extends BaseController {
     @Autowired
     private NavigationService navigationService;
     @Autowired
-    private SettingsService appSettingsService;
-    @Autowired
     private KeyMappingService keyMappingService;
 
     @FXML
-    private Slider soundSlider;  // slider의 properties에 listener 추가 필요
+    private Slider soundSlider;
     @FXML
     private RadioButton screenSizeXS;
     @FXML
@@ -44,7 +42,7 @@ public class SettingSceneController extends BaseController {
     @FXML
     private RadioButton colorModeRGBlind;
     @FXML
-    private RadioButton colorModeYBlind;
+    private RadioButton colorModeBYBlind;
     @FXML
     private Button keySettingButton;
     @FXML
@@ -60,13 +58,57 @@ public class SettingSceneController extends BaseController {
     @Override
     public void initialize() {
         super.initialize();
-        soundSlider.setValue(80);
+
+        loadSettingsToUI();
+
         soundSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             System.out.println("🔊 Sound volume set to: " + newVal.intValue());
+            settingsService.soundVolumeProperty().setValue(newVal.intValue());
+            settingsService.saveSettings();
             //TODO : 사운드 볼륨 조절 기능 구현
         });
-        screenSizeM.setSelected(true);
-        colorModeDefault.setSelected(true);
+    }
+
+    private void loadSettingsToUI() {
+        settingsService.loadSettings();
+
+        soundSlider.setValue(settingsService.soundVolumeProperty().getValue());
+        String screenSize = settingsService.screenSizeProperty().getValue();
+        String colorMode = settingsService.colorModeProperty().getValue();
+
+        switch (screenSize) {
+            case "screenSizeXS":
+                screenSizeXS.setSelected(true);
+                break;
+            case "screenSizeS":
+                screenSizeS.setSelected(true);
+                break;
+            case "screenSizeM":
+                screenSizeM.setSelected(true);
+                break;
+            case "screenSizeL":
+                screenSizeL.setSelected(true);
+                break;
+            case "screenSizeXL":
+                screenSizeXL.setSelected(true);
+                break;
+            default:
+                System.out.println("❗ Unknown screen size in settings: " + screenSize);
+        }
+
+        switch (colorMode) {
+            case "colorModeDefault":
+                colorModeDefault.setSelected(true);
+                break;
+            case "colorModeRGBlind":
+                colorModeRGBlind.setSelected(true);
+                break;
+            case "colorModeBYBlind":
+                colorModeBYBlind.setSelected(true);
+                break;
+            default:
+                System.out.println("❗ Unknown color mode in settings: " + colorMode);
+        }
     }
 
     @FXML
@@ -102,13 +144,18 @@ public class SettingSceneController extends BaseController {
             default:
                 System.out.println("❗ Unknown screen size selected");
         }
-
-        appSettingsService.applyResolution(width, height);
+        settingsService.screenSizeProperty().setValue(selectedRadioButton.getId());
+        settingsService.applyResolution(width, height);
+        settingsService.saveSettings();
+        System.out.println("🖥️ Screen size set to: " + selectedRadioButton.getId());
     }
 
     @FXML
     public void handleColorModeChange(ActionEvent event) {
         RadioButton selectedRadioButton = (RadioButton) event.getSource();
+        settingsService.colorModeProperty().setValue(selectedRadioButton.getId());
+        settingsService.saveSettings();
+
         switch (selectedRadioButton.getId()) {
             case "colorModeDefault":
                 System.out.println("🎨 Color mode set to: Default");
@@ -148,14 +195,9 @@ public class SettingSceneController extends BaseController {
     @FXML
     public void handleResetButton(ActionEvent event) {
         System.out.println("🔄 Reset all settings to default");
-        soundSlider.setValue(80);
-        screenSizeM.setSelected(true);
-        colorModeDefault.setSelected(true);
-        
-        appSettingsService.applyResolution(500, 700);
+        settingsService.restoreDefaults();
         keyMappingService.resetToDefault();
-        //TODO : 색약모드 초기화
-        // appSettingsService.applyColorMode("default");
+        loadSettingsToUI();
     }
 
     @FXML
