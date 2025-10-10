@@ -1,10 +1,7 @@
-package seoultech.se.backend.Score;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+package seoultech.se.backend.score;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -16,6 +13,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import seoultech.se.backend.BaseTimeEntity;
+
+/*
+ * 작성자: 문주성
+ * 공부할 것: Builder
+ */
 
 @Entity
 @Table(name = "scores")

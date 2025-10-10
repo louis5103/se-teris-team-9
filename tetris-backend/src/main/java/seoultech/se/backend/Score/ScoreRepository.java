@@ -1,4 +1,4 @@
-package seoultech.se.backend.Score;
+package seoultech.se.backend.score;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

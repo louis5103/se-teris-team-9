@@ -1,5 +1,4 @@
-package seoultech.se.backend.Score;
-
+package seoultech.se.backend.score;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +13,12 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
+
+/*
+ * 작성자: 문주성
+ * 공부할 것: ResponseEntity 반환값 
+ */
+
 
 @RestController
 @RequestMapping("/tetris/scores")

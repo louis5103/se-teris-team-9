@@ -1,10 +1,15 @@
-package seoultech.se.backend.Score;
+package seoultech.se.backend.score;
 
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
+
+/*
+ * 작성자: 문주성
+ * 공부할 것: strema, map, ::new, toList
+ */
 
 @Service
 @RequiredArgsConstructor
