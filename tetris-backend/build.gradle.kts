@@ -35,7 +35,12 @@ dependencies {
     implementation(libs.backend.spring.boot.starter.actuator)
     implementation(libs.backend.spring.boot.starter.validation)
 
-    runtimeOnly(libs.backend.h2.database)
+    // --- 기존 H2 ---
+    // runtimeOnly(libs.backend.h2.database)
+
+    // --- MySQL ---
+    runtimeOnly("com.mysql:mysql-connector-j")
+
 
     implementation(libs.bundles.backend.development)
     annotationProcessor(libs.backend.spring.boot.configuration.processor)

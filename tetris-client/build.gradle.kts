@@ -38,10 +38,6 @@ dependencies {
     implementation(project(":tetris-core"))
     implementation(project(":tetris-backend"))
     
-    // ============================================================================
-    // 🖥️ CLIENT MODULE SPECIFIC DEPENDENCIES
-    // ============================================================================
-    
     // 🌱 Spring Boot Bundle (DI container only)
     implementation(libs.bundles.client.spring)
     annotationProcessor(libs.client.spring.boot.configuration.processor)

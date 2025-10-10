@@ -1,0 +1,24 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: tetris-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root # MySQL root 계정 비밀번호
+      MYSQL_DATABASE: tetris_dev # 생성할 데이터베이스 이름
+      MYSQL_USER: team9 # 생성할 사용자 이름
+      MYSQL_PASSWORD: sexy-tetris # 생성할 사용자의 비밀번호
+
+    ports:
+      - "3306:3306"
+    # MySQL 서버 설정
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+    # 해당 코드가 data의 영속성을 보존해줌.
+    volumes:
+      - tetris-db-data:/var/lib/mysql
+
+volumes:
+  tetris-db-data:
