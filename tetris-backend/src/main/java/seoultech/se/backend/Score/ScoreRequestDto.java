@@ -1,13 +1,34 @@
 package seoultech.se.backend.Score;
 
-import java.time.LocalDateTime;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
 public class ScoreRequestDto {
 
+    @NotBlank
+    @Size(max = 20)
     private String name;
-    private Integer score;
-    private LocalDateTime updatedAt;
+
+    @NotNull
+    @PositiveOrZero
+    private int score;
+
+    private GameMode gameMode;
+    private boolean isItemMode;
+
+    public ScoreEntity toEntity() {
+        return ScoreEntity.builder()
+            .name(this.name)
+            .score(this.score)
+            .gameMode(this.gameMode)
+            .isItemMode(this.isItemMode)
+            .build();
+    }
+
+
 }

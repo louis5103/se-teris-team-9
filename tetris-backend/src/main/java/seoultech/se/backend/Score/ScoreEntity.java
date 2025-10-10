@@ -1,43 +1,43 @@
 package seoultech.se.backend.Score;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import seoultech.se.backend.BaseTimeEntity;
 
 @Entity
 @Table(name = "scores")
+@Builder
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
-public class ScoreEntity {
+@AllArgsConstructor
+public class ScoreEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 20, unique = false)
     private String name;
-    private Integer score;
 
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime updatedAt;
+    @Column(nullable = false)
+    private int score;
 
-    public static ScoreEntity from(ScoreRequestDto score) {
-        ScoreEntity entity = new ScoreEntity();
-        entity.name = score.getName();
-        entity.score = score.getScore();
-        entity.updatedAt = score.getUpdatedAt();
-        return entity;
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private GameMode gameMode;
+
+    private boolean isItemMode;
 }
