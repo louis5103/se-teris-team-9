@@ -1,23 +1,22 @@
-package seoultech.se.backend.Score;
+package seoultech.se.backend.score;
 
-import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class ScoreResponseDto {
 
     private String name;
-    private Integer score;
-    private LocalDateTime updatedAt;
+    private int score;
+    private GameMode gameMode;
+    private boolean isItemMode;
 
     public ScoreResponseDto(ScoreEntity entity) {
         this.name = entity.getName();
         this.score = entity.getScore();
-        this.updatedAt = entity.getUpdatedAt();
+        this.gameMode = entity.getGameMode();
+        this.isItemMode = entity.isItemMode();
     }
 }

@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import seoultech.se.backend.service.GameService;
 
 
-
 /**
  * 🎮 기본 REST API 컨트롤러 (Spring DI 통합)
  *

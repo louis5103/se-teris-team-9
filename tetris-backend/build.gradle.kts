@@ -29,21 +29,14 @@ dependencies {
     // ⚙️ BACKEND MODULE SPECIFIC DEPENDENCIES
     // ============================================================================
 
-    // 🌱 Spring Boot Core
     implementation(libs.backend.spring.boot.starter)
-
-    // 🌐 Spring Web Bundle (Web + Validation)
     implementation(libs.bundles.backend.spring.web)
-
-    // 🗄️ Data Access Bundle (JPA + H2 Database)
     implementation(libs.backend.spring.boot.starter.data.jpa)
-
-    // 📊 Spring Boot Actuator (Monitoring)
     implementation(libs.backend.spring.boot.starter.actuator)
+    implementation(libs.backend.spring.boot.starter.validation)
 
     runtimeOnly(libs.backend.h2.database)
 
-    // 🔧 Development Tools Bundle
     implementation(libs.bundles.backend.development)
     annotationProcessor(libs.backend.spring.boot.configuration.processor)
 
