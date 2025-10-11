@@ -42,6 +42,15 @@ dependencies {
     // --- MySQL ---
     runtimeOnly("com.mysql:mysql-connector-j")
 
+<<<<<<< HEAD
+=======
+    // --- 기존 H2 ---
+    // runtimeOnly(libs.backend.h2.database)
+
+    // --- MySQL ---
+    runtimeOnly("com.mysql:mysql-connector-j")
+
+>>>>>>> 984a45a9e4bc34af7a8e3a5eb6653078702371f0
 
     implementation(libs.bundles.backend.development)
     annotationProcessor(libs.backend.spring.boot.configuration.processor)

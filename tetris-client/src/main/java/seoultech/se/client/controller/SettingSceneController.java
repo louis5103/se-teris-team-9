@@ -2,20 +2,18 @@ package seoultech.se.client.controller;
 
 import java.io.IOException;
 
-import javafx.stage.Stage;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.sun.javafx.scene.control.inputmap.InputMap;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
+import javafx.stage.Stage;
 import seoultech.se.client.config.ApplicationContextProvider;
-import seoultech.se.client.service.*;
+import seoultech.se.client.service.KeyMappingService;
+import seoultech.se.client.service.NavigationService;
 
 @Component
 public class SettingSceneController extends BaseController {

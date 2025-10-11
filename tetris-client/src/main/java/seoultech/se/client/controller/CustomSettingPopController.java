@@ -3,18 +3,14 @@ package seoultech.se.client.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import seoultech.se.client.model.Setting;
-
-import org.springframework.context.annotation.ComponentScans;
-import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
 import seoultech.se.client.config.ApplicationContextProvider;
-import seoultech.se.client.service.SettingsService;
+import seoultech.se.client.model.Setting;
 
 
 @Component
