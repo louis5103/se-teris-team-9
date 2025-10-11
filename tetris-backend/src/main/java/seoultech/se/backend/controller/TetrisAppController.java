@@ -24,6 +24,5 @@ public class TetrisAppController {
     public String getStatus() {
         return gameService.getStatus();
     }
-
     // TODO: 팀에서 필요한 API 엔드포인트들을 구현하세요
 }
