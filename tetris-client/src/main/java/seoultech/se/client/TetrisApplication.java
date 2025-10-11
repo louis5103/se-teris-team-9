@@ -22,7 +22,11 @@ import seoultech.se.client.service.SettingsService;
  * - JavaFX UI와 Spring Boot 서비스 레이어 연동
  * - 독립적으로 실행 가능한 데스크톱 애플리케이션
  */
-@SpringBootApplication(scanBasePackages = {"seoultech.se.backend", "seoultech.se.client"})
+@SpringBootApplication(scanBasePackages = {
+    "seoultech.se.client", 
+    "seoultech.se.backend", 
+    "seoultech.se.core"
+})
 public class TetrisApplication extends Application {
 
     private ConfigurableApplicationContext springContext;

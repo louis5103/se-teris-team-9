@@ -2,8 +2,6 @@ package seoultech.se.core.model.enumType;
 
 import java.util.Map;
 
-import seoultech.se.core.model.enumType.RotationState;
-import seoultech.se.core.model.enumType.TetrominoType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
