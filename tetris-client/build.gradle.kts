@@ -38,9 +38,12 @@ dependencies {
     implementation(project(":tetris-core"))
     implementation(project(":tetris-backend"))
     
-    // 🌱 Spring Boot Bundle (DI container only)
+    // 🌱 Spring Boot Bundle (DI container + JPA)
     implementation(libs.bundles.client.spring)
     annotationProcessor(libs.client.spring.boot.configuration.processor)
+    
+    // 🗄️ H2 Database (로컬 저장소)
+    runtimeOnly(libs.backend.h2.database)
     
     // 🎨 JavaFX Bundle (Desktop UI)
     implementation(libs.bundles.client.javafx)
