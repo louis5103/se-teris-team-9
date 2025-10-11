@@ -34,6 +34,7 @@ dependencies {
     implementation(libs.backend.spring.boot.starter.data.jpa)
     implementation(libs.backend.spring.boot.starter.actuator)
     implementation(libs.backend.spring.boot.starter.validation)
+    implementation("org.springframework.boot:spring-boot-starter-security")
 
     // --- 기존 H2 ---
     // runtimeOnly(libs.backend.h2.database)
