@@ -4,10 +4,10 @@ services:
     container_name: tetris-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: hklim0510! # MySQL root 계정 비밀번호
+      MYSQL_ROOT_PASSWORD: root # MySQL root 계정 비밀번호
       MYSQL_DATABASE: tetris_dev # 생성할 데이터베이스 이름
-      MYSQL_USER: louis5103 # 생성할 사용자 이름
-      MYSQL_PASSWORD: hklim0510! # 생성할 사용자의 비밀번호
+      MYSQL_USER: team9 # 생성할 사용자 이름
+      MYSQL_PASSWORD: sexy-tetris # 생성할 사용자의 비밀번호
 
     ports:
       - "3306:3306"
