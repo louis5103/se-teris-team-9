@@ -5,12 +5,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 
 @RestController
@@ -31,32 +31,18 @@ public class UserController {
     /**
      * 로그인
      */
-    @GetMapping("/login")
-    public String login(@RequestBody LoginRequestDto user) {
-        return new String();
+    @PostMapping("/login")
+    public ResponseEntity<LoginResultDto> login(@RequestBody LoginRequestDto dto) {
+        LoginResultDto loginResult = userService.login(dto);
+        return ResponseEntity.ok(loginResult);
     }
 
     /**
      * 로그아웃
      */
-    @PostMapping("logout")
-    public String postMethodName(Long id) {
-        //TODO: process POST request
-        
-        return new String();
+    @PostMapping("/logout")
+    public String postMethodName(@RequestBody String email) {
+        String message = userService.logout(email);
+        return message;
     }
-    
-
-
-    /**
-     * 회원 삭제
-     */
-    @DeleteMapping("/delete")
-    public String deleteAccount(Long id) {
-        
-        return new String();
-    }
-    
-    
-    
 }
