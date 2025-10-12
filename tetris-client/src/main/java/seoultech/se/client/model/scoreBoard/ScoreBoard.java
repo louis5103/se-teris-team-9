@@ -1,5 +1,7 @@
 package seoultech.se.client.model.scoreBoard;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
@@ -28,6 +30,7 @@ public class ScoreBoard extends VBox{
     public void init () {
         // 라벨
         Label title = new Label("🏆싱글모드 점수 순위");
+        title.getStyleClass().add("score-board-title");
 
         // 테이블 컬럼
         TableColumn<ScoreRankDto, String> rankCol = new TableColumn<>("순위");
@@ -46,17 +49,33 @@ public class ScoreBoard extends VBox{
         // 테이블에 컬럼 추가
         tableView.getColumns().addAll(rankCol, nameCol, scoreCol, modeCol, dateCol);
 
+        // TableView에 CSS 스타일 클래스 적용
+        tableView.getStyleClass().add("score-table");
+
+        // VBox에 title과 tableView 추가
+        this.getChildren().addAll(title, tableView);
+
         // 데이터는 나중에 로드 (초기화 시점이 아닌 뷰가 표시될 때)
     }
 
     private ObservableList<ScoreRankDto> loadSingleData() {
         // 데이터 로드 - getTopScores 사용 (Pageable 없음)
-        return FXCollections.observableArrayList(scoreService.getTopScores(false, 20));
+        List<ScoreRankDto> scores = scoreService.getTopScores(false, 20);
+        System.out.println("📊 Loaded Single Mode scores: " + scores.size() + " records");
+        scores.forEach(score -> 
+            System.out.println("  - " + score.getRank() + ". " + score.getName() + ": " + score.getScore())
+        );
+        return FXCollections.observableArrayList(scores);
     }
     
     private ObservableList<ScoreRankDto> loadAcadeData() {
         // 데이터 로드 - getTopScores 사용 (Pageable 없음)
-        return FXCollections.observableArrayList(scoreService.getTopScores(true, 20));
+        List<ScoreRankDto> scores = scoreService.getTopScores(true, 20);
+        System.out.println("📊 Loaded Item Mode scores: " + scores.size() + " records");
+        scores.forEach(score -> 
+            System.out.println("  - " + score.getRank() + ". " + score.getName() + ": " + score.getScore())
+        );
+        return FXCollections.observableArrayList(scores);
     }
     
     /**
