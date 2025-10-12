@@ -2,6 +2,8 @@ package seoultech.se.backend.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,7 +27,7 @@ public class UserEntity {
     @Column(name = "id", updatable = false)
     private Long id;
 
-    @Column(name = "name", updatable = true)
+    @Column(name = "name")
     @NotBlank
     @Size(max = 20)
     private String name;
@@ -36,10 +38,23 @@ public class UserEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "login-status")
+    @Enumerated(EnumType.STRING)
+    private LoginStatus status = LoginStatus.LOGOUT;
+
     @Builder
     public UserEntity(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
+    }
+
+    //TODO: 중간평가 이후 수정 및 JWT & Security 도입 예정
+    public void login() {
+        this.status = LoginStatus.LOGIN;
+    }
+    //TODO: 중간평가 이후 수정 및 JWT & Security 도입 예정
+    public void logout() {
+        this.status = LoginStatus.LOGOUT;
     }
 }
