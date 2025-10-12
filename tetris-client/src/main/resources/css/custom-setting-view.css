@@ -10,7 +10,7 @@
     -fx-padding: 1em 2em 2em 2em;
     -fx-spacing: 1.7em;
     -fx-border-color: #606060;
-    -fx-border-width: 0 0 0 1px;
+    -fx-border-width: 0 0 0 0.083em;
 }
 
 .bottom-box-custom {

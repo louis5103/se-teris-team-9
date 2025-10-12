@@ -3,44 +3,44 @@
     -fx-background-color: #1a1a1a;
 }
 
-/* ========== 메인 메뉴 버튼 ========== */
+/* ========== 메뉴 버튼 ========== */
 .menu-button {
-    -fx-pref-width: 200px;
-    -fx-pref-height: 50px;
+    -fx-pref-width: 16.667em;
+    -fx-pref-height: 4.167em;
     -fx-background-color: #333333;
     -fx-text-fill: white;
-    -fx-font-size: 24px;
+    -fx-font-size: 2em;
     -fx-font-family: "Arial Black";
     -fx-border-color: #555555;
-    -fx-border-width: 2px;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
+    -fx-border-width: 0.167em;
+    -fx-background-radius: 0.833em;
+    -fx-border-radius: 0.833em;
 }
 
 .menu-button-middle {
-    -fx-pref-width: 250px;
-    -fx-pref-height: 45px;
+    -fx-pref-width: 20.833em;
+    -fx-pref-height: 3.75em;
     -fx-background-color: #333333;
     -fx-text-fill: white;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.667em;
     -fx-font-family: "Arial Black";
     -fx-border-color: #555555;
-    -fx-border-width: 2px;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
+    -fx-border-width: 0.167em;
+    -fx-background-radius: 0.833em;
+    -fx-border-radius: 0.833em;
 }
 
 .menu-button-small {
-    -fx-pref-width: 100px;
-    -fx-pref-height: 40px;
+    -fx-pref-width: 8.333em;
+    -fx-pref-height: 3.333em;
     -fx-background-color: #333333;
     -fx-text-fill: white;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.5em;
     -fx-font-family: "Arial Black";
     -fx-border-color: #555555;
-    -fx-border-width: 2px;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
+    -fx-border-width: 0.167em;
+    -fx-background-radius: 0.667em;
+    -fx-border-radius: 0.667em;
 }
 
 .menu-button:hover {
@@ -56,156 +56,14 @@
 .menu-button-small:hover {
     -fx-background-color: #4CAF50;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.5), 10, 0, 0, 0);
-}
-
-/* ========== 게임 화면 ========== */
-.game-background {
-    -fx-background-color: #1a1a1a;
-}
-
-.game-title {
-    -fx-font-size: 48px;
-    -fx-font-family: "Impact";
-    -fx-text-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, aqua 0%, red 50%);
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 3, 3);
-    -fx-alignment: center;
-}
-
-/* ========== 게임 보드 ========== */
-.game-board {
-    -fx-background-color: #0a0a0a;
-    -fx-border-color: #444444;
-    -fx-border-width: 3px;
-    -fx-padding: 2px;
-    -fx-hgap: 1;
-    -fx-vgap: 1;
-}
-
-/* 게임 보드의 각 셀 */
-.board-cell {
-    -fx-fill: #1a1a1a;
-    -fx-stroke: #333333;
-    -fx-stroke-width: 0.5;
-}
-
-/* ========== 테트로미노 색상 ========== */
-/* 각 테트로미노 타입별로 다른 색상을 가집니다 */
-
-.tetromino-red {
-    -fx-fill: linear-gradient(to bottom, #ff4444, #cc0000);
-    -fx-stroke: #ff6666;
-    -fx-stroke-width: 1;
-    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 1);
-}
-
-.tetromino-green {
-    -fx-fill: linear-gradient(to bottom, #44ff44, #00cc00);
-    -fx-stroke: #66ff66;
-    -fx-stroke-width: 1;
-    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 1);
-}
-
-.tetromino-blue {
-    -fx-fill: linear-gradient(to bottom, #4444ff, #0000cc);
-    -fx-stroke: #6666ff;
-    -fx-stroke-width: 1;
-    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 1);
-}
-
-.tetromino-yellow {
-    -fx-fill: linear-gradient(to bottom, #ffff44, #cccc00);
-    -fx-stroke: #ffff66;
-    -fx-stroke-width: 1;
-    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 1);
-}
-
-.tetromino-cyan {
-    -fx-fill: linear-gradient(to bottom, #44ffff, #00cccc);
-    -fx-stroke: #66ffff;
-    -fx-stroke-width: 1;
-    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 1);
-}
-
-.tetromino-magenta {
-    -fx-fill: linear-gradient(to bottom, #ff44ff, #cc00cc);
-    -fx-stroke: #ff66ff;
-    -fx-stroke-width: 1;
-    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 1);
-}
-
-.tetromino-orange {
-    -fx-fill: linear-gradient(to bottom, #ff8844, #cc4400);
-    -fx-stroke: #ffaa66;
-    -fx-stroke-width: 1;
-    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 1);
-}
-
-/* ========== 게임 정보 라벨 ========== */
-.info-label-title {
-    -fx-font-size: 16px;
-    -fx-font-family: "Arial Black";
-    -fx-text-fill: #888888;
-    -fx-alignment: center;
-}
-
-.info-label-value {
-    -fx-font-size: 32px;
-    -fx-font-family: "Arial Black";
-    -fx-text-fill: #00ff00;
-    -fx-alignment: center;
-    -fx-effect: dropshadow(gaussian, rgba(0,255,0,0.5), 5, 0, 0, 0);
-}
-
-/* ========== 조작법 안내 ========== */
-.controls-info {
-    -fx-background-color: rgba(50, 50, 50, 0.5);
-    -fx-padding: 10px;
-    -fx-background-radius: 5px;
-}
-
-.control-text {
-    -fx-font-size: 12px;
-    -fx-font-family: "Consolas", "Courier New", monospace;
-    -fx-text-fill: #aaaaaa;
-}
-
-/* ========== 게임 오버 메시지 ========== */
-.game-over-label {
-    -fx-font-size: 48px;
-    -fx-font-family: "Impact";
-    -fx-text-fill: #ff0000;
-    -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.8), 20, 0, 0, 0);
-    -fx-alignment: center;
-    -fx-background-color: rgba(0, 0, 0, 0.8);
-    -fx-padding: 20px;
-    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.5), 0.833em, 0, 0, 0);
 }
 
 /* ========== 하단 버튼 박스 ========== */
 .bottom-box {
-    -fx-padding: 15px 20px 15px 20px;
-    -fx-spacing: 10px;
+    -fx-padding: 1.25em 1.667em 1.25em 1.667em;
+    -fx-spacing: 0.833em;
     -fx-background-color: rgba(30, 30, 30, 0.5);
     -fx-alignment: CENTER_RIGHT;
 }
 
-/* ========== 프리뷰 보드 (HOLD, NEXT) ========== */
-.preview-board {
-    -fx-background-color: #0a0a0a;
-    -fx-border-color: #444444;
-    -fx-border-width: 2px;
-    -fx-padding: 5px;
-}
-
-/* ========== 콤보 라벨 ========== */
-.combo-label {
-    -fx-font-size: 24px;
-    -fx-font-family: "Impact";
-    -fx-text-fill: #FFD700;
-    -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.8), 10, 0, 0, 0);
-    -fx-alignment: center;
-    -fx-background-color: rgba(0, 0, 0, 0.7);
-    -fx-padding: 10px 20px;
-    -fx-background-radius: 5px;
-}

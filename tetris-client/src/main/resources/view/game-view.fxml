@@ -18,7 +18,7 @@
             fx:controller="seoultech.se.client.controller.GameController"
             prefHeight="800.0" prefWidth="900.0"
             styleClass="game-background"
-            stylesheets="@../css/application.css">
+            stylesheets="@../css/application.css, @../css/game-view.css">
     
     <!-- 상단: 제목 -->
     <top>
