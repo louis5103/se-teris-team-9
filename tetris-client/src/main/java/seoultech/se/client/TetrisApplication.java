@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.FilterType;
+
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -24,14 +25,25 @@ import seoultech.se.client.service.SettingsService;
  * - init()에서 Spring Boot 컨텍스트 초기화
  * - JavaFX UI와 Spring Boot 서비스 레이어 연동
  * - 독립적으로 실행 가능한 데스크톱 애플리케이션
+ * 
+ * Backend 모듈 통합:
+ * - Service, Repository 모두 활성화 (로컬 DB 사용)
+ * - Controller만 제외 (REST API 불필요)
  */
 @SpringBootApplication
-// 1. 다른 모듈의 Component(@Service, @Controller 등)를 스캔하기 위한 설정
-@ComponentScan(basePackages = {"seoultech.se.client", "seoultech.se.backend"})
-// 2. 다른 모듈의 JPA Repository를 스캔하기 위한 설정
-@EnableJpaRepositories(basePackages = "seoultech.se.backend")
-// 3. 다른 모듈의 JPA Entity(@Entity)를 스캔하기 위한 설정
-@EntityScan(basePackages = "seoultech.se.backend")
+@ComponentScan(
+    basePackages = {
+        "seoultech.se.client",
+        "seoultech.se.backend",  // Backend 전체 스캔
+        "seoultech.se.core"
+    },
+    excludeFilters = {
+        @ComponentScan.Filter(
+            type = FilterType.REGEX,
+            pattern = "seoultech\\.se\\.backend\\.controller\\..*"  // Controller만 제외
+        )
+    }
+)
 public class TetrisApplication extends Application {
 
     private ConfigurableApplicationContext springContext;
