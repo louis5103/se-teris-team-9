@@ -60,9 +60,9 @@ public class MainController extends BaseController {
     /**
      * SCORE 버튼 액션 (향후 구현 예정)
      */
-    public void handleScoreButtonAction() {
+    public void handleScoreButtonAction() throws IOException {
         System.out.println("🏆 Score button clicked");
-        // TODO: 점수판 화면 구현
+        navigationService.navigateTo("/view/score-board.fxml");
     }
 
     /**
