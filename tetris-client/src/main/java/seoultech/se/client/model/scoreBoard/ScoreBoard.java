@@ -46,21 +46,26 @@ public class ScoreBoard extends VBox{
         // 테이블에 컬럼 추가
         tableView.getColumns().addAll(rankCol, nameCol, scoreCol, modeCol, dateCol);
 
-        // tetris-backend에서 실제 데이터 가져옴.
-        ObservableList<ScoreRankDto> scores = loadSingleData();
-        tableView.setItems(scores);
+        // 데이터는 나중에 로드 (초기화 시점이 아닌 뷰가 표시될 때)
     }
 
     private ObservableList<ScoreRankDto> loadSingleData() {
-        // 데이터 로드
-        return FXCollections.observableArrayList(scoreService.getScoreRank(false, null));
+        // 데이터 로드 - getTopScores 사용 (Pageable 없음)
+        return FXCollections.observableArrayList(scoreService.getTopScores(false, 20));
     }
     
     private ObservableList<ScoreRankDto> loadAcadeData() {
-        // 데이터 로드
-        return FXCollections.observableArrayList(scoreService.getScoreRank(true, null));
+        // 데이터 로드 - getTopScores 사용 (Pageable 없음)
+        return FXCollections.observableArrayList(scoreService.getTopScores(true, 20));
     }
-
+    
+    /**
+     * 초기 데이터 로드 - 스코어보드가 표시될 때 호출되어야 함
+     */
+    public void loadInitialData() {
+        updateDataWhenClicked(false); // 기본값: 싱글모드
+    }
+    
     public void updateDataWhenClicked(boolean isItemMode) {
         ObservableList<ScoreRankDto> scores = (isItemMode==true) ? loadAcadeData() : loadSingleData();
         tableView.setItems(scores);

@@ -15,11 +15,11 @@ public interface ScoreRepository extends JpaRepository<ScoreEntity, Long> {
                 "    DENSE_RANK() OVER (ORDER BY score DESC) as rank, " +
                 "    name, " +          
                 "    score, " +         
-                "    item_mode as itemMode, " + 
+                "    is_item_mode as itemMode, " + 
                 "    created_at as createdAt " + 
-                "FROM score_entity " +     
-                "WHERE item_mode = :itemMode",
-        countQuery = "SELECT count(*) FROM score_entity WHERE item_mode = :itemMode",
+                "FROM scores " +     
+                "WHERE is_item_mode = :itemMode",
+        countQuery = "SELECT count(*) FROM scores WHERE is_item_mode = :itemMode",
         nativeQuery = true
     )
     Page<ScoreRankDto> findRanksByItemMode(@Param("itemMode") Boolean itemMode, Pageable pageable);
