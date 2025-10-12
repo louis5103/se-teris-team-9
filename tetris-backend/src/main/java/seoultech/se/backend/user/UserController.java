@@ -38,5 +38,11 @@ public class UserController {
 
     /**
      * 로그아웃
-     */    
+     */
+    @PostMapping("/logout")
+    public String postMethodName(@RequestBody String email) {
+        String message = userService.logout(email);
+        return message;
+    }
+        
 }
