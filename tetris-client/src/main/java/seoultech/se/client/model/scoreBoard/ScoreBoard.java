@@ -86,7 +86,7 @@ public class ScoreBoard extends VBox{
     }
     
     public void updateDataWhenClicked(boolean isItemMode) {
-        ObservableList<ScoreRankDto> scores = (isItemMode==true) ? loadAcadeData() : loadSingleData();
+        ObservableList<ScoreRankDto> scores = isItemMode ? loadAcadeData() : loadSingleData();
         tableView.setItems(scores);
     }
 }
