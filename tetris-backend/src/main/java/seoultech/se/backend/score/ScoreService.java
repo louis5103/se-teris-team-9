@@ -2,6 +2,8 @@ package seoultech.se.backend.score;
 
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,13 @@ public class ScoreService {
     public List<ScoreResponseDto> getScoreBoard() {
         List<ScoreEntity> scoreList = scoreRepository.findAll();
         return scoreList.stream().map(ScoreResponseDto::new).toList();
+    }
+
+    public List<ScoreRankDto> getTopScores(Boolean isItemMode, Integer limit) {
+        if (limit == null) limit = 20;
+        
+        Pageable pageable = PageRequest.of(0, limit);
+        return scoreRepository.findRanksByItemMode(isItemMode, pageable).getContent();
     }
 
     public void deleteScoreBoard() {
