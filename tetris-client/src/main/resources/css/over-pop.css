@@ -7,16 +7,21 @@
 }
 
 .center-box {
-    -fx-padding: 1em 2em 2em 2em;
-    -fx-spacing: 1.7em;
     -fx-border-color: #606060;
     -fx-border-width: 0 0 0 0.083em;
+    -fx-padding: 1em 1em 3em 1em;
+    -fx-spacing: 1.7em;
+    -fx-alignment: center;
 }
 
-.bottom-box-custom {
-    -fx-spacing: 1em;
+.score-table {
+    -fx-background-color: transparent;
+    -fx-border-color: #555555;
+    -fx-border-width: 0.167em;
 }
 
-.custom-setting-button-selected {
-    -fx-background-color: #2427d5;
+.notice-label {
+    -fx-text-fill: white;
+    -fx-font-size: 1.5em;
+    -fx-font-family: "System Bold";
 }
