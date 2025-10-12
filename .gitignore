@@ -359,3 +359,9 @@ Desktop.ini
 # 개발자별 로그 파일
 *.log
 logs/
+
+
+tetris_settings
+docker-compose.yml
+*.properties
+
