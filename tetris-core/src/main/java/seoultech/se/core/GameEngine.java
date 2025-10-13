@@ -163,9 +163,7 @@ public class GameEngine {
             dropDistance++;
         }
 
-        // 2. deepCopy 후 최종 위치 설정 및 점수 추가
-        GameState droppedState = state.deepCopy();
-        droppedState.setCurrentY(finalY);
+        // Hard Drop 점수 추가. (1칸당 2점)
         droppedState.addScore(dropDistance * 2);
 
         // 3. 즉시 고정 (이미 deepCopy되었으므로 내부에서 다시 복사하지 않음)
@@ -363,8 +361,9 @@ public class GameEngine {
 
             // B2B (Back-to-Back) 업데이트
             // Tetris(4줄) 또는 T-Spin을 연속으로 성공하면 B2B 카운트 증가
-            boolean isDifficult = clearResult.getLinesCleared() == 4 || clearResult.isTSpin();
-            if(isDifficult && newState.isLastClearWasDifficult()) {
+            boolean isDifficult = clearResult.getLinesCleared() == GameConstants.TETRIS_LINE_COUNT 
+                                || clearResult.isTSpin();
+            if (isDifficult && newState.isLastClearWasDifficult()) {
                 // 이전에도 difficult였고 지금도 difficult → B2B 계속
                 newState.setBackToBackCount(newState.getBackToBackCount() + 1);
             } else if (isDifficult) {
@@ -542,11 +541,9 @@ public class GameEngine {
             targetRow--;
         }
         
-        // 3. 남은 위쪽 줄들은 빈 칸으로 채우기
-        for (int row = targetRow; row >= 0; row--) {
-            for (int col = 0; col < state.getBoardWidth(); col++) {
-                state.getGrid()[row][col] = Cell.empty();
-            }
+        // 새 그리드를 원래 그리드에 복사 (System.arraycopy 사용으로 성능 개선)
+        for (int row = 0; row < state.getBoardHeight(); row++) {
+            System.arraycopy(newGrid[row], 0, state.getGrid()[row], 0, state.getBoardWidth());
         }
 
         int linesCleared = clearedRowsList.size();
@@ -604,33 +601,41 @@ public class GameEngine {
 
         // 기본 점수 계산
         if (tSpin) {
-            if(tSpinMini){
-                baseScore = lines == 0 ? 100 : lines == 1 ? 200 : 400;
+            if (tSpinMini) {
+                baseScore = lines == 0 ? GameConstants.TSPIN_MINI_NO_LINE 
+                          : lines == 1 ? GameConstants.TSPIN_MINI_SINGLE 
+                          : GameConstants.TSPIN_MINI_DOUBLE;
             } else {
-                baseScore = lines == 0 ? 400 : lines == 1 ? 800 : lines == 2 ? 1200 : 1600;
+                baseScore = lines == 0 ? GameConstants.TSPIN_NO_LINE 
+                          : lines == 1 ? GameConstants.TSPIN_SINGLE 
+                          : lines == 2 ? GameConstants.TSPIN_DOUBLE 
+                          : GameConstants.TSPIN_TRIPLE;
             }
         } else {
             switch (lines) {
-                case 1 : baseScore = 100; break;
-                case 2 : baseScore = 300; break;
-                case 3 : baseScore = 500; break;
-                case 4 : baseScore = 800; break;
+                case 1: baseScore = GameConstants.SCORE_SINGLE; break;
+                case 2: baseScore = GameConstants.SCORE_DOUBLE; break;
+                case 3: baseScore = GameConstants.SCORE_TRIPLE; break;
+                case 4: baseScore = GameConstants.SCORE_TETRIS; break;
             }
         }
 
-        // B2B 보너스 (1.5배)
-        if (b2b > 0 && (lines == 4 || tSpin)) {
-            baseScore = (long)(baseScore * 1.5);
+        // B2B 보너스
+        if (b2b > 0 && (lines == GameConstants.TETRIS_LINE_COUNT || tSpin)) {
+            baseScore = (long)(baseScore * GameConstants.BACK_TO_BACK_MULTIPLIER);
         }
 
-        // 콤보 보너스 (콤보 수 * 50)
+        // 콤보 보너스
         if (combo > 0) {
-            baseScore += combo * 50 * level;
+            baseScore += combo * GameConstants.COMBO_BONUS_PER_LEVEL * level;
         }
 
         // 퍼펙트 클리어 보너스
         if (perfectClear) {
-            baseScore += lines == 1 ? 800 : lines == 2 ? 1200 : lines == 3? 1800 : 2000;
+            baseScore += lines == 1 ? GameConstants.PERFECT_CLEAR_SINGLE 
+                       : lines == 2 ? GameConstants.PERFECT_CLEAR_DOUBLE 
+                       : lines == 3 ? GameConstants.PERFECT_CLEAR_TRIPLE 
+                       : GameConstants.PERFECT_CLEAR_TETRIS;
         }
 
         // 레벨 배수
