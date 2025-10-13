@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
@@ -166,6 +167,7 @@ public class GameController implements BoardObserver {
         // GridPane 크기 고정
         double boardWidth = width * UIConstants.CELL_SIZE;
         double boardHeight = height * UIConstants.CELL_SIZE;
+      
         boardGridPane.setPrefSize(boardWidth, boardHeight);
         boardGridPane.setMinSize(boardWidth, boardHeight);
         boardGridPane.setMaxSize(boardWidth, boardHeight);
@@ -526,7 +528,6 @@ public class GameController implements BoardObserver {
     }
 
     // ========== 게임 제어 ==========
-
     public void startGame() {
         gameOverLabel.setVisible(false);
         gameLoopManager.start();
