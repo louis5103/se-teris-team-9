@@ -90,7 +90,7 @@ public class Board {
     // ========== 게임 로직 (Observer 알림 통합) ==========
 
     public void spawnNewTetromino() {
-        // TODO: 7-bag 시스템으로 변경 필요
+        // LEGACY_TODO: 7-bag 시스템으로 변경 필요
         TetrominoType randomType = TetrominoType.getRandomTetrominoType();
         this.currentTetromino = new Tetromino(randomType);
         currentX = boardWidth / 2 - 1;
@@ -210,10 +210,10 @@ public class Board {
     }
     
     /**
-     * Hold 기능 (TODO: 구현 필요)
+     * Hold 기능 (LEGACY_TODO: 구현 필요)
      */
     public void hold() {
-        // TODO: Hold 시스템 구현
+        // LEGACY_TODO: Hold 시스템 구현
         System.out.println("⚠️ Hold not implemented yet");
     }
 
@@ -295,7 +295,7 @@ public class Board {
             long points = calculateScore(clearedRowCount);
             gameState.addScore(points);
             
-            // TODO: T-Spin, Perfect Clear 감지 구현 필요
+            // LEGACY_TODO: T-Spin, Perfect Clear 감지 구현 필요
             boolean isTSpin = false;
             boolean isTSpinMini = false;
             boolean isPerfectClear = checkPerfectClear();
@@ -309,7 +309,7 @@ public class Board {
             notifyScoreAdded(points, reason);
             notifyGameStateChanged(gameState);
             
-            // TODO: 콤보/B2B 시스템 구현 필요
+            // LEGACY_TODO: 콤보/B2B 시스템 구현 필요
         }
     }
     
