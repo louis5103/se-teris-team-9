@@ -33,7 +33,7 @@ public final class ColorMapper {
             case CYAN    -> Color.rgb(68, 255, 255);
             case MAGENTA -> Color.rgb(255, 68, 255);
             case ORANGE  -> Color.rgb(255, 136, 68);
-            default      -> Color.rgb(128, 128, 128); // 회색 (기본값)
+            default      -> Color.rgb(128, 128, 128); // Gray (default value)
         };
     }
     
