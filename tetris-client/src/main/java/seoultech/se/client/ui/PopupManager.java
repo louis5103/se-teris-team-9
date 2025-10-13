@@ -75,23 +75,31 @@ public class PopupManager {
     }
     
     /**
+     * 오버레이의 가시성을 설정하는 헬퍼 메서드
+     * Platform.runLater 코드 중복을 제거하기 위해 추출
+     * 
+     * @param overlay 제어할 오버레이 VBox
+     * @param visible true면 표시, false면 숨김
+     */
+    private void setOverlayVisibility(VBox overlay, boolean visible) {
+        Platform.runLater(() -> {
+            overlay.setVisible(visible);
+            overlay.setManaged(visible);
+        });
+    }
+    
+    /**
      * 일시정지 팝업을 표시합니다
      */
     public void showPausePopup() {
-        Platform.runLater(() -> {
-            pauseOverlay.setVisible(true);
-            pauseOverlay.setManaged(true);
-        });
+        setOverlayVisibility(pauseOverlay, true);
     }
     
     /**
      * 일시정지 팝업을 숨깁니다
      */
     public void hidePausePopup() {
-        Platform.runLater(() -> {
-            pauseOverlay.setVisible(false);
-            pauseOverlay.setManaged(false);
-        });
+        setOverlayVisibility(pauseOverlay, false);
     }
     
     /**
@@ -102,19 +110,15 @@ public class PopupManager {
     public void showGameOverPopup(long finalScore) {
         Platform.runLater(() -> {
             finalScoreLabel.setText(String.valueOf(finalScore));
-            gameOverOverlay.setVisible(true);
-            gameOverOverlay.setManaged(true);
         });
+        setOverlayVisibility(gameOverOverlay, true);
     }
     
     /**
      * 게임 오버 팝업을 숨깁니다
      */
     public void hideGameOverPopup() {
-        Platform.runLater(() -> {
-            gameOverOverlay.setVisible(false);
-            gameOverOverlay.setManaged(false);
-        });
+        setOverlayVisibility(gameOverOverlay, false);
     }
     
     /**
