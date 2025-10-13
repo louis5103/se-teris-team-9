@@ -119,25 +119,29 @@ public class GameEngine {
      * 1. 바닥까지 이동
      * 2. 즉시 고정 (lockTetromino 호출)
      * 
+     * 성능 최적화: deepCopy를 한 번만 수행
+     * 
      * @return LockResult (라인 클리어 포함)
      */
     public static LockResult hardDrop(GameState state){
-        // 1. 바닥까지 이동.
-        GameState droppedState = state.deepCopy();
+        // 1. 바닥까지 이동 거리 계산 (원본 state는 수정하지 않음)
         int dropDistance = 0;
+        int finalY = state.getCurrentY();
 
-        while(isValidPosition(droppedState, droppedState.getCurrentTetromino(), 
-                              droppedState.getCurrentX(), droppedState.getCurrentY() + 1)
+        while(isValidPosition(state, state.getCurrentTetromino(), 
+                              state.getCurrentX(), finalY + 1)
         ) {
-            droppedState.setCurrentY(droppedState.getCurrentY() + 1);
+            finalY++;
             dropDistance++;
         }
 
-        // Hard Drop 점수 추가. (1칸당 2점)
+        // 2. deepCopy 후 최종 위치 설정 및 점수 추가
+        GameState droppedState = state.deepCopy();
+        droppedState.setCurrentY(finalY);
         droppedState.addScore(dropDistance * 2);
 
-        // 2. 즉시 고정.
-        return lockTetromino(droppedState);
+        // 3. 즉시 고정 (이미 deepCopy되었으므로 내부에서 다시 복사하지 않음)
+        return lockTetrominoInternal(droppedState, false);
     }
     
     // ========== Hold 기능 ==========
@@ -240,7 +244,18 @@ public class GameEngine {
      * @return 고정 결과 (게임 오버 여부, 라인 클리어 정보 포함)
      */
     public static LockResult lockTetromino(GameState state) {
-        GameState newState = state.deepCopy();
+        return lockTetrominoInternal(state, true);
+    }
+    
+    /**
+     * 테트로미노를 보드에 고정하는 내부 메서드
+     * 
+     * @param state 현재 게임 상태
+     * @param needsCopy deepCopy가 필요한지 여부 (false면 이미 복사된 상태로 간주)
+     * @return 고정 결과
+     */
+    private static LockResult lockTetrominoInternal(GameState state, boolean needsCopy) {
+        GameState newState = needsCopy ? state.deepCopy() : state;
         
         // 고정하기 전에 블록 정보 저장! (EventMapper에서 사용)
         Tetromino lockedTetromino = state.getCurrentTetromino();
