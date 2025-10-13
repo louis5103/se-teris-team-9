@@ -341,18 +341,37 @@ public class GameEngine {
             return LineClearResult.none();
         }
 
-        // 라인 클리어 실행. (라인 지우기 + 위 블록들 아래로 내리기)
-        for(int clearedRow : clearedRowsList){
-            // 해당 줄 위 모든 라인 내리기
-            for (int row = clearedRow; row > 0; row--) {
-                for(int col = 0; col <state.getBoardWidth(); col++) {
-                    state.getGrid()[row][col] = state.getGrid()[row - 1][col].copy();
+        // 라인 클리어 실행 (수정된 버전)
+        // 여러 줄이 동시에 클리어될 때 인덱스 문제를 해결하기 위해
+        // 클리어되지 않은 라인들만 모아서 아래부터 다시 배치합니다
+        
+        // 1. 클리어되지 않은 라인들만 수집
+        java.util.List<Cell[]> remainingRows = new java.util.ArrayList<>();
+        for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
+            boolean isCleared = clearedRowsList.contains(row);
+            if (!isCleared) {
+                // 이 줄은 클리어되지 않았으므로 보존
+                Cell[] rowCopy = new Cell[state.getBoardWidth()];
+                for (int col = 0; col < state.getBoardWidth(); col++) {
+                    rowCopy[col] = state.getGrid()[row][col].copy();
                 }
+                remainingRows.add(rowCopy);
             }
-
-            // 최상단 줄은 빈 칸으로 초기화
+        }
+        
+        // 2. 보드를 아래에서부터 다시 채우기
+        int targetRow = state.getBoardHeight() - 1;
+        for (Cell[] rowData : remainingRows) {
             for (int col = 0; col < state.getBoardWidth(); col++) {
-                state.getGrid()[0][col] = Cell.empty();
+                state.getGrid()[targetRow][col] = rowData[col];
+            }
+            targetRow--;
+        }
+        
+        // 3. 남은 위쪽 줄들은 빈 칸으로 채우기
+        for (int row = targetRow; row >= 0; row--) {
+            for (int col = 0; col < state.getBoardWidth(); col++) {
+                state.getGrid()[row][col] = Cell.empty();
             }
         }
 
