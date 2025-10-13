@@ -173,10 +173,22 @@ public class GameEngine {
             TetrominoType nextType = newState.getNextQueue()[0];
             Tetromino newTetromino = new Tetromino(nextType);
             
-            // 새 블록 스폰
+            // 새 블록 스폰 위치 설정
+            int spawnX = newState.getBoardWidth() / 2 - 1;
+            int spawnY = 0;
+            
+            // 스폰 위치 충돌 검사
+            if (!isValidPosition(newState, newTetromino, spawnX, spawnY)) {
+                // 스폰 위치에 블록이 있으면 게임 오버
+                newState.setGameOver(true);
+                newState.setGameOverReason("Cannot spawn new tetromino after hold: spawn position blocked");
+                return seoultech.se.core.result.HoldResult.failure("Game Over: Cannot spawn new tetromino");
+            }
+            
+            // 스폰 성공
             newState.setCurrentTetromino(newTetromino);
-            newState.setCurrentX(newState.getBoardWidth() / 2 - 1);
-            newState.setCurrentY(0);
+            newState.setCurrentX(spawnX);
+            newState.setCurrentY(spawnY);
             
             // Next Queue 업데이트는 BoardController에서 처리하도록 함
             // (7-bag 시스템과 동기화하기 위해)
@@ -187,9 +199,23 @@ public class GameEngine {
             
             // Hold된 블록을 꺼내서 현재 블록으로 설정
             Tetromino heldTetromino = new Tetromino(previousHeld);
+            
+            // 스폰 위치 설정
+            int spawnX = newState.getBoardWidth() / 2 - 1;
+            int spawnY = 0;
+            
+            // 스폰 위치 충돌 검사
+            if (!isValidPosition(newState, heldTetromino, spawnX, spawnY)) {
+                // 스폰 위치에 블록이 있으면 게임 오버
+                newState.setGameOver(true);
+                newState.setGameOverReason("Cannot swap held tetromino: spawn position blocked");
+                return seoultech.se.core.result.HoldResult.failure("Game Over: Cannot swap held tetromino");
+            }
+            
+            // 스폰 성공
             newState.setCurrentTetromino(heldTetromino);
-            newState.setCurrentX(newState.getBoardWidth() / 2 - 1);
-            newState.setCurrentY(0);
+            newState.setCurrentX(spawnX);
+            newState.setCurrentY(spawnY);
         }
         
         // Hold 사용 플래그 설정

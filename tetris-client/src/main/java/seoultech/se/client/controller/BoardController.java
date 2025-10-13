@@ -337,10 +337,17 @@ public class BoardController {
             events.add(new GameStateChangedEvent(gameState));
             
         } else {
-            // Hold 실패 Event
-            events.add(new seoultech.se.core.event.HoldFailedEvent(
-                result.getFailureReason()
-            ));
+            // Hold 실패 처리
+            // 게임 오버 상태인지 확인
+            if (gameState.isGameOver()) {
+                // 게임 오버 Event 발생
+                events.add(new GameOverEvent(result.getFailureReason()));
+            } else {
+                // 일반 Hold 실패 (이미 사용함 등)
+                events.add(new seoultech.se.core.event.HoldFailedEvent(
+                    result.getFailureReason()
+                ));
+            }
         }
         
         return events;
