@@ -238,6 +238,11 @@ public class GameEngine {
      */
     public static LockResult lockTetromino(GameState state) {
         GameState newState = state.deepCopy();
+        
+        // 고정하기 전에 블록 정보 저장! (EventMapper에서 사용)
+        Tetromino lockedTetromino = state.getCurrentTetromino();
+        int lockedX = state.getCurrentX();
+        int lockedY = state.getCurrentY();
 
         // 1. Grid에 테트로미노 고정
         int[][] shape = state.getCurrentTetromino().getCurrentShape();
@@ -252,7 +257,13 @@ public class GameEngine {
                     if( absY < 0 ) {
                         // 게임 오버 처리
                         newState.setGameOver(true);
-                        return LockResult.gameOver(newState, "[GameEngine] (Method: lockTetromino) Game Over: Block locked above the board.");
+                        return LockResult.gameOver(
+                            newState, 
+                            "[GameEngine] (Method: lockTetromino) Game Over: Block locked above the board.",
+                            lockedTetromino,
+                            lockedX,
+                            lockedY
+                        );
                     }
                     // 셀에 색상 채우기
                     if(absY >= 0 && absY < state.getBoardHeight() &&
@@ -296,7 +307,14 @@ public class GameEngine {
 
         // 4. Hold 재사용 가능하게 설정.
         newState.setHoldUsedThisTurn(false);
-        return LockResult.success(newState, clearResult);
+        
+        return LockResult.success(
+            newState, 
+            clearResult,
+            lockedTetromino,  // 고정된 블록 정보 전달!
+            lockedX,
+            lockedY
+        );
     }
 
     // ========== 라인 클리어 ===================

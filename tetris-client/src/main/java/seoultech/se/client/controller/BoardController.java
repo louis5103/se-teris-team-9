@@ -7,6 +7,7 @@ import java.util.Random;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import seoultech.se.client.mapper.EventMapper;
 import seoultech.se.core.BoardObserver;
 import seoultech.se.core.GameEngine;
 import seoultech.se.core.GameState;
@@ -402,100 +403,25 @@ public class BoardController {
     /**
      * LockResult를 처리하고 적절한 Event들을 생성합니다
      * 
-     * 이 메서드가 Result → Event 변환의 핵심입니다.
-     * LockResult는 GameEngine의 언어이고, Event는 도메인의 언어입니다.
+     * 이제 EventMapper를 사용하여 Result → Event 변환을 수행합니다.
+     * 이를 통해 BoardController의 복잡도가 크게 감소했습니다.
      * 
-     * LockResult에는 다음 정보가 포함되어 있습니다:
-     * - 게임 오버 여부
-     * - LineClearResult (지워진 라인 정보)
-     * - 새로운 GameState
-     * 
-     * 우리는 이것을 여러 Event로 분해합니다:
-     * - TetrominoLockedEvent: 블록이 고정되었다
-     * - LineClearedEvent: 라인이 지워졌다 (있다면)
-     * - ScoreAddedEvent: 점수를 얻었다 (있다면)
-     * - GameOverEvent: 게임이 끝났다 (게임 오버라면)
-     * - TetrominoSpawnedEvent: 새 블록이 생성되었다 (게임 오버가 아니라면)
-     * - GameStateChangedEvent: 게임 상태가 변경되었다
+     * @param result 고정 결과
+     * @return 발생한 이벤트들의 리스트
      */
     private List<GameEvent> processLockResult(LockResult result) {
-        List<GameEvent> events = new ArrayList<>();
+        // EventMapper를 사용하여 LockResult를 Event 리스트로 변환
+        List<GameEvent> events = EventMapper.fromLockResult(
+            result,
+            gameState,
+            gameStartTime
+        );
 
-        // 1. 블록 고정 Event
-        events.add(new TetrominoLockedEvent(
-            gameState.getCurrentTetromino(),
-            gameState.getCurrentX(),
-            gameState.getCurrentY()
-        ));
-
-        // 2. 게임 오버 체크
-        if (result.isGameOver()) {
-            long playTimeMillis = System.currentTimeMillis() - gameStartTime;
-            events.add(new GameOverEvent(
-                result.getGameOverReason(),
-                gameState.getScore(),
-                gameState.getLevel(),
-                gameState.getLinesCleared(),
-                playTimeMillis
-            ));
-            
-            // GameState 업데이트 Event
-            events.add(new GameStateChangedEvent(gameState));
-            
-            return events; // 게임 오버면 여기서 종료
+        // 게임 오버가 아니면 새 블록 생성
+        if (!result.isGameOver()) {
+            spawnNewTetromino();
+            events.addAll(EventMapper.createTetrominoSpawnEvents(gameState));
         }
-
-        // 3. 라인 클리어 처리
-        LineClearResult clearResult = result.getLineClearResult();
-        if (clearResult.getLinesCleared() > 0) {
-            // LineClearedEvent
-            events.add(new LineClearedEvent(
-                clearResult.getLinesCleared(),
-                clearResult.getClearedRows(),
-                clearResult.isTSpin(),
-                clearResult.isTSpinMini(),
-                clearResult.isPerfectClear()
-            ));
-
-            // ScoreAddedEvent
-            events.add(new ScoreAddedEvent(
-                clearResult.getScoreEarned(),
-                getScoreReason(clearResult)
-            ));
-
-            // Combo Event
-            if (gameState.getComboCount() > 0) {
-                events.add(new ComboEvent(gameState.getComboCount()));
-            }
-            
-            // Back-to-Back Event
-            if (gameState.getBackToBackCount() > 0) {
-                events.add(new BackToBackEvent(gameState.getBackToBackCount()));
-            }
-        } else {
-            // 라인을 지우지 못했으면 콤보 종료
-            if (gameState.getComboCount() > 0) {
-                events.add(new ComboBreakEvent(gameState.getComboCount()));
-            }
-        }
-
-        // 4. GameState 변경 Event
-        events.add(new GameStateChangedEvent(gameState));
-
-        // 5. 새 블록 생성
-        spawnNewTetromino();
-        events.add(new TetrominoSpawnedEvent(
-            gameState.getCurrentTetromino(),
-            gameState.getCurrentX(),
-            gameState.getCurrentY()
-        ));
-        
-        // 새 블록의 위치 Event
-        events.add(new TetrominoMovedEvent(
-            gameState.getCurrentX(),
-            gameState.getCurrentY(),
-            gameState.getCurrentTetromino()
-        ));
 
         return events;
     }
@@ -571,32 +497,6 @@ public class BoardController {
         }
         
         gameState.setNextQueue(queue);
-    }
-
-    // ========== 헬퍼 메서드들 ==========
-    
-    private String getScoreReason(LineClearResult result) {
-        if (result.isPerfectClear()) {
-            return "PERFECT_CLEAR";
-        }
-        if (result.isTSpin()) {
-            if (result.isTSpinMini()) {
-                return "T-SPIN_MINI_" + lineCountToName(result.getLinesCleared());
-            } else {
-                return "T-SPIN_" + lineCountToName(result.getLinesCleared());
-            }
-        }
-        return lineCountToName(result.getLinesCleared());
-    }
-
-    private String lineCountToName(int lines) {
-        switch (lines) {
-            case 1: return "SINGLE";
-            case 2: return "DOUBLE";
-            case 3: return "TRIPLE";
-            case 4: return "TETRIS";
-            default: return "UNKNOWN";
-        }
     }
 
     // ========== Observer 알림 ==========
