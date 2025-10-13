@@ -35,15 +35,15 @@
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
 # since they will be recreated, and may cause churn.  Uncomment if using
-# auto-import.
-# .idea/artifacts
-# .idea/compiler.xml
-# .idea/jarRepositories.xml
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
-# *.iml
-# *.ipr
+auto-import.
+.idea/artifacts
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/modules.xml
+.idea/*.iml
+.idea/modules
+*.iml
+*.ipr
 
 # CMake
 cmake-build-*/
@@ -267,10 +267,14 @@ gradle-app.setting
 # 개인 환경 설정 파일 (팀원별로 다름)
 gradle.properties.local
 local.properties
+
+# 환경변수 파일들 (실제 값이 들어있는 파일들)
 .env
 .env.local
 .env.development
 .env.production
+# 예외: 예시 파일은 Git에 포함
+!.env.example
 
 # Gradle 개인 설정 및 캐시
 .gradle/
@@ -360,8 +364,20 @@ Desktop.ini
 *.log
 logs/
 
-
+# 기타 설정 파일들
 tetris_settings
-docker-compose.yml
-*.properties
 
+# Docker Compose 파일 (실제 설정 포함)
+docker-compose.yml
+docker-compose.override.yml
+# 예외: 예시 파일은 Git에 포함
+!docker-compose.yml.example
+
+# Spring Boot Properties 파일
+# application.properties는 Git에 포함 (환경변수로 값 참조)
+# 민감한 정보가 직접 들어가는 별도 properties만 제외
+*-local.properties
+*-secret.properties
+
+# Obsidian 메모
+.obsidian
