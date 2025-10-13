@@ -287,21 +287,27 @@ public class GameEngine {
             newState.addScore(clearResult.getScoreEarned());
             newState.addLinesCleared(clearResult.getLinesCleared());
 
-            // 콤보 업데이트
+            // 콤보 업데이트 (연속 라인 클리어 횟수)
+            // 0 → 1 (첫 콤보), 1 → 2 (콤보 계속), 2 → 3, ...
             newState.setComboCount(newState.getComboCount() + 1);
             newState.setLastActionClearedLines(true);
 
-            // B2B 업데이트 
+            // B2B (Back-to-Back) 업데이트
+            // Tetris(4줄) 또는 T-Spin을 연속으로 성공하면 B2B 카운트 증가
             boolean isDifficult = clearResult.getLinesCleared() == 4 || clearResult.isTSpin();
             if(isDifficult && newState.isLastClearWasDifficult()) {
+                // 이전에도 difficult였고 지금도 difficult → B2B 계속
                 newState.setBackToBackCount(newState.getBackToBackCount() + 1);
             } else if (isDifficult) {
+                // 처음으로 difficult 클리어 → B2B 시작
                 newState.setBackToBackCount(1);
             } else {
+                // 일반 클리어 (1~3줄) → B2B 종료
                 newState.setBackToBackCount(0);
             }
-            newState.setLastClearWasDifficult(isDifficult);;
-        } else { // 라인 클리어 못했으면 콤보 초기화
+            newState.setLastClearWasDifficult(isDifficult);
+        } else { 
+            // 라인 클리어 실패 → 모든 연속 보너스 초기화
             newState.setComboCount(0);
             newState.setLastActionClearedLines(false);
             newState.setBackToBackCount(0);
