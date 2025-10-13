@@ -235,8 +235,8 @@ public class GameEngine {
      * 테트로미노를 보드에 고정하고 라인 클리어를 처리합니다
      * 
      * 이 메서드는 여러 단계를 거칩니다:
-     * 1. 테트로미노의 각 블록을 grid에 추가
-     * 2. 게임 오버 체크 (spawn 위치를 벗어나면 게임 오버)
+     * 1. 게임 오버 체크 (블록이 보드 위쪽에 고정되는지 먼저 확인)
+     * 2. 테트로미노의 각 블록을 grid에 추가
      * 3. 라인 클리어 체크 및 실행
      * 4. 점수 계산
      * 5. Hold 재사용 가능하게 설정
@@ -251,6 +251,12 @@ public class GameEngine {
     /**
      * 테트로미노를 보드에 고정하는 내부 메서드
      * 
+     * 실행 순서:
+     * 1. 게임 오버 체크 (먼저!)
+     * 2. 블록 고정
+     * 3. 라인 클리어
+     * 4. 점수 계산
+     * 
      * @param state 현재 게임 상태
      * @param needsCopy deepCopy가 필요한지 여부 (false면 이미 복사된 상태로 간주)
      * @return 고정 결과
@@ -263,18 +269,17 @@ public class GameEngine {
         int lockedX = state.getCurrentX();
         int lockedY = state.getCurrentY();
 
-        // 1. Grid에 테트로미노 고정
         int[][] shape = state.getCurrentTetromino().getCurrentShape();
 
+        // 1. 게임 오버 체크 (블록을 고정하기 전에 먼저 확인)
+        // 블록의 어느 부분이라도 보드 위쪽(y < 0)에 있으면 게임 오버
         for(int row = 0; row < shape.length; row++) {
             for(int col = 0; col < shape[row].length; col++) {
                 if (shape[row][col] == 1) {
-                    int absX = state.getCurrentX() + (col - state.getCurrentTetromino().getPivotX());
                     int absY = state.getCurrentY() + (row - state.getCurrentTetromino().getPivotY());
-
-                    // 게임 오버 체크. 
-                    if( absY < 0 ) {
-                        // 게임 오버 처리
+                    
+                    if(absY < 0) {
+                        // 게임 오버 - 블록이 보드 위쪽에 고정됨
                         newState.setGameOver(true);
                         return LockResult.gameOver(
                             newState, 
@@ -284,7 +289,19 @@ public class GameEngine {
                             lockedY
                         );
                     }
+                }
+            }
+        }
+
+        // 2. Grid에 테트로미노 고정 (게임 오버가 아닌 경우에만 실행됨)
+        for(int row = 0; row < shape.length; row++) {
+            for(int col = 0; col < shape[row].length; col++) {
+                if (shape[row][col] == 1) {
+                    int absX = state.getCurrentX() + (col - state.getCurrentTetromino().getPivotX());
+                    int absY = state.getCurrentY() + (row - state.getCurrentTetromino().getPivotY());
+
                     // 셀에 색상 채우기
+                    // (이미 게임 오버 체크를 통과했으므로 absY >= 0 보장됨)
                     if(absY >= 0 && absY < state.getBoardHeight() &&
                        absX >= 0 && absX < state.getBoardWidth()
                     ) {
@@ -295,10 +312,10 @@ public class GameEngine {
             }
         }
 
-        // 2. 라인 클리어 체크 및 실행
+        // 3. 라인 클리어 체크 및 실행
         LineClearResult clearResult = checkAndClearLines(newState);
 
-        // 3. 점수 및 통계 업데이트
+        // 4. 점수 및 통계 업데이트
         if(clearResult.getLinesCleared() > 0) {
             newState.addScore(clearResult.getScoreEarned());
             newState.addLinesCleared(clearResult.getLinesCleared());
@@ -330,7 +347,7 @@ public class GameEngine {
             newState.setLastClearWasDifficult(false);
         }
 
-        // 4. Hold 재사용 가능하게 설정.
+        // 5. Hold 재사용 가능하게 설정.
         newState.setHoldUsedThisTurn(false);
         
         return LockResult.success(
