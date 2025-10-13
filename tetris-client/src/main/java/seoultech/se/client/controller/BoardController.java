@@ -301,6 +301,11 @@ public class BoardController {
         if (result.isSuccess()) {
             gameState = result.getNewState();
             
+            // Hold가 비어있었던 경우, Next Queue를 7-bag 시스템으로 업데이트
+            if (result.getPreviousHeldPiece() == null) {
+                updateNextQueue();
+            }
+            
             // Hold 변경 Event
             events.add(new seoultech.se.core.event.HoldChangedEvent(
                 result.getNewHeldPiece(),

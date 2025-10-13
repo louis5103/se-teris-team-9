@@ -178,8 +178,8 @@ public class GameEngine {
             newState.setCurrentX(newState.getBoardWidth() / 2 - 1);
             newState.setCurrentY(0);
             
-            // Next Queue 업데이트 (첫 번째 제거하고 새로운 블록 추가)
-            updateNextQueue(newState);
+            // Next Queue 업데이트는 BoardController에서 처리하도록 함
+            // (7-bag 시스템과 동기화하기 위해)
             
         } else {
             // Hold에 블록이 있음: 현재 블록과 교체
@@ -198,29 +198,6 @@ public class GameEngine {
         return seoultech.se.core.result.HoldResult.success(newState, previousHeld, currentType);
     }
     
-    /**
-     * Next Queue를 업데이트합니다
-     * 첫 번째 블록을 제거하고 새로운 블록을 추가합니다
-     * 
-     * 주의: 이 메서드는 임시 구현입니다. 
-     * 실제 7-bag 시스템은 BoardController에서 관리되므로,
-     * Hold 기능에서만 제한적으로 사용됩니다.
-     * 향후 리팩토링 시 제거될 수 있습니다.
-     */
-    private static void updateNextQueue(GameState state) {
-        TetrominoType[] queue = state.getNextQueue();
-        TetrominoType[] newQueue = new TetrominoType[queue.length];
-        
-        // 한 칸씩 앞으로 당기기
-        System.arraycopy(queue, 1, newQueue, 0, queue.length - 1);
-        
-        // 마지막에 새로운 블록 추가 (단순 랜덤 - 7-bag은 BoardController에서 처리)
-        TetrominoType[] allTypes = TetrominoType.values();
-        newQueue[queue.length - 1] = allTypes[(int)(Math.random() * allTypes.length)];
-        
-        state.setNextQueue(newQueue);
-    }
-
     // ========== 테트로미노 고정 ==========
     
     /**
