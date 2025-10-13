@@ -78,11 +78,11 @@ public class EventMapper {
     ) {
         List<GameEvent> events = new ArrayList<>();
 
-        // 1. 블록 고정 Event
+        // 1. 블록 고정 Event - LockResult에서 고정된 블록 정보 사용
         events.add(new TetrominoLockedEvent(
-            gameState.getCurrentTetromino(),
-            gameState.getCurrentX(),
-            gameState.getCurrentY()
+            result.getLockedTetromino(),  // ✅ 수정됨: 실제 고정된 블록
+            result.getLockedX(),           // ✅ 수정됨: 고정된 X 위치
+            result.getLockedY()            // ✅ 수정됨: 고정된 Y 위치
         ));
 
         // 2. 게임 오버 체크
@@ -102,8 +102,8 @@ public class EventMapper {
         // 4. GameState 변경 Event
         events.add(new GameStateChangedEvent(gameState));
 
-        // 5. 새 블록 관련 이벤트는 BoardController에서 추가
-        // (spawnNewTetromino() 호출 후 이벤트 생성)
+        // 5. 새 블록 관련 이벤트는 BoardController에서 별도 생성
+        // createTetrominoSpawnEvents() 메서드 사용
 
         return events;
     }
