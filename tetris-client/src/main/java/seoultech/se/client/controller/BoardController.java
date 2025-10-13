@@ -123,6 +123,13 @@ public class BoardController {
             return List.of(); // 게임 오버 상태에서는 Command 무시
         }
 
+        // 일시정지 상태에서는 PAUSE/RESUME 명령만 허용
+        if (gameState.isPaused() && 
+            command.getType() != seoultech.se.core.command.CommandType.RESUME &&
+            command.getType() != seoultech.se.core.command.CommandType.PAUSE) {
+            return List.of(); // 일시정지 중이면 다른 명령 무시
+        }
+
         List<GameEvent> events = new ArrayList<>();
 
         // Command 타입에 따라 분기
@@ -630,6 +637,18 @@ public class BoardController {
                 seoultech.se.core.event.LevelUpEvent levelUpEvent = (seoultech.se.core.event.LevelUpEvent) event;
                 for (BoardObserver observer : observers) {
                     observer.onLevelUp(levelUpEvent.getNewLevel());
+                }
+                break;
+
+            case GAME_PAUSED:
+                for (BoardObserver observer : observers) {
+                    observer.onGamePaused();
+                }
+                break;
+
+            case GAME_RESUMED:
+                for (BoardObserver observer : observers) {
+                    observer.onGameResumed();
                 }
                 break;
 

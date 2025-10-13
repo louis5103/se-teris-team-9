@@ -16,6 +16,7 @@ import javafx.scene.shape.Rectangle;
 import seoultech.se.client.constants.UIConstants;
 import seoultech.se.client.model.GameAction;
 import seoultech.se.client.service.KeyMappingService;
+import seoultech.se.client.service.NavigationService;
 import seoultech.se.client.ui.BoardRenderer;
 import seoultech.se.client.ui.GameLoopManager;
 import seoultech.se.client.ui.NotificationManager;
@@ -66,6 +67,9 @@ public class GameController implements BoardObserver {
 
     @Autowired
     private KeyMappingService keyMappingService;
+
+    @Autowired
+    private NavigationService navigationService;
 
     // 게임 로직 컨트롤러
     private BoardController boardController;
@@ -143,6 +147,10 @@ public class GameController implements BoardObserver {
             
             if (gameState.isGameOver()) {
                 return false; // 게임 루프 중지
+            }
+            
+            if (gameState.isPaused()) {
+                return true; // 일시정지 중이면 블록 낙하 안 함, 루프는 계속
             }
             
             // 블록 자동 낙하
@@ -475,12 +483,13 @@ public class GameController implements BoardObserver {
 
     @Override
     public void onGamePaused() {
-        gameLoopManager.pause();
-        notificationManager.showLineClearType("⏸️ PAUSED - Press P to resume");
+        pauseGame();
+        showPausePopup();
     }
 
     @Override
     public void onGameResumed() {
+        // UI만 업데이트 (Command는 이미 실행된 상태)
         gameLoopManager.resume();
         notificationManager.hideAllNotifications();
     }
@@ -493,6 +502,7 @@ public class GameController implements BoardObserver {
             System.out.println("💀 GAME OVER (" + reason + ")");
             System.out.println("   Final Score: " + gameState.getScore());
             System.out.println("   Lines Cleared: " + gameState.getLinesCleared());
+            showGameOverPopup();
         });
     }
 
@@ -537,9 +547,39 @@ public class GameController implements BoardObserver {
 
     public void pauseGame() {
         gameLoopManager.pause();
+        notificationManager.showLineClearType("⏸️ PAUSED - Press P to resume");
     }
 
     public void resumeGame() {
         gameLoopManager.resume();
+        notificationManager.hideAllNotifications();
+        // Resume Command 실행하여 게임 상태도 업데이트
+        boardController.executeCommand(new seoultech.se.core.command.ResumeCommand());
+    }
+
+    /**
+     * 일시정지 팝업을 표시합니다
+     */
+    private void showPausePopup() {
+        try {
+            PausePopController controller = navigationService.showPopup("/view/pause-pop.fxml");
+            controller.setGameController(this);
+        } catch (Exception e) {
+            System.err.println("❌ Failed to load pause-pop.fxml: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 게임 오버 팝업을 표시합니다
+     */
+    private void showGameOverPopup() {
+        try {
+            OverPopController controller = navigationService.showPopup("/view/over-pop.fxml");
+            controller.setScore(boardController.getGameState().getScore());
+        } catch (Exception e) {
+            System.err.println("❌ Failed to load over-pop.fxml: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

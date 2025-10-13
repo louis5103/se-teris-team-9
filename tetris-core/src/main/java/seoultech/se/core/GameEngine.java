@@ -495,7 +495,7 @@ public class GameEngine {
     private static LineClearResult checkAndClearLines(GameState state) {
         List<Integer> clearedRowsList = new ArrayList<>();
 
-        // 라인 체크
+        // 라인 체크 (아래에서 위로)
         for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
             boolean isFullLine = true;
 

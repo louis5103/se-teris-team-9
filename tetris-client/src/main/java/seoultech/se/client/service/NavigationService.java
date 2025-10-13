@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import seoultech.se.client.TetrisApplication;
 
@@ -49,5 +50,29 @@ public class NavigationService {
         stage.setY(currentY - deltaY);
         
         stage.show();
+    }
+
+    /**
+     * 모달 팝업 창을 표시합니다
+     * @param fxmlPath FXML 파일 경로
+     * @return 로드된 컨트롤러 인스턴스
+     */
+    public <T> T showPopup(String fxmlPath) throws IOException {
+        FXMLLoader loader = new FXMLLoader(TetrisApplication.class.getResource(fxmlPath));
+        loader.setControllerFactory(springContext::getBean);
+        Parent root = loader.load();
+        
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.initOwner(settingsService.getPrimaryStage());
+        popupStage.setScene(new Scene(root));
+        popupStage.setResizable(false);
+        
+        // 컨트롤러에 Stage 참조 전달 (만약 필요하다면)
+        T controller = loader.getController();
+        
+        popupStage.showAndWait();
+        
+        return controller;
     }
 }
