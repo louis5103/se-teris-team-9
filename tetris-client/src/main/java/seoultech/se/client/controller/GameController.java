@@ -1,34 +1,28 @@
 package seoultech.se.client.controller;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Rectangle;
 import seoultech.se.client.constants.UIConstants;
-import seoultech.se.client.model.GameAction;
 import seoultech.se.client.service.KeyMappingService;
 import seoultech.se.client.service.NavigationService;
 import seoultech.se.client.ui.BoardRenderer;
+import seoultech.se.client.ui.GameInfoManager;
 import seoultech.se.client.ui.GameLoopManager;
+import seoultech.se.client.ui.InputHandler;
 import seoultech.se.client.ui.NotificationManager;
+import seoultech.se.client.ui.PopupManager;
 import seoultech.se.client.util.ColorMapper;
 import seoultech.se.core.BoardObserver;
 import seoultech.se.core.GameState;
 import seoultech.se.core.command.Direction;
-import seoultech.se.core.command.GameCommand;
-import seoultech.se.core.command.HardDropCommand;
-import seoultech.se.core.command.HoldCommand;
 import seoultech.se.core.command.MoveCommand;
-import seoultech.se.core.command.RotateCommand;
 import seoultech.se.core.model.Cell;
 import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.RotationDirection;
@@ -47,6 +41,9 @@ import seoultech.se.core.model.enumType.TetrominoType;
  * - NotificationManager: 알림 메시지 관리
  * - BoardRenderer: 보드 렌더링
  * - GameLoopManager: 게임 루프 관리
+ * - PopupManager: 팝업 오버레이 관리
+ * - InputHandler: 키보드 입력 처리 및 Command 변환
+ * - GameInfoManager: 게임 정보 레이블 업데이트
  */
 @Component
 public class GameController implements BoardObserver {
@@ -83,6 +80,9 @@ public class GameController implements BoardObserver {
     private BoardRenderer boardRenderer;
     private NotificationManager notificationManager;
     private GameLoopManager gameLoopManager;
+    private PopupManager popupManager;
+    private InputHandler inputHandler;
+    private GameInfoManager gameInfoManager;
     
     // Rectangle 배열들
     private Rectangle[][] cellRectangles;
@@ -118,7 +118,7 @@ public class GameController implements BoardObserver {
         // UI 관리 클래스들 초기화
         initializeManagers();
         
-        updateGameInfoLabels();
+        gameInfoManager.updateAll(gameState);
         setupKeyboardControls();
         startGame();
 
@@ -162,6 +162,75 @@ public class GameController implements BoardObserver {
             boardController.executeCommand(new MoveCommand(Direction.DOWN));
             return true; // 게임 루프 계속
         });
+        
+        // PopupManager 초기화
+        popupManager = new PopupManager(
+            pauseOverlay,
+            gameOverOverlay,
+            finalScoreLabel
+        );
+        
+        // PopupManager 콜백 설정
+        popupManager.setCallback(new PopupManager.PopupActionCallback() {
+            @Override
+            public void onResumeRequested() {
+                resumeGame();
+            }
+            
+            @Override
+            public void onQuitRequested() {
+                try {
+                    navigationService.navigateTo("/view/main-view.fxml");
+                } catch (Exception e) {
+                    System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            
+            @Override
+            public void onMainMenuRequested() {
+                try {
+                    navigationService.navigateTo("/view/main-view.fxml");
+                } catch (Exception e) {
+                    System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            
+            @Override
+            public void onRestartRequested() {
+                try {
+                    navigationService.navigateTo("/view/game-view.fxml");
+                } catch (Exception e) {
+                    System.err.println("❌ Failed to restart game: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
+        
+        // InputHandler 초기화
+        inputHandler = new InputHandler(keyMappingService);
+        inputHandler.setCallback(command -> {
+            boardController.executeCommand(command);
+        });
+        inputHandler.setGameStateProvider(new InputHandler.GameStateProvider() {
+            @Override
+            public boolean isGameOver() {
+                return boardController.getGameState().isGameOver();
+            }
+            
+            @Override
+            public boolean isPaused() {
+                return boardController.getGameState().isPaused();
+            }
+        });
+        
+        // GameInfoManager 초기화
+        gameInfoManager = new GameInfoManager(
+            scoreLabel,
+            levelLabel,
+            linesLabel
+        );
     }
 
     /**
@@ -266,81 +335,7 @@ public class GameController implements BoardObserver {
      * 키보드 입력을 처리합니다
      */
     private void setupKeyboardControls() {
-        boardGridPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                newScene.setOnKeyPressed(this::handleKeyPress);
-                System.out.println("⌨️  Keyboard controls enabled");
-            }
-        });
-    }
-
-    /**
-     * 키 입력을 Command로 변환하고 실행합니다
-     */
-    private void handleKeyPress(KeyEvent event) {
-        if (boardController.getGameState().isGameOver()) {
-            return;
-        }
-
-        // KeyMappingService로 키를 GameAction으로 변환
-        Optional<GameAction> actionOpt = keyMappingService.getAction(event.getCode());
-        
-        if (actionOpt.isEmpty()) {
-            return; // 매핑되지 않은 키는 무시
-        }
-        
-        GameAction action = actionOpt.get();
-        GameCommand command = null;
-
-        // GameAction에 따라 Command 생성
-        switch (action) {
-            case MOVE_LEFT:
-                command = new MoveCommand(Direction.LEFT);
-                break;
-                
-            case MOVE_RIGHT:
-                command = new MoveCommand(Direction.RIGHT);
-                break;
-                
-            case MOVE_DOWN:
-                command = new MoveCommand(Direction.DOWN, true);  // 수동 DOWN = Soft Drop
-                break;
-                
-            case ROTATE_CLOCKWISE:
-                command = new RotateCommand(RotationDirection.CLOCKWISE);
-                break;
-                
-            case ROTATE_COUNTER_CLOCKWISE:
-                command = new RotateCommand(RotationDirection.COUNTER_CLOCKWISE);
-                break;
-                
-            case HARD_DROP:
-                command = new HardDropCommand();
-                break;
-                
-            case HOLD:
-                command = new HoldCommand();
-                break;
-                
-            case PAUSE_RESUME:
-                // Pause/Resume 토글
-                if (boardController.getGameState().isPaused()) {
-                    command = new seoultech.se.core.command.ResumeCommand();
-                } else {
-                    command = new seoultech.se.core.command.PauseCommand();
-                }
-                break;
-                
-            default:
-                break;
-        }
-
-        // Command가 생성되었으면 실행
-        if (command != null) {
-            boardController.executeCommand(command);
-        }
-
-        event.consume();
+        inputHandler.setupKeyboardControls(boardGridPane);
     }
 
     // ========== BoardObserver 구현 ==========
@@ -476,7 +471,7 @@ public class GameController implements BoardObserver {
     @Override
     public void onGameStateChanged(GameState gameState) {
         Platform.runLater(() -> {
-            updateGameInfoLabels();
+            gameInfoManager.updateAll(gameState);
             gameLoopManager.updateDropSpeed(gameState);
         });
     }
@@ -489,7 +484,7 @@ public class GameController implements BoardObserver {
     @Override
     public void onGamePaused() {
         pauseGame();
-        showPausePopup();
+        popupManager.showPausePopup();
     }
 
     @Override
@@ -507,7 +502,7 @@ public class GameController implements BoardObserver {
             System.out.println("💀 GAME OVER (" + reason + ")");
             System.out.println("   Final Score: " + gameState.getScore());
             System.out.println("   Lines Cleared: " + gameState.getLinesCleared());
-            showGameOverPopup();
+            popupManager.showGameOverPopup(gameState.getScore());
         });
     }
 
@@ -534,13 +529,7 @@ public class GameController implements BoardObserver {
     }
 
     // ========== UI 업데이트 헬퍼 메서드들 ==========
-
-    private void updateGameInfoLabels() {
-        GameState state = boardController.getGameState();
-        scoreLabel.setText(String.valueOf(state.getScore()));
-        levelLabel.setText(String.valueOf(state.getLevel()));
-        linesLabel.setText(String.valueOf(state.getLinesCleared()));
-    }
+    // GameInfoManager로 이동됨
 
     // ========== 게임 제어 ==========
     public void startGame() {
@@ -562,77 +551,26 @@ public class GameController implements BoardObserver {
         boardController.executeCommand(new seoultech.se.core.command.ResumeCommand());
     }
 
-    /**
-     * 일시정지 팝업 오버레이를 표시합니다
-     */
-    private void showPausePopup() {
-        pauseOverlay.setVisible(true);
-        pauseOverlay.setManaged(true);
-    }
-
-    /**
-     * 일시정지 팝업 오버레이를 숨깁니다
-     */
-    private void hidePausePopup() {
-        pauseOverlay.setVisible(false);
-        pauseOverlay.setManaged(false);
-    }
-
-    /**
-     * 게임 오버 팝업 오버레이를 표시합니다
-     */
-    private void showGameOverPopup() {
-        finalScoreLabel.setText(String.valueOf(boardController.getGameState().getScore()));
-        gameOverOverlay.setVisible(true);
-        gameOverOverlay.setManaged(true);
-    }
-
-    /**
-     * 게임 오버 팝업 오버레이를 숨깁니다
-     */
-    private void hideGameOverPopup() {
-        gameOverOverlay.setVisible(false);
-        gameOverOverlay.setManaged(false);
-    }
-
     // ========== 오버레이 버튼 핸들러 ==========
+    // PopupManager로 위임
 
     @FXML
     private void handleResumeFromOverlay() {
-        hidePausePopup();
-        resumeGame();
+        popupManager.handleResumeAction();
     }
 
     @FXML
     private void handleQuitFromOverlay() {
-        try {
-            hidePausePopup();
-            navigationService.navigateTo("/view/main-view.fxml");
-        } catch (Exception e) {
-            System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
-            e.printStackTrace();
-        }
+        popupManager.handleQuitAction();
     }
 
     @FXML
     private void handleMainFromOverlay() {
-        try {
-            hideGameOverPopup();
-            navigationService.navigateTo("/view/main-view.fxml");
-        } catch (Exception e) {
-            System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
-            e.printStackTrace();
-        }
+        popupManager.handleMainMenuAction();
     }
 
     @FXML
     private void handleRestartFromOverlay() {
-        try {
-            hideGameOverPopup();
-            navigationService.navigateTo("/view/game-view.fxml");
-        } catch (Exception e) {
-            System.err.println("❌ Failed to restart game: " + e.getMessage());
-            e.printStackTrace();
-        }
+        popupManager.handleRestartAction();
     }
 }
