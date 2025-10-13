@@ -64,6 +64,11 @@ public class GameController implements BoardObserver {
     @FXML private Label lineClearTypeLabel;
     @FXML private Label backToBackLabel;
     @FXML private Label lineClearNotificationLabel;
+    
+    // 팝업 오버레이 요소들
+    @FXML private javafx.scene.layout.VBox pauseOverlay;
+    @FXML private javafx.scene.layout.VBox gameOverOverlay;
+    @FXML private Label finalScoreLabel;
 
     @Autowired
     private KeyMappingService keyMappingService;
@@ -558,27 +563,75 @@ public class GameController implements BoardObserver {
     }
 
     /**
-     * 일시정지 팝업을 표시합니다
+     * 일시정지 팝업 오버레이를 표시합니다
      */
     private void showPausePopup() {
+        pauseOverlay.setVisible(true);
+        pauseOverlay.setManaged(true);
+    }
+
+    /**
+     * 일시정지 팝업 오버레이를 숨깁니다
+     */
+    private void hidePausePopup() {
+        pauseOverlay.setVisible(false);
+        pauseOverlay.setManaged(false);
+    }
+
+    /**
+     * 게임 오버 팝업 오버레이를 표시합니다
+     */
+    private void showGameOverPopup() {
+        finalScoreLabel.setText(String.valueOf(boardController.getGameState().getScore()));
+        gameOverOverlay.setVisible(true);
+        gameOverOverlay.setManaged(true);
+    }
+
+    /**
+     * 게임 오버 팝업 오버레이를 숨깁니다
+     */
+    private void hideGameOverPopup() {
+        gameOverOverlay.setVisible(false);
+        gameOverOverlay.setManaged(false);
+    }
+
+    // ========== 오버레이 버튼 핸들러 ==========
+
+    @FXML
+    private void handleResumeFromOverlay() {
+        hidePausePopup();
+        resumeGame();
+    }
+
+    @FXML
+    private void handleQuitFromOverlay() {
         try {
-            PausePopController controller = navigationService.showPopup("/view/pause-pop.fxml");
-            controller.setGameController(this);
+            hidePausePopup();
+            navigationService.navigateTo("/view/main-view.fxml");
         } catch (Exception e) {
-            System.err.println("❌ Failed to load pause-pop.fxml: " + e.getMessage());
+            System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * 게임 오버 팝업을 표시합니다
-     */
-    private void showGameOverPopup() {
+    @FXML
+    private void handleMainFromOverlay() {
         try {
-            OverPopController controller = navigationService.showPopup("/view/over-pop.fxml");
-            controller.setScore(boardController.getGameState().getScore());
+            hideGameOverPopup();
+            navigationService.navigateTo("/view/main-view.fxml");
         } catch (Exception e) {
-            System.err.println("❌ Failed to load over-pop.fxml: " + e.getMessage());
+            System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleRestartFromOverlay() {
+        try {
+            hideGameOverPopup();
+            navigationService.navigateTo("/view/game-view.fxml");
+        } catch (Exception e) {
+            System.err.println("❌ Failed to restart game: " + e.getMessage());
             e.printStackTrace();
         }
     }
