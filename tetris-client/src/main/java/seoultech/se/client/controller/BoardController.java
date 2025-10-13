@@ -15,9 +15,6 @@ import seoultech.se.core.command.Direction;
 import seoultech.se.core.command.GameCommand;
 import seoultech.se.core.command.MoveCommand;
 import seoultech.se.core.command.RotateCommand;
-import seoultech.se.core.event.BackToBackEvent;
-import seoultech.se.core.event.ComboBreakEvent;
-import seoultech.se.core.event.ComboEvent;
 import seoultech.se.core.event.GameEvent;
 import seoultech.se.core.event.GameOverEvent;
 import seoultech.se.core.event.GameStateChangedEvent;
@@ -29,7 +26,6 @@ import seoultech.se.core.event.TetrominoRotatedEvent;
 import seoultech.se.core.event.TetrominoSpawnedEvent;
 import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.TetrominoType;
-import seoultech.se.core.result.LineClearResult;
 import seoultech.se.core.result.LockResult;
 import seoultech.se.core.result.MoveResult;
 import seoultech.se.core.result.RotationResult;
@@ -341,7 +337,11 @@ public class BoardController {
             // 게임 오버 상태인지 확인
             if (gameState.isGameOver()) {
                 // 게임 오버 Event 발생
-                events.add(new GameOverEvent(result.getFailureReason()));
+                events.add(new GameOverEvent(result.getFailureReason(), 
+                    gameState.getScore(), 
+                    gameState.getLevel(), 
+                    gameState.getLinesCleared(), 
+                    (System.currentTimeMillis() - gameStartTime) / 1000));
             } else {
                 // 일반 Hold 실패 (이미 사용함 등)
                 events.add(new seoultech.se.core.event.HoldFailedEvent(
