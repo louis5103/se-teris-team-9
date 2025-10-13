@@ -5,6 +5,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <!--
@@ -46,23 +47,9 @@
                 </GridPane>
             </VBox>
             
-            <!-- 게임 보드 -->
-            <VBox alignment="CENTER" spacing="10.0">
-                <!-- 게임 오버 메시지 (평소에는 숨김) -->
-                <Label fx:id="gameOverLabel" 
-                       text="GAME OVER" 
-                       styleClass="game-over-label" 
-                       visible="false"
-                       managed="false"/>
-                
-                <!-- Combo/B2B 알림 (평소에는 숨김) -->
-                <Label fx:id="comboLabel" 
-                       text="" 
-                       styleClass="combo-label" 
-                       visible="false"
-                       managed="false"/>
-                
-                <!-- 실제 테트리스 보드 (10x20 그리드) -->
+            <!-- 게임 보드 (StackPane으로 오버레이 구현) -->
+            <StackPane>
+                <!-- 실제 테트리스 보드 (10x20 그리드) - 배경 -->
                 <GridPane fx:id="boardGridPane" 
                          styleClass="game-board"
                          focusTraversable="true">
@@ -71,7 +58,55 @@
                         Rectangle들로 채워집니다 (10열 x 20행)
                     -->
                 </GridPane>
-            </VBox>
+                
+                <!-- 게임 오버 메시지 (평소에는 숨김) - 중앙 배치 -->
+                <Label fx:id="gameOverLabel" 
+                       text="GAME OVER" 
+                       styleClass="game-over-label" 
+                       StackPane.alignment="CENTER"
+                       visible="false"
+                       managed="false"
+                       mouseTransparent="false"/>
+                
+                <!-- 상단 이벤트 알림 영역 -->
+                <VBox alignment="TOP_CENTER" spacing="8.0" 
+                      pickOnBounds="false"
+                      mouseTransparent="true"
+                      StackPane.alignment="TOP_CENTER">
+                    <StackPane.margin>
+                        <Insets top="30.0" />
+                    </StackPane.margin>
+                    
+                    <!-- 첫 번째 라인: Combo + Back-to-Back -->
+                    <HBox fx:id="topEventLine" alignment="CENTER" spacing="30.0" 
+                          visible="false" managed="false">
+                        <Label fx:id="comboLabel" 
+                               text="" 
+                               styleClass="combo-label" 
+                               visible="false"
+                               managed="false"/>
+                        <Label fx:id="backToBackLabel" 
+                               text="" 
+                               styleClass="back-to-back-label" 
+                               visible="false"
+                               managed="false"/>
+                    </HBox>
+                    
+                    <!-- 두 번째 라인: Line Clear Type (T-Spin, TETRIS 등) -->
+                    <Label fx:id="lineClearTypeLabel" 
+                           text="" 
+                           styleClass="line-clear-type-label" 
+                           visible="false"
+                           managed="false"/>
+                    
+                    <!-- 세 번째 라인: Line Clear Notification -->
+                    <Label fx:id="lineClearNotificationLabel" 
+                           text="" 
+                           styleClass="line-clear-notification-label" 
+                           visible="false"
+                           managed="false"/>
+                </VBox>
+            </StackPane>
             
             <!-- 오른쪽: 게임 정보 -->
             <VBox spacing="30.0" alignment="TOP_CENTER" minWidth="150.0">
@@ -98,9 +133,9 @@
                 </VBox>
                 
                 <!-- 지운 줄 수 -->
-                <VBox spacing="5.0" alignment="CENTER">
+                <VBox spacing="5.0" alignment="CENTER" minHeight="60.0" prefHeight="60.0">
                     <Label text="LINES" styleClass="info-label-title"/>
-                    <Label fx:id="linesLabel" text="0" styleClass="info-label-value"/>
+                    <Label fx:id="linesLabel" text="0" styleClass="info-label-value" minWidth="80.0" alignment="CENTER"/>
                 </VBox>
                 
                 <!-- 조작법 안내 -->

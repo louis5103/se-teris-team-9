@@ -53,9 +53,11 @@
     -fx-background-color: #0a0a0a;
     -fx-border-color: #444444;
     -fx-border-width: 0.25em;
-    -fx-padding: 0.167em;
-    -fx-hgap: 0.083em;
-    -fx-vgap: 0.083em;
+    -fx-padding: 0;
+    -fx-hgap: 0;
+    -fx-vgap: 0;
+    -fx-alignment: center;
+    -fx-grid-lines-visible: false;
 }
 
 /* 게임 보드의 각 셀 */
@@ -63,6 +65,7 @@
     -fx-fill: #1a1a1a;
     -fx-stroke: #333333;
     -fx-stroke-width: 0.5;
+    -fx-smooth: false;
 }
 
 /* ========== 테트로미노 색상 ========== */
@@ -71,50 +74,57 @@
 .tetromino-red {
     -fx-fill: linear-gradient(to bottom, #ff4444, #cc0000);
     -fx-stroke: #ff6666;
-    -fx-stroke-width: 0.083em;
+    -fx-stroke-width: 0.5;
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
 }
 
 .tetromino-green {
     -fx-fill: linear-gradient(to bottom, #44ff44, #00cc00);
     -fx-stroke: #66ff66;
-    -fx-stroke-width: 0.083em;
+    -fx-stroke-width: 0.5;
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
 }
 
 .tetromino-blue {
     -fx-fill: linear-gradient(to bottom, #4444ff, #0000cc);
     -fx-stroke: #6666ff;
-    -fx-stroke-width: 0.083em;
+    -fx-stroke-width: 0.5;
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
 }
 
 .tetromino-yellow {
     -fx-fill: linear-gradient(to bottom, #ffff44, #cccc00);
     -fx-stroke: #ffff66;
-    -fx-stroke-width: 0.083em;
+    -fx-stroke-width: 0.5;
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
 }
 
 .tetromino-cyan {
     -fx-fill: linear-gradient(to bottom, #44ffff, #00cccc);
     -fx-stroke: #66ffff;
-    -fx-stroke-width: 0.083em;
+    -fx-stroke-width: 0.5;
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
 }
 
 .tetromino-magenta {
     -fx-fill: linear-gradient(to bottom, #ff44ff, #cc00cc);
     -fx-stroke: #ff66ff;
-    -fx-stroke-width: 0.083em;
+    -fx-stroke-width: 0.5;
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
 }
 
 .tetromino-orange {
     -fx-fill: linear-gradient(to bottom, #ff8844, #cc4400);
     -fx-stroke: #ffaa66;
-    -fx-stroke-width: 0.083em;
+    -fx-stroke-width: 0.5;
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
 }
 
 /* ========== 게임 정보 라벨 ========== */
@@ -164,17 +174,57 @@
     -fx-border-color: #444444;
     -fx-border-width: 0.167em;
     -fx-padding: 0.417em;
+    -fx-hgap: 0;
+    -fx-vgap: 0;
+    -fx-alignment: center;
+    -fx-grid-lines-visible: false;
 }
 
-/* ========== 콤보 라벨 ========== */
+/* ========== 콤보 라벨 (좌측) ========== */
 .combo-label {
-    -fx-font-size: 2em;
+    -fx-font-size: 1.2em;
     -fx-font-family: "Impact";
     -fx-text-fill: #FFD700;
-    -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.8), 0.833em, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.6), 0.5em, 0, 0, 0);
     -fx-alignment: center;
-    -fx-background-color: rgba(0, 0, 0, 0.7);
-    -fx-padding: 0.833em 1.667em;
-    -fx-background-radius: 0.417em;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-padding: 0.3em 0.8em;
+    -fx-background-radius: 0.25em;
+}
+
+/* ========== 라인 클리어 타입 라벨 (중앙) ========== */
+.line-clear-type-label {
+    -fx-font-size: 1.6em;
+    -fx-font-family: "Impact";
+    -fx-text-fill: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.7), 0.6em, 0, 0, 0);
+    -fx-alignment: center;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-padding: 0.4em 1em;
+    -fx-background-radius: 0.25em;
+}
+
+/* ========== Back-to-Back 라벨 (우측) ========== */
+.back-to-back-label {
+    -fx-font-size: 1.2em;
+    -fx-font-family: "Arial Black";
+    -fx-text-fill: #FF6B6B;
+    -fx-effect: dropshadow(gaussian, rgba(255,107,107,0.6), 0.5em, 0, 0, 0);
+    -fx-alignment: center;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-padding: 0.3em 0.8em;
+    -fx-background-radius: 0.25em;
+}
+
+/* ========== 라인 클리어 수 알림 라벨 ========== */
+.line-clear-notification-label {
+    -fx-font-size: 1.1em;
+    -fx-font-family: "Arial Black";
+    -fx-text-fill: #4ECDC4;
+    -fx-effect: dropshadow(gaussian, rgba(78,205,196,0.6), 0.5em, 0, 0, 0);
+    -fx-alignment: center;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-padding: 0.3em 0.8em;
+    -fx-background-radius: 0.25em;
 }
 

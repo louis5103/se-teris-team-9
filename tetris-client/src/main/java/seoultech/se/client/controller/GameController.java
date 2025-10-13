@@ -8,9 +8,11 @@ import org.springframework.stereotype.Component;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import seoultech.se.client.model.GameAction;
@@ -62,7 +64,11 @@ public class GameController implements BoardObserver {
     @FXML private Label levelLabel;
     @FXML private Label linesLabel;
     @FXML private Label gameOverLabel;
+    @FXML private HBox topEventLine;
     @FXML private Label comboLabel;
+    @FXML private Label lineClearTypeLabel;
+    @FXML private Label backToBackLabel;
+    @FXML private Label lineClearNotificationLabel;
 
     @Autowired
     private KeyMappingService keyMappingService;
@@ -129,6 +135,17 @@ public class GameController implements BoardObserver {
 
         System.out.println("🎨 Initializing GridPane with " + width + "x" + height + " cells...");
 
+        // GridPane 기본 설정
+        boardGridPane.setHgap(0);
+        boardGridPane.setVgap(0);
+        
+        // GridPane 크기 고정
+        double boardWidth = width * CELL_SIZE;
+        double boardHeight = height * CELL_SIZE;
+        boardGridPane.setPrefSize(boardWidth, boardHeight);
+        boardGridPane.setMinSize(boardWidth, boardHeight);
+        boardGridPane.setMaxSize(boardWidth, boardHeight);
+        
         cellRectangles = new Rectangle[height][width];
 
         for (int row = 0; row < height; row++) {
@@ -139,6 +156,10 @@ public class GameController implements BoardObserver {
                 rect.setFill(Color.rgb(26, 26, 26));
                 rect.setStroke(Color.rgb(51, 51, 51));
                 rect.setStrokeWidth(0.5);
+                
+                // 픽셀 정렬로 떨림 방지
+                rect.setSmooth(false);
+                rect.setCache(true);
 
                 // CSS 클래스 추가
                 rect.getStyleClass().add("board-cell");
@@ -370,7 +391,7 @@ public class GameController implements BoardObserver {
     @Override
     public void onHoldFailed() {
         // Hold 실패 시각 효과 (예: Hold 영역 깜빡임)
-        showComboMessage("⚠️ Hold already used!");
+        showLineClearType("⚠️ Hold already used!");
     }
 
     @Override
@@ -378,10 +399,12 @@ public class GameController implements BoardObserver {
                               boolean isTSpin, boolean isTSpinMini, boolean isPerfectClear) {
         StringBuilder message = new StringBuilder();
         
+        // T-Spin 표시
         if (isTSpin) {
             message.append(isTSpinMini ? "T-SPIN MINI " : "T-SPIN ");
         }
         
+        // 라인 타입 표시
         switch (linesCleared) {
             case 1:
                 message.append("SINGLE");
@@ -397,13 +420,19 @@ public class GameController implements BoardObserver {
                 break;
         }
         
+        // Perfect Clear 표시
         if (isPerfectClear) {
-            message.append("\n🌟 PERFECT CLEAR!");
+            message.append(" 🌟 PERFECT CLEAR!");
         }
         
+        // 중앙에 라인 클리어 타입 표시
         if (message.length() > 0) {
-            showComboMessage(message.toString());
+            showLineClearType(message.toString());
         }
+        
+        // 우측에 라인 클리어 수 표시
+        GameState state = boardController.getGameState();
+        showLineClearNotification(linesCleared, state.getLinesCleared());
     }
 
     @Override
@@ -418,7 +447,7 @@ public class GameController implements BoardObserver {
 
     @Override
     public void onBackToBack(int backToBackCount) {
-        showComboMessage("⚡ BACK-TO-BACK x" + backToBackCount);
+        showBackToBackMessage("⚡ B2B x" + backToBackCount);
     }
 
     @Override
@@ -444,13 +473,13 @@ public class GameController implements BoardObserver {
 
     @Override
     public void onLevelUp(int newLevel) {
-        showComboMessage("📈 LEVEL UP!\nLevel " + newLevel);
+        showLineClearType("📈 LEVEL UP! - Level " + newLevel);
     }
 
     @Override
     public void onGamePaused() {
         pauseGame();
-        showComboMessage("⏸️ PAUSED\nPress P to resume");
+        showLineClearType("⏸️ PAUSED - Press P to resume");
     }
 
     @Override
@@ -637,12 +666,28 @@ public class GameController implements BoardObserver {
      * 미리보기 그리드 초기화 헬퍼 메서드
      */
     private void initializePreviewGrid(GridPane gridPane, Rectangle[][] rectangles, int rows, int cols) {
+        // GridPane 기본 설정
+        gridPane.setHgap(0);
+        gridPane.setVgap(0);
+        
+        // GridPane 크기 고정
+        double gridWidth = cols * PREVIEW_CELL_SIZE;
+        double gridHeight = rows * PREVIEW_CELL_SIZE;
+        gridPane.setPrefSize(gridWidth, gridHeight);
+        gridPane.setMinSize(gridWidth, gridHeight);
+        gridPane.setMaxSize(gridWidth, gridHeight);
+        
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
                 Rectangle rect = new Rectangle(PREVIEW_CELL_SIZE, PREVIEW_CELL_SIZE);
                 rect.setFill(Color.rgb(26, 26, 26));
                 rect.setStroke(Color.rgb(51, 51, 51));
                 rect.setStrokeWidth(0.5);
+                
+                // 픽셀 정렬로 떨림 방지
+                rect.setSmooth(false);
+                rect.setCache(true);
+                
                 gridPane.add(rect, col, row);
                 rectangles[row][col] = rect;
             }
@@ -660,6 +705,7 @@ public class GameController implements BoardObserver {
                     Platform.runLater(() -> {
                         comboLabel.setVisible(false);
                         comboLabel.setManaged(false);
+                        updateTopEventLineAlignment();
                     });
                     stop();
                 }
@@ -668,7 +714,7 @@ public class GameController implements BoardObserver {
     }
     
     /**
-     * Combo/B2B 메시지 표시
+     * Combo 메시지 표시 (좌측)
      */
     private void showComboMessage(String message) {
         Platform.runLater(() -> {
@@ -677,6 +723,118 @@ public class GameController implements BoardObserver {
             comboLabel.setManaged(true);
             comboShowTime = System.nanoTime();
             comboFadeTimer.start();
+            
+            // topEventLine 정렬 업데이트
+            updateTopEventLineAlignment();
+        });
+    }
+    
+    /**
+     * 라인 클리어 타입 표시 (중앙)
+     */
+    private void showLineClearType(String message) {
+        Platform.runLater(() -> {
+            lineClearTypeLabel.setText(message);
+            lineClearTypeLabel.setVisible(true);
+            lineClearTypeLabel.setManaged(true);
+            
+            // 2초 후 사라지게 하기
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000);
+                    Platform.runLater(() -> {
+                        lineClearTypeLabel.setVisible(false);
+                        lineClearTypeLabel.setManaged(false);
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        });
+    }
+    
+    /**
+     * Back-to-Back 메시지 표시 (우측)
+     */
+    private void showBackToBackMessage(String message) {
+        Platform.runLater(() -> {
+            backToBackLabel.setText(message);
+            backToBackLabel.setVisible(true);
+            backToBackLabel.setManaged(true);
+            
+            // topEventLine 정렬 업데이트
+            updateTopEventLineAlignment();
+            
+            // 2초 후 사라지게 하기
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000);
+                    Platform.runLater(() -> {
+                        backToBackLabel.setVisible(false);
+                        backToBackLabel.setManaged(false);
+                        updateTopEventLineAlignment();
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        });
+    }
+    
+    /**
+     * topEventLine의 정렬을 동적으로 조정
+     * - 하나만 표시될 때: CENTER
+     * - 둘 다 표시될 때: SPACE_BETWEEN
+     */
+    private void updateTopEventLineAlignment() {
+        boolean comboVisible = comboLabel.isVisible();
+        boolean b2bVisible = backToBackLabel.isVisible();
+        
+        if (!comboVisible && !b2bVisible) {
+            // 둘 다 숨겨졌으면 HBox도 숨김
+            topEventLine.setVisible(false);
+            topEventLine.setManaged(false);
+        } else if (comboVisible && b2bVisible) {
+            // 둘 다 표시되면 좌우로 배치
+            topEventLine.setAlignment(Pos.CENTER);
+            topEventLine.setVisible(true);
+            topEventLine.setManaged(true);
+        } else {
+            // 하나만 표시되면 중앙 정렬
+            topEventLine.setAlignment(Pos.CENTER);
+            topEventLine.setVisible(true);
+            topEventLine.setManaged(true);
+        }
+    }
+    
+    /**
+     * 라인 클리어 수 알림 표시 (우측 중간)
+     * @param clearedLines 방금 지운 라인 수
+     * @param totalLines 총 라인 수
+     */
+    private void showLineClearNotification(int clearedLines, int totalLines) {
+        Platform.runLater(() -> {
+            String message = String.format("+%d LINE%s | Total: %d", 
+                clearedLines, 
+                clearedLines > 1 ? "S" : "",
+                totalLines);
+            
+            lineClearNotificationLabel.setText(message);
+            lineClearNotificationLabel.setVisible(true);
+            lineClearNotificationLabel.setManaged(true);
+            
+            // 2초 후 사라지게 하기
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000);
+                    Platform.runLater(() -> {
+                        lineClearNotificationLabel.setVisible(false);
+                        lineClearNotificationLabel.setManaged(false);
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
         });
     }
     
