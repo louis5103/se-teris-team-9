@@ -489,7 +489,7 @@ public class GameController implements BoardObserver {
 
     @Override
     public void onGameResumed() {
-        // UI만 업데이트 (Command는 이미 실행된 상태)
+        // 게임 재개 후 UI를 업데이트합니다. (ResumeCommand는 별도의 위치에서 실행됨)
         gameLoopManager.resume();
         notificationManager.hideAllNotifications();
     }
