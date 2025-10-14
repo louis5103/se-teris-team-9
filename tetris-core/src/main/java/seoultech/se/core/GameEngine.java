@@ -98,7 +98,8 @@ public class GameEngine {
         // O 블록 : 회전해도 모양이 같음
         // 하지만 불변성 원칙을 지키기 위해 새로운 state를 반환
         if(state.getCurrentTetromino().getType() == TetrominoType.O) {
-            return RotationResult.success(state.deepCopy(), direction, 0);
+            // O-block rotation does not change state; return original state to avoid unnecessary deep copy
+            return RotationResult.success(state, direction, 0);
         }
 
         Tetromino rotated = state.getCurrentTetromino().getRotatedInstance(direction);
