@@ -163,7 +163,9 @@ public class GameEngine {
             dropDistance++;
         }
 
-        // Hard Drop 점수 추가. (1칸당 2점)
+        // 2. deepCopy 후 최종 위치 설정 및 점수 추가
+        GameState droppedState = state.deepCopy();
+        droppedState.setCurrentY(finalY);
         droppedState.addScore(dropDistance * 2);
 
         // 3. 즉시 고정 (이미 deepCopy되었으므로 내부에서 다시 복사하지 않음)
