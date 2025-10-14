@@ -98,11 +98,16 @@ public class EventMapper {
         } else {
             events.addAll(createNoLineClearEvents(gameState));
         }
+        
+        // 4. 레벨업 체크
+        if (result.isLeveledUp()) {
+            events.add(new seoultech.se.core.event.LevelUpEvent(result.getNewLevel()));
+        }
 
-        // 4. GameState 변경 Event
+        // 5. GameState 변경 Event
         events.add(new GameStateChangedEvent(gameState));
 
-        // 5. 새 블록 관련 이벤트는 BoardController에서 별도 생성
+        // 6. 새 블록 관련 이벤트는 BoardController에서 별도 생성
         // createTetrominoSpawnEvents() 메서드 사용
 
         return events;

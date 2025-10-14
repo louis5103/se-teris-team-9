@@ -625,6 +625,13 @@ public class BoardController {
                     observer.onGameOver(gameOverEvent.getReason());
                 }
                 break;
+                
+            case LEVEL_UP:
+                seoultech.se.core.event.LevelUpEvent levelUpEvent = (seoultech.se.core.event.LevelUpEvent) event;
+                for (BoardObserver observer : observers) {
+                    observer.onLevelUp(levelUpEvent.getNewLevel());
+                }
+                break;
 
             // 아직 처리하지 않는 Event 타입들
             default:

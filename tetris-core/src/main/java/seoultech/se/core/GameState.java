@@ -28,6 +28,7 @@ public class GameState {
     private long score;
     private int linesCleared;
     private int level;
+    private int linesForNextLevel;  // 다음 레벨까지 필요한 라인 수
     private boolean isGameOver;
     private String gameOverReason;
 
@@ -69,6 +70,7 @@ public class GameState {
         this.score = 0;
         this.level = 1;
         this.linesCleared = 0;
+        this.linesForNextLevel = 10;  // 레벨 1에서는 10라인으로 레벨업
         this.isGameOver = false;
 
         // 콤보/B2B 초기화
@@ -121,6 +123,7 @@ public class GameState {
         copy.score = this.score;
         copy.linesCleared = this.linesCleared;
         copy.level = this.level;
+        copy.linesForNextLevel = this.linesForNextLevel;
         copy.isGameOver = this.isGameOver;
         copy.gameOverReason = this.gameOverReason;
 
@@ -145,8 +148,34 @@ public class GameState {
         this.score += points;
     }
 
-    public void addLinesCleared(int count) {
+    /**
+     * 클리어한 라인 수를 추가하고 레벨업을 체크합니다
+     * 
+     * 표준 테트리스 레벨 시스템:
+     * - 레벨 1 → 2: 10라인 필요
+     * - 레벨 2 → 3: 20라인 필요 (추가로)
+     * - 레벨 3 → 4: 30라인 필요 (추가로)
+     * - ...
+     * - 최대 레벨: 15
+     * 
+     * @param count 클리어한 라인 수
+     * @return 레벨업이 발생했으면 true
+     */
+    public boolean addLinesCleared(int count) {
+        int previousLevel = this.level;
         this.linesCleared += count;
-        this.level = (this.linesCleared / 10) + 1; // 예: 10라인마다 레벨업
+        
+        // 레벨업 체크
+        while (this.linesCleared >= this.linesForNextLevel && this.level < 15) {
+            // 레벨업!
+            this.level++;
+            
+            // 다음 레벨까지 필요한 라인 수 업데이트
+            // 레벨 * 10 방식: 레벨 2는 20라인, 레벨 3은 30라인...
+            this.linesForNextLevel += this.level * 10;
+        }
+        
+        // 레벨업이 발생했는지 반환
+        return this.level > previousLevel;
     }
 }

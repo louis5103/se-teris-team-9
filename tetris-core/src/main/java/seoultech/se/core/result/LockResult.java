@@ -10,6 +10,7 @@ import seoultech.se.core.model.Tetromino;
     * 2. 게임 오버 체크
     * 3. 라인 클리어 체크
     * 4. 점수 계산
+    * 5. 레벨업 체크
  * 
  * 이 Result는 고정된 블록의 정보를 포함합니다.
  * EventMapper가 TetrominoLockedEvent를 생성할 때 필요합니다.
@@ -25,13 +26,19 @@ public class LockResult {
     Tetromino lockedTetromino;
     int lockedX;
     int lockedY;
+    
+    // 레벨업 정보
+    boolean leveledUp;
+    int newLevel;
 
     public static LockResult success(
             GameState newState, 
             LineClearResult lineClearResult,
             Tetromino lockedTetromino,
             int lockedX,
-            int lockedY
+            int lockedY,
+            boolean leveledUp,
+            int newLevel
     ) {
         return new LockResult(
             false, 
@@ -40,7 +47,9 @@ public class LockResult {
             null,
             lockedTetromino,
             lockedX,
-            lockedY
+            lockedY,
+            leveledUp,
+            newLevel
         );
     }
 
@@ -58,7 +67,9 @@ public class LockResult {
             reason,
             lockedTetromino,
             lockedX,
-            lockedY
+            lockedY,
+            false,
+            newState.getLevel()
         );
     }
 }
