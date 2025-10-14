@@ -708,12 +708,12 @@ public class BoardController {
 - [ ] 테스트 케이스 작성
 
 ### Phase 2: 구조 개선 (2주)
-- [ ] EventMapper 클래스 생성
+- [x] EventMapper 클래스 생성
 - [ ] TetrominoGenerator 인터페이스 도입
 - [ ] 기존 로직 리팩토링
 
 ### Phase 3: 품질 향상 (1주)
-- [ ] ColorMapper EnumMap 변경
+- [x] ColorMapper EnumMap 변경
 - [ ] Event dispatch 메서드 추가
 - [ ] ScoreReason Enum 도입
 

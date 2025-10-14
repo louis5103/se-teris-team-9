@@ -38,7 +38,8 @@ public class LevelUpEvent implements GameEvent {
      * 새로운 레벨 (레벨업 후의 레벨)
      */
     int newLevel;
-    
+    long timestamp = System.currentTimeMillis();
+
     @Override
     public EventType getType() {
         return EventType.LEVEL_UP;
