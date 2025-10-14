@@ -15,23 +15,13 @@ public class PausePopController extends BaseController {
     @Autowired
     private NavigationService navigationService;
     
-    private GameController gameController;
 
-    /**
-     * GameController 설정
-     */
-    public void setGameController(GameController gameController) {
-        this.gameController = gameController;
-    }
 
     /**
      * Resume 버튼 핸들러 - 게임 재개
      */
     @FXML
     private void handleResume(ActionEvent event) {
-        if (gameController != null) {
-            gameController.resumeGame();
-        }
         closePopup(event);
     }
 
