@@ -290,7 +290,7 @@ public class GameController implements BoardObserver {
                 break;
                 
             case MOVE_DOWN:
-                command = new MoveCommand(Direction.DOWN);
+                command = new MoveCommand(Direction.DOWN, true);  // 수동 DOWN = Soft Drop
                 break;
                 
             case ROTATE_CLOCKWISE:

@@ -15,9 +15,6 @@ import seoultech.se.core.command.Direction;
 import seoultech.se.core.command.GameCommand;
 import seoultech.se.core.command.MoveCommand;
 import seoultech.se.core.command.RotateCommand;
-import seoultech.se.core.event.BackToBackEvent;
-import seoultech.se.core.event.ComboBreakEvent;
-import seoultech.se.core.event.ComboEvent;
 import seoultech.se.core.event.GameEvent;
 import seoultech.se.core.event.GameOverEvent;
 import seoultech.se.core.event.GameStateChangedEvent;
@@ -29,7 +26,6 @@ import seoultech.se.core.event.TetrominoRotatedEvent;
 import seoultech.se.core.event.TetrominoSpawnedEvent;
 import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.TetrominoType;
-import seoultech.se.core.result.LineClearResult;
 import seoultech.se.core.result.LockResult;
 import seoultech.se.core.result.MoveResult;
 import seoultech.se.core.result.RotationResult;
@@ -75,6 +71,7 @@ public class BoardController {
 
     // 7-bag 시스템을 위한 상태
     private List<TetrominoType> currentBag = new ArrayList<>();
+    private List<TetrominoType> nextBag = new ArrayList<>();  // 다음 가방 미리 준비
     private int bagIndex = 0;
     
     // 플레이 시간 추적
@@ -190,7 +187,7 @@ public class BoardController {
                 result = GameEngine.tryMoveRight(gameState);
                 break;
             case DOWN:
-                result = GameEngine.tryMoveDown(gameState);
+                result = GameEngine.tryMoveDown(gameState, command.isSoftDrop());
                 break;
             default:
                 return events; // 알 수 없는 방향
@@ -301,6 +298,11 @@ public class BoardController {
         if (result.isSuccess()) {
             gameState = result.getNewState();
             
+            // Hold가 비어있었던 경우, Next Queue를 7-bag 시스템으로 업데이트
+            if (result.getPreviousHeldPiece() == null) {
+                updateNextQueue();
+            }
+            
             // Hold 변경 Event
             events.add(new seoultech.se.core.event.HoldChangedEvent(
                 result.getNewHeldPiece(),
@@ -332,10 +334,21 @@ public class BoardController {
             events.add(new GameStateChangedEvent(gameState));
             
         } else {
-            // Hold 실패 Event
-            events.add(new seoultech.se.core.event.HoldFailedEvent(
-                result.getFailureReason()
-            ));
+            // Hold 실패 처리
+            // 게임 오버 상태인지 확인
+            if (gameState.isGameOver()) {
+                // 게임 오버 Event 발생
+                events.add(new GameOverEvent(result.getFailureReason(), 
+                    gameState.getScore(), 
+                    gameState.getLevel(), 
+                    gameState.getLinesCleared(), 
+                    (System.currentTimeMillis() - gameStartTime) / 1000));
+            } else {
+                // 일반 Hold 실패 (이미 사용함 등)
+                events.add(new seoultech.se.core.event.HoldFailedEvent(
+                    result.getFailureReason()
+                ));
+            }
         }
         
         return events;
@@ -447,7 +460,10 @@ public class BoardController {
 
     private TetrominoType getNextTetrominoType() {
         if (currentBag.isEmpty() || bagIndex >= currentBag.size()) {
-            refillBag();
+            // 현재 가방이 비었으면 다음 가방을 현재 가방으로 교체
+            currentBag = nextBag;
+            nextBag = createAndShuffleBag();
+            bagIndex = 0;
         }
 
         TetrominoType nextType = currentBag.get(bagIndex);
@@ -456,21 +472,32 @@ public class BoardController {
         return nextType;
     }
 
-    private void refillBag() {
-        currentBag.clear();
-        bagIndex = 0;
-
+    /**
+     * 새로운 7-bag을 생성하고 섞습니다
+     */
+    private List<TetrominoType> createAndShuffleBag() {
+        List<TetrominoType> bag = new ArrayList<>();
+        
+        // 7가지 블록을 모두 추가
         for (TetrominoType type : TetrominoType.values()) {
-            currentBag.add(type);
+            bag.add(type);
         }
 
-        // 셔플 (Fisher-Yates 알고리즘)
-        for (int i = currentBag.size() - 1; i > 0; i--) {
+        // Fisher-Yates 셔플
+        for (int i = bag.size() - 1; i > 0; i--) {
             int j = random.nextInt(i + 1);
-            TetrominoType temp = currentBag.get(i);
-            currentBag.set(i, currentBag.get(j));
-            currentBag.set(j, temp);
+            TetrominoType temp = bag.get(i);
+            bag.set(i, bag.get(j));
+            bag.set(j, temp);
         }
+        
+        return bag;
+    }
+
+    private void refillBag() {
+        currentBag = createAndShuffleBag();
+        nextBag = createAndShuffleBag();  // 다음 가방도 미리 준비
+        bagIndex = 0;
     }
 
     private void initializeNextQueue() {
@@ -479,6 +506,12 @@ public class BoardController {
         spawnNewTetromino();
     }
 
+    /**
+     * Next Queue를 업데이트합니다
+     * 
+     * 현재 가방과 다음 가방에서 정확하게 6개의 블록을 미리보기로 제공합니다.
+     * 이제 다음 가방이 미리 준비되어 있으므로 정확한 예측이 가능합니다.
+     */
     private void updateNextQueue() {
         TetrominoType[] queue = new TetrominoType[6];
 
@@ -486,12 +519,13 @@ public class BoardController {
             int index = bagIndex + i;
 
             if (index < currentBag.size()) {
+                // 현재 가방에서 가져오기
                 queue[i] = currentBag.get(index);
             } else {
-                // 다음 가방의 블록 예측 (아직 섞이지 않았으므로 순서대로)
+                // 다음 가방에서 가져오기 (이미 섞여있음)
                 int nextBagIndex = index - currentBag.size();
-                if (nextBagIndex < 7) {
-                    queue[i] = TetrominoType.values()[nextBagIndex % 7];
+                if (nextBagIndex < nextBag.size()) {
+                    queue[i] = nextBag.get(nextBagIndex);
                 }
             }
         }
@@ -589,6 +623,13 @@ public class BoardController {
                 GameOverEvent gameOverEvent = (GameOverEvent) event;
                 for (BoardObserver observer : observers) {
                     observer.onGameOver(gameOverEvent.getReason());
+                }
+                break;
+                
+            case LEVEL_UP:
+                seoultech.se.core.event.LevelUpEvent levelUpEvent = (seoultech.se.core.event.LevelUpEvent) event;
+                for (BoardObserver observer : observers) {
+                    observer.onLevelUp(levelUpEvent.getNewLevel());
                 }
                 break;
 

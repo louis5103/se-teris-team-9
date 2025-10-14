@@ -1,5 +1,6 @@
 package seoultech.se.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import seoultech.se.core.model.Cell;
@@ -20,12 +21,20 @@ import seoultech.se.core.result.RotationResult;
  * 각 메서드는 성공 여부와 함께 새로운 상태를 포함하는 결과 객체를 반환
  */
 public class GameEngine {
+    private static final int[][] T_SPIN_CORNERS = {
+        {-1, -1},  // 좌상
+        {1, -1},   // 우상
+        {-1, 1},   // 좌하
+        {1, 1}     // 우하
+    };
+
     public static MoveResult tryMoveLeft(GameState state) {
         int newX = state.getCurrentX() - 1;
 
         if(isValidPosition(state, state.getCurrentTetromino(), newX, state.getCurrentY())) {
             GameState newState = state.deepCopy();
             newState.setCurrentX(newX);
+            newState.setLastActionWasRotation(false);  // 이동 시 회전 플래그 리셋
             return MoveResult.success(newState);
         }
         return MoveResult.failed(state, "[GameEngine] (Method: tryMoveLeft) Cannot move left : Blocked or out of bounds");
@@ -39,6 +48,7 @@ public class GameEngine {
         if(isValidPosition(state, state.getCurrentTetromino(), newX, state.getCurrentY())) {
             GameState newState = state.deepCopy();
             newState.setCurrentX(newX);
+            newState.setLastActionWasRotation(false);  // 이동 시 회전 플래그 리셋
             return MoveResult.success(newState);
         }
         return MoveResult.failed(state, "[GameEngine] (Method: tryMoveRight) Cannot move right : Blocked or out of bounds");
@@ -50,13 +60,28 @@ public class GameEngine {
      * 이동할 수 없으면 고정(lock)이 필요하다는 신호입니다.
      * 하지만 이 메서드는 고정을 수행하지 않습니다.
      * 호출자가 MoveResult를 보고 lockTetromino()를 호출해야 합니다.
+     * 
+     * Soft Drop:
+     * isSoftDrop이 true이면 수동 DOWN 입력으로 간주하여 1점을 부여합니다.
+     * isSoftDrop이 false이면 자동 낙하로 간주하여 점수를 주지 않습니다.
+     * 
+     * @param state 현재 게임 상태
+     * @param isSoftDrop 수동 DOWN 입력 여부
+     * @return 이동 결과
      */
-    public static MoveResult tryMoveDown(GameState state) {
+    public static MoveResult tryMoveDown(GameState state, boolean isSoftDrop) {
         int newY = state.getCurrentY() + 1;
 
         if(isValidPosition(state, state.getCurrentTetromino(), state.getCurrentX(), newY)) {
             GameState newState = state.deepCopy();
             newState.setCurrentY(newY);
+            newState.setLastActionWasRotation(false);  // 이동 시 회전 플래그 리셋
+            
+            // Soft Drop 점수 추가 (1칸당 1점)
+            if (isSoftDrop) {
+                newState.addScore(1);
+            }
+            
             return MoveResult.success(newState);
         }
         return MoveResult.failed(state, "[GameEngine] (Method: tryMoveDown) Cannot move down : Blocked or out of bounds");
@@ -78,8 +103,10 @@ public class GameEngine {
      * @return 회전 결과 (성공/실패, kickIndex 포함)
      */
     public static RotationResult tryRotate(GameState state, RotationDirection direction) {
-        // O 블록 : 회전하진 않음.
+        // O 블록 : 회전해도 모양이 같음
+        // 하지만 불변성 원칙을 지키기 위해 새로운 state를 반환
         if(state.getCurrentTetromino().getType() == TetrominoType.O) {
+            // O-block rotation does not change state; return original state to avoid unnecessary deep copy
             return RotationResult.success(state, direction, 0);
         }
 
@@ -103,6 +130,7 @@ public class GameEngine {
                 newState.setCurrentTetromino(rotated);
                 newState.setCurrentX(newX);
                 newState.setCurrentY(newY);
+                newState.setLastActionWasRotation(true);  // 회전 성공 시 플래그 설정
                 return RotationResult.success(newState, direction, kickIndex);
             }
         }
@@ -119,25 +147,29 @@ public class GameEngine {
      * 1. 바닥까지 이동
      * 2. 즉시 고정 (lockTetromino 호출)
      * 
+     * 성능 최적화: deepCopy를 한 번만 수행
+     * 
      * @return LockResult (라인 클리어 포함)
      */
     public static LockResult hardDrop(GameState state){
-        // 1. 바닥까지 이동.
-        GameState droppedState = state.deepCopy();
+        // 1. 바닥까지 이동 거리 계산 (원본 state는 수정하지 않음)
         int dropDistance = 0;
+        int finalY = state.getCurrentY();
 
-        while(isValidPosition(droppedState, droppedState.getCurrentTetromino(), 
-                              droppedState.getCurrentX(), droppedState.getCurrentY() + 1)
+        while(isValidPosition(state, state.getCurrentTetromino(), 
+                              state.getCurrentX(), finalY + 1)
         ) {
-            droppedState.setCurrentY(droppedState.getCurrentY() + 1);
+            finalY++;
             dropDistance++;
         }
 
-        // Hard Drop 점수 추가. (1칸당 2점)
+        // 2. deepCopy 후 최종 위치 설정 및 점수 추가
+        GameState droppedState = state.deepCopy();
+        droppedState.setCurrentY(finalY);
         droppedState.addScore(dropDistance * 2);
 
-        // 2. 즉시 고정.
-        return lockTetromino(droppedState);
+        // 3. 즉시 고정 (이미 deepCopy되었으므로 내부에서 다시 복사하지 않음)
+        return lockTetrominoInternal(droppedState, false);
     }
     
     // ========== Hold 기능 ==========
@@ -173,13 +205,25 @@ public class GameEngine {
             TetrominoType nextType = newState.getNextQueue()[0];
             Tetromino newTetromino = new Tetromino(nextType);
             
-            // 새 블록 스폰
-            newState.setCurrentTetromino(newTetromino);
-            newState.setCurrentX(newState.getBoardWidth() / 2 - 1);
-            newState.setCurrentY(0);
+            // 새 블록 스폰 위치 설정
+            int spawnX = newState.getBoardWidth() / 2 - 1;
+            int spawnY = 0;
             
-            // Next Queue 업데이트 (첫 번째 제거하고 새로운 블록 추가)
-            updateNextQueue(newState);
+            // 스폰 위치 충돌 검사
+            if (!isValidPosition(newState, newTetromino, spawnX, spawnY)) {
+                // 스폰 위치에 블록이 있으면 게임 오버
+                newState.setGameOver(true);
+                newState.setGameOverReason("Cannot spawn new tetromino after hold: spawn position blocked");
+                return seoultech.se.core.result.HoldResult.failure("Game Over: Cannot spawn new tetromino");
+            }
+            
+            // 스폰 성공
+            newState.setCurrentTetromino(newTetromino);
+            newState.setCurrentX(spawnX);
+            newState.setCurrentY(spawnY);
+            
+            // Next Queue 업데이트는 BoardController에서 처리하도록 함
+            // (7-bag 시스템과 동기화하기 위해)
             
         } else {
             // Hold에 블록이 있음: 현재 블록과 교체
@@ -187,48 +231,42 @@ public class GameEngine {
             
             // Hold된 블록을 꺼내서 현재 블록으로 설정
             Tetromino heldTetromino = new Tetromino(previousHeld);
+            
+            // 스폰 위치 설정
+            int spawnX = newState.getBoardWidth() / 2 - 1;
+            int spawnY = 0;
+            
+            // 스폰 위치 충돌 검사
+            if (!isValidPosition(newState, heldTetromino, spawnX, spawnY)) {
+                // 스폰 위치에 블록이 있으면 게임 오버
+                newState.setGameOver(true);
+                newState.setGameOverReason("Cannot swap held tetromino: spawn position blocked");
+                return seoultech.se.core.result.HoldResult.failure("Game Over: Cannot swap held tetromino");
+            }
+            
+            // 스폰 성공
             newState.setCurrentTetromino(heldTetromino);
-            newState.setCurrentX(newState.getBoardWidth() / 2 - 1);
-            newState.setCurrentY(0);
+            newState.setCurrentX(spawnX);
+            newState.setCurrentY(spawnY);
         }
         
         // Hold 사용 플래그 설정
         newState.setHoldUsedThisTurn(true);
         
+        // 회전 플래그 리셋 (새로운 블록이라 이전 회전 정보 무효화)
+        newState.setLastActionWasRotation(false);
+        
         return seoultech.se.core.result.HoldResult.success(newState, previousHeld, currentType);
     }
     
-    /**
-     * Next Queue를 업데이트합니다
-     * 첫 번째 블록을 제거하고 새로운 블록을 추가합니다
-     * 
-     * 주의: 이 메서드는 임시 구현입니다. 
-     * 실제 7-bag 시스템은 BoardController에서 관리되므로,
-     * Hold 기능에서만 제한적으로 사용됩니다.
-     * 향후 리팩토링 시 제거될 수 있습니다.
-     */
-    private static void updateNextQueue(GameState state) {
-        TetrominoType[] queue = state.getNextQueue();
-        TetrominoType[] newQueue = new TetrominoType[queue.length];
-        
-        // 한 칸씩 앞으로 당기기
-        System.arraycopy(queue, 1, newQueue, 0, queue.length - 1);
-        
-        // 마지막에 새로운 블록 추가 (단순 랜덤 - 7-bag은 BoardController에서 처리)
-        TetrominoType[] allTypes = TetrominoType.values();
-        newQueue[queue.length - 1] = allTypes[(int)(Math.random() * allTypes.length)];
-        
-        state.setNextQueue(newQueue);
-    }
-
     // ========== 테트로미노 고정 ==========
     
     /**
      * 테트로미노를 보드에 고정하고 라인 클리어를 처리합니다
      * 
      * 이 메서드는 여러 단계를 거칩니다:
-     * 1. 테트로미노의 각 블록을 grid에 추가
-     * 2. 게임 오버 체크 (spawn 위치를 벗어나면 게임 오버)
+     * 1. 게임 오버 체크 (블록이 보드 위쪽에 고정되는지 먼저 확인)
+     * 2. 테트로미노의 각 블록을 grid에 추가
      * 3. 라인 클리어 체크 및 실행
      * 4. 점수 계산
      * 5. Hold 재사용 가능하게 설정
@@ -237,25 +275,41 @@ public class GameEngine {
      * @return 고정 결과 (게임 오버 여부, 라인 클리어 정보 포함)
      */
     public static LockResult lockTetromino(GameState state) {
-        GameState newState = state.deepCopy();
+        return lockTetrominoInternal(state, true);
+    }
+    
+    /**
+     * 테트로미노를 보드에 고정하는 내부 메서드
+     * 
+     * 실행 순서:
+     * 1. 게임 오버 체크 (먼저!)
+     * 2. 블록 고정
+     * 3. 라인 클리어
+     * 4. 점수 계산
+     * 
+     * @param state 현재 게임 상태
+     * @param needsCopy deepCopy가 필요한지 여부 (false면 이미 복사된 상태로 간주)
+     * @return 고정 결과
+     */
+    private static LockResult lockTetrominoInternal(GameState state, boolean needsCopy) {
+        GameState newState = needsCopy ? state.deepCopy() : state;
         
         // 고정하기 전에 블록 정보 저장! (EventMapper에서 사용)
         Tetromino lockedTetromino = state.getCurrentTetromino();
         int lockedX = state.getCurrentX();
         int lockedY = state.getCurrentY();
 
-        // 1. Grid에 테트로미노 고정
         int[][] shape = state.getCurrentTetromino().getCurrentShape();
 
+        // 1. 게임 오버 체크 (블록을 고정하기 전에 먼저 확인)
+        // 블록의 어느 부분이라도 보드 위쪽(y < 0)에 있으면 게임 오버
         for(int row = 0; row < shape.length; row++) {
             for(int col = 0; col < shape[row].length; col++) {
                 if (shape[row][col] == 1) {
-                    int absX = state.getCurrentX() + (col - state.getCurrentTetromino().getPivotX());
                     int absY = state.getCurrentY() + (row - state.getCurrentTetromino().getPivotY());
-
-                    // 게임 오버 체크. 
-                    if( absY < 0 ) {
-                        // 게임 오버 처리
+                    
+                    if(absY < 0) {
+                        // 게임 오버 - 블록이 보드 위쪽에 고정됨
                         newState.setGameOver(true);
                         return LockResult.gameOver(
                             newState, 
@@ -265,7 +319,19 @@ public class GameEngine {
                             lockedY
                         );
                     }
+                }
+            }
+        }
+
+        // 2. Grid에 테트로미노 고정 (게임 오버가 아닌 경우에만 실행됨)
+        for(int row = 0; row < shape.length; row++) {
+            for(int col = 0; col < shape[row].length; col++) {
+                if (shape[row][col] == 1) {
+                    int absX = state.getCurrentX() + (col - state.getCurrentTetromino().getPivotX());
+                    int absY = state.getCurrentY() + (row - state.getCurrentTetromino().getPivotY());
+
                     // 셀에 색상 채우기
+                    // (이미 게임 오버 체크를 통과했으므로 absY >= 0 보장됨)
                     if(absY >= 0 && absY < state.getBoardHeight() &&
                        absX >= 0 && absX < state.getBoardWidth()
                     ) {
@@ -276,50 +342,158 @@ public class GameEngine {
             }
         }
 
-        // 2. 라인 클리어 체크 및 실행
+        // 3. 라인 클리어 체크 및 실행
         LineClearResult clearResult = checkAndClearLines(newState);
 
-        // 3. 점수 및 통계 업데이트
+        // 4. 점수 및 통계 업데이트
+        boolean leveledUp = false;
+        int newLevel = newState.getLevel();
+        
         if(clearResult.getLinesCleared() > 0) {
             newState.addScore(clearResult.getScoreEarned());
-            newState.addLinesCleared(clearResult.getLinesCleared());
+            
+            // 라인 클리어 추가 및 레벨업 체크
+            leveledUp = newState.addLinesCleared(clearResult.getLinesCleared());
+            newLevel = newState.getLevel();
 
-            // 콤보 업데이트
+            // 콤보 업데이트 (연속 라인 클리어 횟수)
+            // 0 → 1 (첫 콤보), 1 → 2 (콤보 계속), 2 → 3, ...
             newState.setComboCount(newState.getComboCount() + 1);
             newState.setLastActionClearedLines(true);
 
-            // B2B 업데이트 
+            // B2B (Back-to-Back) 업데이트
+            // Tetris(4줄) 또는 T-Spin을 연속으로 성공하면 B2B 카운트 증가
             boolean isDifficult = clearResult.getLinesCleared() == 4 || clearResult.isTSpin();
             if(isDifficult && newState.isLastClearWasDifficult()) {
+                // 이전에도 difficult였고 지금도 difficult → B2B 계속
                 newState.setBackToBackCount(newState.getBackToBackCount() + 1);
             } else if (isDifficult) {
+                // 처음으로 difficult 클리어 → B2B 시작
                 newState.setBackToBackCount(1);
             } else {
+                // 일반 클리어 (1~3줄) → B2B 종료
                 newState.setBackToBackCount(0);
             }
-            newState.setLastClearWasDifficult(isDifficult);;
-        } else { // 라인 클리어 못했으면 콤보 초기화
+            newState.setLastClearWasDifficult(isDifficult);
+        } else { 
+            // 라인 클리어 실패 → 모든 연속 보너스 초기화
             newState.setComboCount(0);
             newState.setLastActionClearedLines(false);
             newState.setBackToBackCount(0);
             newState.setLastClearWasDifficult(false);
         }
 
-        // 4. Hold 재사용 가능하게 설정.
+        // 5. Hold 재사용 가능하게 설정.
         newState.setHoldUsedThisTurn(false);
+        
+        // 6. 회전 플래그 리셋 (다음 블록을 위해)
+        newState.setLastActionWasRotation(false);
         
         return LockResult.success(
             newState, 
             clearResult,
             lockedTetromino,  // 고정된 블록 정보 전달!
             lockedX,
-            lockedY
+            lockedY,
+            leveledUp,
+            newLevel
         );
     }
 
+    // ========== T-Spin 감지 ==========
+    
+    /**
+     * T-Spin 여부를 감지합니다
+     * 
+     * T-Spin 판별 조건:
+     * 1. T 블록이어야 함
+     * 2. 마지막 액션이 회전이어야 함 (lastActionWasRotation = true)
+     * 3. 3-Corner Rule: T 블록의 4개 코너 중 3개 이상이 채워져 있어야 함
+     * 
+     * 3-Corner Rule:
+     * T 블록의 pivot(중심)을 기준으로 4개의 코너 위치를 확인합니다.
+     * 코너가 보드 밖이거나 블록으로 채워져 있으면 "차있음"으로 판정합니다.
+     * 
+     * @param state 현재 게임 상태
+     * @return T-Spin이면 true, 아니면 false
+     */
+    private static boolean detectTSpin(GameState state) {
+        // 1. T 블록이 아니면 T-Spin이 아님
+        if (state.getCurrentTetromino().getType() != TetrominoType.T) {
+            return false;
+        }
+        
+        // 2. 마지막 액션이 회전이 아니면 T-Spin이 아님
+        if (!state.isLastActionWasRotation()) {
+            return false;
+        }
+        
+        // 3. 3-Corner Rule 체크
+        return check3CornerRule(state);
+    }
+    
+    /**
+     * 3-Corner Rule을 체크합니다
+     * 
+     * T 블록의 pivot을 중심으로 4개의 코너 위치를 확인합니다.
+     * - 좌상 (px-1, py-1)
+     * - 우상 (px+1, py-1)
+     * - 좌하 (px-1, py+1)
+     * - 우하 (px+1, py+1)
+     * 
+     * 코너가 보드 밖이거나 블록으로 채워져 있으면 "채워짐"으로 판정합니다.
+     * 4개 중 3개 이상이 채워져 있으면 true를 반환합니다.
+     * 
+     * @param state 현재 게임 상태
+     * @return 3개 이상의 코너가 채워져 있으면 true
+     */
+    private static boolean check3CornerRule(GameState state) {
+        int px = state.getCurrentX();
+        int py = state.getCurrentY();
+        
+        
+        int filledCorners = 0;
+
+        for (int[] corner : T_SPIN_CORNERS) {
+            int checkX = px + corner[0];
+            int checkY = py + corner[1];
+            
+            // 코너가 보드 밖이거나 블록으로 채워져 있으면 "채워짐"
+            if (isCornerFilled(state, checkX, checkY)) {
+                filledCorners++;
+            }
+        }
+        
+        // 3개 이상의 코너가 채워져 있으면 T-Spin
+        return filledCorners >= 3;
+    }
+    
+    /**
+     * 특정 위치의 코너가 채워져 있는지 확인합니다
+     * 
+     * 코너가 채워진 것으로 판정되는 경우:
+     * 1. 보드 밖인 경우
+     * 2. 블록이 이미 있는 경우
+     * 
+     * @param state 현재 게임 상태
+     * @param x 체크할 X 좌표
+     * @param y 체크할 Y 좌표
+     * @return 코너가 채워져 있으면 true
+     */
+    private static boolean isCornerFilled(GameState state, int x, int y) {
+        // 보드 밖 = 채워진 것으로 판정
+        if (x < 0 || x >= state.getBoardWidth() || 
+            y < 0 || y >= state.getBoardHeight()) {
+            return true;
+        }
+        
+        // 블록이 있으면 채워진 것으로 판정
+        return state.getGrid()[y][x].isOccupied();
+    }
+    
     // ========== 라인 클리어 ===================
     private static LineClearResult checkAndClearLines(GameState state) {
-        List<Integer> clearedRowsList = new java.util.ArrayList<>();
+        List<Integer> clearedRowsList = new ArrayList<>();
 
         // 라인 체크
         for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
@@ -341,18 +515,37 @@ public class GameEngine {
             return LineClearResult.none();
         }
 
-        // 라인 클리어 실행. (라인 지우기 + 위 블록들 아래로 내리기)
-        for(int clearedRow : clearedRowsList){
-            // 해당 줄 위 모든 라인 내리기
-            for (int row = clearedRow; row > 0; row--) {
-                for(int col = 0; col <state.getBoardWidth(); col++) {
-                    state.getGrid()[row][col] = state.getGrid()[row - 1][col].copy();
+        // 라인 클리어 실행 (수정된 버전)
+        // 여러 줄이 동시에 클리어될 때 인덱스 문제를 해결하기 위해
+        // 클리어되지 않은 라인들만 모아서 아래부터 다시 배치합니다
+        
+        // 1. 클리어되지 않은 라인들만 수집
+        List<Cell[]> remainingRows = new ArrayList<>();
+        for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
+            boolean isCleared = clearedRowsList.contains(row);
+            if (!isCleared) {
+                // 이 줄은 클리어되지 않았으므로 보존
+                Cell[] rowCopy = new Cell[state.getBoardWidth()];
+                for (int col = 0; col < state.getBoardWidth(); col++) {
+                    rowCopy[col] = state.getGrid()[row][col].copy();
                 }
+                remainingRows.add(rowCopy);
             }
-
-            // 최상단 줄은 빈 칸으로 초기화
+        }
+        
+        // 2. 보드를 아래에서부터 다시 채우기
+        int targetRow = state.getBoardHeight() - 1;
+        for (Cell[] rowData : remainingRows) {
             for (int col = 0; col < state.getBoardWidth(); col++) {
-                state.getGrid()[0][col] = Cell.empty();
+                state.getGrid()[targetRow][col] = rowData[col];
+            }
+            targetRow--;
+        }
+        
+        // 3. 남은 위쪽 줄들은 빈 칸으로 채우기
+        for (int row = targetRow; row >= 0; row--) {
+            for (int col = 0; col < state.getBoardWidth(); col++) {
+                state.getGrid()[row][col] = Cell.empty();
             }
         }
 
@@ -362,9 +555,9 @@ public class GameEngine {
         // Perfect clear 체크
         boolean isPerfectClear = checkPerfectClear(state);
 
-        // T-Spin 감지 (현재 미구현, 향후 확장 가능)
-        boolean isTSpin = false;
-        boolean isTSpinMini = false;
+        // T-Spin 감지
+        boolean isTSpin = detectTSpin(state);
+        boolean isTSpinMini = false;  // T-Spin Mini는 나중에 구현
 
         // 점수 계산
         long score = calculateScore(linesCleared, isTSpin, isTSpinMini, isPerfectClear,
@@ -480,4 +673,5 @@ public class GameEngine {
         }
         return true;
     }
+    
 }
