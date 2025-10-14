@@ -52,14 +52,28 @@ public class GameEngine {
      * 이동할 수 없으면 고정(lock)이 필요하다는 신호입니다.
      * 하지만 이 메서드는 고정을 수행하지 않습니다.
      * 호출자가 MoveResult를 보고 lockTetromino()를 호출해야 합니다.
+     * 
+     * Soft Drop:
+     * isSoftDrop이 true이면 수동 DOWN 입력으로 간주하여 1점을 부여합니다.
+     * isSoftDrop이 false이면 자동 낙하로 간주하여 점수를 주지 않습니다.
+     * 
+     * @param state 현재 게임 상태
+     * @param isSoftDrop 수동 DOWN 입력 여부
+     * @return 이동 결과
      */
-    public static MoveResult tryMoveDown(GameState state) {
+    public static MoveResult tryMoveDown(GameState state, boolean isSoftDrop) {
         int newY = state.getCurrentY() + 1;
 
         if(isValidPosition(state, state.getCurrentTetromino(), state.getCurrentX(), newY)) {
             GameState newState = state.deepCopy();
             newState.setCurrentY(newY);
             newState.setLastActionWasRotation(false);  // 이동 시 회전 플래그 리셋
+            
+            // Soft Drop 점수 추가 (1칸당 1점)
+            if (isSoftDrop) {
+                newState.addScore(1);
+            }
+            
             return MoveResult.success(newState);
         }
         return MoveResult.failed(state, "[GameEngine] (Method: tryMoveDown) Cannot move down : Blocked or out of bounds");

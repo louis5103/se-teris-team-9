@@ -10,9 +10,14 @@ import lombok.NoArgsConstructor;
  * 이 Command는 테트로미노를 특정 방향으로 한 칸 이동시키고 싶다는 의도를 표현합니다.
  * 실제로 이동이 가능한지, 벽이나 다른 블록에 막히는지는 GameEngine이 판단합니다.
  * 
+ * Soft Drop:
+ * isSoftDrop 플래그가 true이면 수동 DOWN 입력으로 간주됩니다.
+ * 표준 테트리스에서 Soft Drop은 1칸당 1점을 획득합니다.
+ * 자동 낙하(gravity)는 점수를 주지 않습니다.
+ * 
  * 사용 예시:
  * - 사용자가 왼쪽 화살표를 누름
- * - GameController가 new MoveCommand(Direction.LEFT) 생성
+ * - GameController가 new MoveCommand(Direction.LEFT, false) 생성
  * - GameService에 Command 전달
  * - GameService가 GameEngine.tryMoveLeft() 호출
  * - 결과를 Event로 변환하여 UI에 알림
@@ -42,6 +47,21 @@ public class MoveCommand implements GameCommand {
      */
     private Direction direction;
     
+    /**
+     * Soft Drop 여부
+     * true면 수동 DOWN 입력 (점수 획득)
+     * false면 자동 낙하 (점수 없음)
+     */
+    private boolean isSoftDrop;
+    
+    /**
+     * 기본 생성자 - Soft Drop 여부가 false로 설정됨 (자동 낙하)
+     */
+    public MoveCommand(Direction direction) {
+        this.direction = direction;
+        this.isSoftDrop = false;
+    }
+    
     @Override
     public CommandType getType() {
         return CommandType.MOVE;
@@ -49,11 +69,11 @@ public class MoveCommand implements GameCommand {
     
     @Override
     public String getDescription() {
-        return "Move " + direction;
+        return "Move " + direction + (isSoftDrop ? " (Soft Drop)" : "");
     }
     
     @Override
     public String toString() {
-        return "MoveCommand{direction=" + direction + "}";
+        return "MoveCommand{direction=" + direction + ", isSoftDrop=" + isSoftDrop + "}";
     }
 }

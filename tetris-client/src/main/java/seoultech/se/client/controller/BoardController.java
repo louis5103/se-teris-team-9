@@ -187,7 +187,7 @@ public class BoardController {
                 result = GameEngine.tryMoveRight(gameState);
                 break;
             case DOWN:
-                result = GameEngine.tryMoveDown(gameState);
+                result = GameEngine.tryMoveDown(gameState, command.isSoftDrop());
                 break;
             default:
                 return events; // 알 수 없는 방향
