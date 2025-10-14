@@ -1,5 +1,6 @@
 package seoultech.se.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import seoultech.se.core.model.Cell;
@@ -20,6 +21,13 @@ import seoultech.se.core.result.RotationResult;
  * 각 메서드는 성공 여부와 함께 새로운 상태를 포함하는 결과 객체를 반환
  */
 public class GameEngine {
+    private static final int[][] T_SPIN_CORNERS = {
+        {-1, -1},  // 좌상
+        {1, -1},   // 우상
+        {-1, 1},   // 좌하
+        {1, 1}     // 우하
+    };
+
     public static MoveResult tryMoveLeft(GameState state) {
         int newX = state.getCurrentX() - 1;
 
@@ -443,17 +451,10 @@ public class GameEngine {
         int px = state.getCurrentX();
         int py = state.getCurrentY();
         
-        // 4개의 코너 위치 (pivot 기준 상대 좌표)
-        int[][] corners = {
-            {-1, -1},  // 좌상
-            {1, -1},   // 우상
-            {-1, 1},   // 좌하
-            {1, 1}     // 우하
-        };
         
         int filledCorners = 0;
-        
-        for (int[] corner : corners) {
+
+        for (int[] corner : T_SPIN_CORNERS) {
             int checkX = px + corner[0];
             int checkY = py + corner[1];
             
@@ -492,7 +493,7 @@ public class GameEngine {
     
     // ========== 라인 클리어 ===================
     private static LineClearResult checkAndClearLines(GameState state) {
-        List<Integer> clearedRowsList = new java.util.ArrayList<>();
+        List<Integer> clearedRowsList = new ArrayList<>();
 
         // 라인 체크
         for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
@@ -519,7 +520,7 @@ public class GameEngine {
         // 클리어되지 않은 라인들만 모아서 아래부터 다시 배치합니다
         
         // 1. 클리어되지 않은 라인들만 수집
-        java.util.List<Cell[]> remainingRows = new java.util.ArrayList<>();
+        List<Cell[]> remainingRows = new ArrayList<>();
         for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
             boolean isCleared = clearedRowsList.contains(row);
             if (!isCleared) {
@@ -672,4 +673,5 @@ public class GameEngine {
         }
         return true;
     }
+    
 }
