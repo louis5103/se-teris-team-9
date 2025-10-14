@@ -44,6 +44,9 @@ public class GameState {
     
     // 게임 상태
     private boolean isPaused;
+    
+    // T-Spin 감지를 위한 정보
+    private boolean lastActionWasRotation;  // 마지막 액션이 회전이었는지
 
 
     // 생성자
@@ -84,6 +87,9 @@ public class GameState {
         
         // 게임 상태 초기화
         this.isPaused = false;
+        
+        // T-Spin 감지 초기화
+        this.lastActionWasRotation = false;
     }
     
     // 깊은 복사.
@@ -128,6 +134,10 @@ public class GameState {
         // Lock Delay 복사
         copy.isLockDelayActive = this.isLockDelayActive;
         copy.lockDelayResets = this.lockDelayResets;
+        
+        // T-Spin 관련 복사
+        copy.lastActionWasRotation = this.lastActionWasRotation;
+        
         return copy;
     }
 

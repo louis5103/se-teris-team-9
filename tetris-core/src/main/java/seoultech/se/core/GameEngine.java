@@ -26,6 +26,7 @@ public class GameEngine {
         if(isValidPosition(state, state.getCurrentTetromino(), newX, state.getCurrentY())) {
             GameState newState = state.deepCopy();
             newState.setCurrentX(newX);
+            newState.setLastActionWasRotation(false);  // 이동 시 회전 플래그 리셋
             return MoveResult.success(newState);
         }
         return MoveResult.failed(state, "[GameEngine] (Method: tryMoveLeft) Cannot move left : Blocked or out of bounds");
@@ -39,6 +40,7 @@ public class GameEngine {
         if(isValidPosition(state, state.getCurrentTetromino(), newX, state.getCurrentY())) {
             GameState newState = state.deepCopy();
             newState.setCurrentX(newX);
+            newState.setLastActionWasRotation(false);  // 이동 시 회전 플래그 리셋
             return MoveResult.success(newState);
         }
         return MoveResult.failed(state, "[GameEngine] (Method: tryMoveRight) Cannot move right : Blocked or out of bounds");
@@ -57,6 +59,7 @@ public class GameEngine {
         if(isValidPosition(state, state.getCurrentTetromino(), state.getCurrentX(), newY)) {
             GameState newState = state.deepCopy();
             newState.setCurrentY(newY);
+            newState.setLastActionWasRotation(false);  // 이동 시 회전 플래그 리셋
             return MoveResult.success(newState);
         }
         return MoveResult.failed(state, "[GameEngine] (Method: tryMoveDown) Cannot move down : Blocked or out of bounds");
@@ -104,6 +107,7 @@ public class GameEngine {
                 newState.setCurrentTetromino(rotated);
                 newState.setCurrentX(newX);
                 newState.setCurrentY(newY);
+                newState.setLastActionWasRotation(true);  // 회전 성공 시 플래그 설정
                 return RotationResult.success(newState, direction, kickIndex);
             }
         }
@@ -225,6 +229,9 @@ public class GameEngine {
         
         // Hold 사용 플래그 설정
         newState.setHoldUsedThisTurn(true);
+        
+        // 회전 플래그 리셋 (새로운 블록이라 이전 회전 정보 무효화)
+        newState.setLastActionWasRotation(false);
         
         return seoultech.se.core.result.HoldResult.success(newState, previousHeld, currentType);
     }
@@ -350,6 +357,9 @@ public class GameEngine {
         // 5. Hold 재사용 가능하게 설정.
         newState.setHoldUsedThisTurn(false);
         
+        // 6. 회전 플래그 리셋 (다음 블록을 위해)
+        newState.setLastActionWasRotation(false);
+        
         return LockResult.success(
             newState, 
             clearResult,
@@ -359,6 +369,104 @@ public class GameEngine {
         );
     }
 
+    // ========== T-Spin 감지 ==========
+    
+    /**
+     * T-Spin 여부를 감지합니다
+     * 
+     * T-Spin 판별 조건:
+     * 1. T 블록이어야 함
+     * 2. 마지막 액션이 회전이어야 함 (lastActionWasRotation = true)
+     * 3. 3-Corner Rule: T 블록의 4개 코너 중 3개 이상이 채워져 있어야 함
+     * 
+     * 3-Corner Rule:
+     * T 블록의 pivot(중심)을 기준으로 4개의 코너 위치를 확인합니다.
+     * 코너가 보드 밖이거나 블록으로 채워져 있으면 "차있음"으로 판정합니다.
+     * 
+     * @param state 현재 게임 상태
+     * @return T-Spin이면 true, 아니면 false
+     */
+    private static boolean detectTSpin(GameState state) {
+        // 1. T 블록이 아니면 T-Spin이 아님
+        if (state.getCurrentTetromino().getType() != TetrominoType.T) {
+            return false;
+        }
+        
+        // 2. 마지막 액션이 회전이 아니면 T-Spin이 아님
+        if (!state.isLastActionWasRotation()) {
+            return false;
+        }
+        
+        // 3. 3-Corner Rule 체크
+        return check3CornerRule(state);
+    }
+    
+    /**
+     * 3-Corner Rule을 체크합니다
+     * 
+     * T 블록의 pivot을 중심으로 4개의 코너 위치를 확인합니다.
+     * - 좌상 (px-1, py-1)
+     * - 우상 (px+1, py-1)
+     * - 좌하 (px-1, py+1)
+     * - 우하 (px+1, py+1)
+     * 
+     * 코너가 보드 밖이거나 블록으로 채워져 있으면 "채워짐"으로 판정합니다.
+     * 4개 중 3개 이상이 채워져 있으면 true를 반환합니다.
+     * 
+     * @param state 현재 게임 상태
+     * @return 3개 이상의 코너가 채워져 있으면 true
+     */
+    private static boolean check3CornerRule(GameState state) {
+        int px = state.getCurrentX();
+        int py = state.getCurrentY();
+        
+        // 4개의 코너 위치 (pivot 기준 상대 좌표)
+        int[][] corners = {
+            {-1, -1},  // 좌상
+            {1, -1},   // 우상
+            {-1, 1},   // 좌하
+            {1, 1}     // 우하
+        };
+        
+        int filledCorners = 0;
+        
+        for (int[] corner : corners) {
+            int checkX = px + corner[0];
+            int checkY = py + corner[1];
+            
+            // 코너가 보드 밖이거나 블록으로 채워져 있으면 "채워짐"
+            if (isCornerFilled(state, checkX, checkY)) {
+                filledCorners++;
+            }
+        }
+        
+        // 3개 이상의 코너가 채워져 있으면 T-Spin
+        return filledCorners >= 3;
+    }
+    
+    /**
+     * 특정 위치의 코너가 채워져 있는지 확인합니다
+     * 
+     * 코너가 채워진 것으로 판정되는 경우:
+     * 1. 보드 밖인 경우
+     * 2. 블록이 이미 있는 경우
+     * 
+     * @param state 현재 게임 상태
+     * @param x 체크할 X 좌표
+     * @param y 체크할 Y 좌표
+     * @return 코너가 채워져 있으면 true
+     */
+    private static boolean isCornerFilled(GameState state, int x, int y) {
+        // 보드 밖 = 채워진 것으로 판정
+        if (x < 0 || x >= state.getBoardWidth() || 
+            y < 0 || y >= state.getBoardHeight()) {
+            return true;
+        }
+        
+        // 블록이 있으면 채워진 것으로 판정
+        return state.getGrid()[y][x].isOccupied();
+    }
+    
     // ========== 라인 클리어 ===================
     private static LineClearResult checkAndClearLines(GameState state) {
         List<Integer> clearedRowsList = new java.util.ArrayList<>();
@@ -423,9 +531,9 @@ public class GameEngine {
         // Perfect clear 체크
         boolean isPerfectClear = checkPerfectClear(state);
 
-        // T-Spin 감지 (현재 미구현, 향후 확장 가능)
-        boolean isTSpin = false;
-        boolean isTSpinMini = false;
+        // T-Spin 감지
+        boolean isTSpin = detectTSpin(state);
+        boolean isTSpinMini = false;  // T-Spin Mini는 나중에 구현
 
         // 점수 계산
         long score = calculateScore(linesCleared, isTSpin, isTSpinMini, isPerfectClear,
