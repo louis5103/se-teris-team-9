@@ -306,6 +306,8 @@ public class BoardController {
             gameState = result.getNewState();
             
             // Hold가 비어있었던 경우, Next Queue를 7-bag 시스템으로 업데이트
+            // GameEngine.tryHold()는 nextQueue[0]을 읽기만 하고 제거하지 않으므로
+            // 여기서 명시적으로 큐를 업데이트하여 7-bag 시스템과 동기화합니다
             if (result.getPreviousHeldPiece() == null) {
                 updateNextQueue();
             }

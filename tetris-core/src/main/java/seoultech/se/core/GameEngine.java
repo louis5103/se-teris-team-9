@@ -184,6 +184,11 @@ public class GameEngine {
      * 2. Hold가 비어있으면: 현재 블록 보관 + Next에서 새 블록 가져오기
      * 3. Hold에 블록이 있으면: 현재 블록과 Hold 블록 교체
      * 
+     * 중요: Next Queue 동기화
+     * - 이 메서드는 nextQueue[0]을 읽기만 하고 제거하지 않습니다
+     * - 실제 큐 업데이트는 BoardController에서 spawnNextTetromino() 호출 시 처리됩니다
+     * - Hold 후 lockTetromino() → BoardController가 새 블록 스폰 → 큐 업데이트
+     * 
      * @param state 현재 게임 상태
      * @return HoldResult (성공/실패, 변경된 상태)
      */
@@ -201,7 +206,8 @@ public class GameEngine {
             // Hold가 비어있음: 현재 블록을 보관하고 Next에서 새 블록 가져오기
             newState.setHeldPiece(currentType);
             
-            // Next Queue에서 새 블록 가져오기
+            // Next Queue에서 새 블록 가져오기 (읽기만 함, 제거는 BoardController에서)
+            // 주의: nextQueue[0]은 BoardController의 spawnNextTetromino()에서 제거됩니다
             TetrominoType nextType = newState.getNextQueue()[0];
             Tetromino newTetromino = new Tetromino(nextType);
             
@@ -222,8 +228,9 @@ public class GameEngine {
             newState.setCurrentX(spawnX);
             newState.setCurrentY(spawnY);
             
-            // Next Queue 업데이트는 BoardController에서 처리하도록 함
-            // (7-bag 시스템과 동기화하기 위해)
+            // 주의: Next Queue 업데이트는 BoardController에서 처리됩니다
+            // Hold 사용 후 lockTetromino() 호출 시 BoardController가 감지하고
+            // spawnNextTetromino()를 통해 큐를 업데이트합니다 (7-bag 시스템 동기화)
             
         } else {
             // Hold에 블록이 있음: 현재 블록과 교체
@@ -520,11 +527,13 @@ public class GameEngine {
         // 여러 줄이 동시에 클리어될 때 인덱스 문제를 해결하기 위해
         // 클리어되지 않은 라인들만 모아서 아래부터 다시 배치합니다
         
+        // 성능 개선: HashSet으로 변환하여 O(1) 조회 성능 확보
+        java.util.Set<Integer> clearedRowsSet = new java.util.HashSet<>(clearedRowsList);
+        
         // 1. 클리어되지 않은 라인들만 수집
         List<Cell[]> remainingRows = new ArrayList<>();
         for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
-            boolean isCleared = clearedRowsList.contains(row);
-            if (!isCleared) {
+            if (!clearedRowsSet.contains(row)) {  // O(1) 조회
                 // 이 줄은 클리어되지 않았으므로 보존
                 Cell[] rowCopy = new Cell[state.getBoardWidth()];
                 for (int col = 0; col < state.getBoardWidth(); col++) {
@@ -543,9 +552,12 @@ public class GameEngine {
             targetRow--;
         }
         
-        // 새 그리드를 원래 그리드에 복사 (System.arraycopy 사용으로 성능 개선)
-        for (int row = 0; row < state.getBoardHeight(); row++) {
-            System.arraycopy(newGrid[row], 0, state.getGrid()[row], 0, state.getBoardWidth());
+        // 3. 남은 위쪽 줄들을 빈 칸으로 초기화 (버그 수정)
+        while (targetRow >= 0) {
+            for (int col = 0; col < state.getBoardWidth(); col++) {
+                state.getGrid()[targetRow][col] = Cell.empty();
+            }
+            targetRow--;
         }
 
         int linesCleared = clearedRowsList.size();
@@ -556,7 +568,14 @@ public class GameEngine {
 
         // T-Spin 감지
         boolean isTSpin = detectTSpin(state);
-        boolean isTSpinMini = false;  // T-Spin Mini는 나중에 구현
+        
+        // TODO: T-Spin Mini 감지 로직 구현 필요
+        // 현재는 모든 T-Spin을 일반 T-Spin으로 처리합니다
+        // T-Spin Mini 조건:
+        // 1. T 블록의 회전으로 발생
+        // 2. 회전 중심(pivot) 기준으로 대각선 4칸 중 3칸 이상이 채워져 있지 않음
+        // 3. Wall kick의 5번째 테스트(index 4)를 사용하지 않음
+        boolean isTSpinMini = false;
 
         // 점수 계산
         long score = calculateScore(linesCleared, isTSpin, isTSpinMini, isPerfectClear,
