@@ -171,8 +171,8 @@ public class GameState {
             this.level++;
             
             // 다음 레벨까지 필요한 라인 수 업데이트
-            // 표준 테트리스: 각 레벨마다 10라인씩 추가 필요
-            this.linesForNextLevel += 10;
+            // 표준 테트리스: 각 레벨마다 누적 10라인씩 추가 필요 (레벨 2: 20, 레벨 3: 30, ...)
+            this.linesForNextLevel = this.level * 10;
         }
         
         // 레벨업이 발생했는지 반환
