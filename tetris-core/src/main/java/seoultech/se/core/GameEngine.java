@@ -306,6 +306,10 @@ public class GameEngine {
         int lockedX = state.getCurrentX();
         int lockedY = state.getCurrentY();
 
+        // T-Spin 감지 (블록이 고정되기 전에 체크해야 정확함!)
+        // 고정 후에는 T 블록 자신도 "채워진 것"으로 판정되어 오류 발생
+        boolean isTSpin = detectTSpin(state);
+
         int[][] shape = state.getCurrentTetromino().getCurrentShape();
 
         // 1. 게임 오버 체크 (블록을 고정하기 전에 먼저 확인)
@@ -349,8 +353,8 @@ public class GameEngine {
             }
         }
 
-        // 3. 라인 클리어 체크 및 실행
-        LineClearResult clearResult = checkAndClearLines(newState);
+        // 3. 라인 클리어 체크 및 실행 (T-Spin 정보 전달)
+        LineClearResult clearResult = checkAndClearLines(newState, isTSpin);
 
         // 4. 점수 및 통계 업데이트
         boolean leveledUp = false;
@@ -500,7 +504,14 @@ public class GameEngine {
     }
     
     // ========== 라인 클리어 ===================
-    private static LineClearResult checkAndClearLines(GameState state) {
+    /**
+     * 라인 클리어를 체크하고 실행합니다
+     * 
+     * @param state 현재 게임 상태
+     * @param isTSpin T-Spin 여부 (블록 고정 전에 미리 감지된 값)
+     * @return 라인 클리어 결과
+     */
+    private static LineClearResult checkAndClearLines(GameState state, boolean isTSpin) {
         List<Integer> clearedRowsList = new ArrayList<>();
 
         // 라인 체크 (아래에서 위로)
@@ -566,8 +577,8 @@ public class GameEngine {
         // Perfect clear 체크
         boolean isPerfectClear = checkPerfectClear(state);
 
-        // T-Spin 감지
-        boolean isTSpin = detectTSpin(state);
+        // T-Spin은 이미 블록 고정 전에 감지되어 매개변수로 전달됨
+        // (블록 고정 후에는 T 블록 자신도 "채워진 것"으로 판정되어 오류 발생)
         
         // TODO: T-Spin Mini 감지 로직 구현 필요
         // 현재는 모든 T-Spin을 일반 T-Spin으로 처리합니다
