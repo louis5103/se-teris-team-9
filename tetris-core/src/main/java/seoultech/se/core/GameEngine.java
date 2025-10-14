@@ -184,6 +184,11 @@ public class GameEngine {
      * 2. Hold가 비어있으면: 현재 블록 보관 + Next에서 새 블록 가져오기
      * 3. Hold에 블록이 있으면: 현재 블록과 Hold 블록 교체
      * 
+     * 중요: Next Queue 동기화
+     * - 이 메서드는 nextQueue[0]을 읽기만 하고 제거하지 않습니다
+     * - 실제 큐 업데이트는 BoardController에서 spawnNextTetromino() 호출 시 처리됩니다
+     * - Hold 후 lockTetromino() → BoardController가 새 블록 스폰 → 큐 업데이트
+     * 
      * @param state 현재 게임 상태
      * @return HoldResult (성공/실패, 변경된 상태)
      */
@@ -201,7 +206,8 @@ public class GameEngine {
             // Hold가 비어있음: 현재 블록을 보관하고 Next에서 새 블록 가져오기
             newState.setHeldPiece(currentType);
             
-            // Next Queue에서 새 블록 가져오기
+            // Next Queue에서 새 블록 가져오기 (읽기만 함, 제거는 BoardController에서)
+            // 주의: nextQueue[0]은 BoardController의 spawnNextTetromino()에서 제거됩니다
             TetrominoType nextType = newState.getNextQueue()[0];
             Tetromino newTetromino = new Tetromino(nextType);
             
@@ -222,8 +228,9 @@ public class GameEngine {
             newState.setCurrentX(spawnX);
             newState.setCurrentY(spawnY);
             
-            // Next Queue 업데이트는 BoardController에서 처리하도록 함
-            // (7-bag 시스템과 동기화하기 위해)
+            // 주의: Next Queue 업데이트는 BoardController에서 처리됩니다
+            // Hold 사용 후 lockTetromino() 호출 시 BoardController가 감지하고
+            // spawnNextTetromino()를 통해 큐를 업데이트합니다 (7-bag 시스템 동기화)
             
         } else {
             // Hold에 블록이 있음: 현재 블록과 교체
@@ -299,6 +306,10 @@ public class GameEngine {
         int lockedX = state.getCurrentX();
         int lockedY = state.getCurrentY();
 
+        // T-Spin 감지 (블록이 고정되기 전에 체크해야 정확함!)
+        // 고정 후에는 T 블록 자신도 "채워진 것"으로 판정되어 오류 발생
+        boolean isTSpin = detectTSpin(state);
+
         int[][] shape = state.getCurrentTetromino().getCurrentShape();
 
         // 1. 게임 오버 체크 (블록을 고정하기 전에 먼저 확인)
@@ -342,8 +353,8 @@ public class GameEngine {
             }
         }
 
-        // 3. 라인 클리어 체크 및 실행
-        LineClearResult clearResult = checkAndClearLines(newState);
+        // 3. 라인 클리어 체크 및 실행 (T-Spin 정보 전달)
+        LineClearResult clearResult = checkAndClearLines(newState, isTSpin);
 
         // 4. 점수 및 통계 업데이트
         boolean leveledUp = false;
@@ -363,8 +374,9 @@ public class GameEngine {
 
             // B2B (Back-to-Back) 업데이트
             // Tetris(4줄) 또는 T-Spin을 연속으로 성공하면 B2B 카운트 증가
-            boolean isDifficult = clearResult.getLinesCleared() == 4 || clearResult.isTSpin();
-            if(isDifficult && newState.isLastClearWasDifficult()) {
+            boolean isDifficult = clearResult.getLinesCleared() == GameConstants.TETRIS_LINE_COUNT 
+                                || clearResult.isTSpin();
+            if (isDifficult && newState.isLastClearWasDifficult()) {
                 // 이전에도 difficult였고 지금도 difficult → B2B 계속
                 newState.setBackToBackCount(newState.getBackToBackCount() + 1);
             } else if (isDifficult) {
@@ -492,10 +504,17 @@ public class GameEngine {
     }
     
     // ========== 라인 클리어 ===================
-    private static LineClearResult checkAndClearLines(GameState state) {
+    /**
+     * 라인 클리어를 체크하고 실행합니다
+     * 
+     * @param state 현재 게임 상태
+     * @param isTSpin T-Spin 여부 (블록 고정 전에 미리 감지된 값)
+     * @return 라인 클리어 결과
+     */
+    private static LineClearResult checkAndClearLines(GameState state, boolean isTSpin) {
         List<Integer> clearedRowsList = new ArrayList<>();
 
-        // 라인 체크
+        // 라인 체크 (아래에서 위로)
         for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
             boolean isFullLine = true;
 
@@ -519,11 +538,13 @@ public class GameEngine {
         // 여러 줄이 동시에 클리어될 때 인덱스 문제를 해결하기 위해
         // 클리어되지 않은 라인들만 모아서 아래부터 다시 배치합니다
         
+        // 성능 개선: HashSet으로 변환하여 O(1) 조회 성능 확보
+        java.util.Set<Integer> clearedRowsSet = new java.util.HashSet<>(clearedRowsList);
+        
         // 1. 클리어되지 않은 라인들만 수집
         List<Cell[]> remainingRows = new ArrayList<>();
         for (int row = state.getBoardHeight() - 1; row >= 0; row--) {
-            boolean isCleared = clearedRowsList.contains(row);
-            if (!isCleared) {
+            if (!clearedRowsSet.contains(row)) {  // O(1) 조회
                 // 이 줄은 클리어되지 않았으므로 보존
                 Cell[] rowCopy = new Cell[state.getBoardWidth()];
                 for (int col = 0; col < state.getBoardWidth(); col++) {
@@ -542,11 +563,12 @@ public class GameEngine {
             targetRow--;
         }
         
-        // 3. 남은 위쪽 줄들은 빈 칸으로 채우기
-        for (int row = targetRow; row >= 0; row--) {
+        // 3. 남은 위쪽 줄들을 빈 칸으로 초기화 (버그 수정)
+        while (targetRow >= 0) {
             for (int col = 0; col < state.getBoardWidth(); col++) {
-                state.getGrid()[row][col] = Cell.empty();
+                state.getGrid()[targetRow][col] = Cell.empty();
             }
+            targetRow--;
         }
 
         int linesCleared = clearedRowsList.size();
@@ -555,9 +577,16 @@ public class GameEngine {
         // Perfect clear 체크
         boolean isPerfectClear = checkPerfectClear(state);
 
-        // T-Spin 감지
-        boolean isTSpin = detectTSpin(state);
-        boolean isTSpinMini = false;  // T-Spin Mini는 나중에 구현
+        // T-Spin은 이미 블록 고정 전에 감지되어 매개변수로 전달됨
+        // (블록 고정 후에는 T 블록 자신도 "채워진 것"으로 판정되어 오류 발생)
+        
+        // TODO: T-Spin Mini 감지 로직 구현 필요
+        // 현재는 모든 T-Spin을 일반 T-Spin으로 처리합니다
+        // T-Spin Mini 조건:
+        // 1. T 블록의 회전으로 발생
+        // 2. 회전 중심(pivot) 기준으로 대각선 4칸 중 3칸 이상이 채워져 있지 않음
+        // 3. Wall kick의 5번째 테스트(index 4)를 사용하지 않음
+        boolean isTSpinMini = false;
 
         // 점수 계산
         long score = calculateScore(linesCleared, isTSpin, isTSpinMini, isPerfectClear,
@@ -604,33 +633,41 @@ public class GameEngine {
 
         // 기본 점수 계산
         if (tSpin) {
-            if(tSpinMini){
-                baseScore = lines == 0 ? 100 : lines == 1 ? 200 : 400;
+            if (tSpinMini) {
+                baseScore = lines == 0 ? GameConstants.TSPIN_MINI_NO_LINE 
+                          : lines == 1 ? GameConstants.TSPIN_MINI_SINGLE 
+                          : GameConstants.TSPIN_MINI_DOUBLE;
             } else {
-                baseScore = lines == 0 ? 400 : lines == 1 ? 800 : lines == 2 ? 1200 : 1600;
+                baseScore = lines == 0 ? GameConstants.TSPIN_NO_LINE 
+                          : lines == 1 ? GameConstants.TSPIN_SINGLE 
+                          : lines == 2 ? GameConstants.TSPIN_DOUBLE 
+                          : GameConstants.TSPIN_TRIPLE;
             }
         } else {
             switch (lines) {
-                case 1 : baseScore = 100; break;
-                case 2 : baseScore = 300; break;
-                case 3 : baseScore = 500; break;
-                case 4 : baseScore = 800; break;
+                case 1: baseScore = GameConstants.SCORE_SINGLE; break;
+                case 2: baseScore = GameConstants.SCORE_DOUBLE; break;
+                case 3: baseScore = GameConstants.SCORE_TRIPLE; break;
+                case 4: baseScore = GameConstants.SCORE_TETRIS; break;
             }
         }
 
-        // B2B 보너스 (1.5배)
-        if (b2b > 0 && (lines == 4 || tSpin)) {
-            baseScore = (long)(baseScore * 1.5);
+        // B2B 보너스
+        if (b2b > 0 && (lines == GameConstants.TETRIS_LINE_COUNT || tSpin)) {
+            baseScore = (long)(baseScore * GameConstants.BACK_TO_BACK_MULTIPLIER);
         }
 
-        // 콤보 보너스 (콤보 수 * 50)
+        // 콤보 보너스
         if (combo > 0) {
-            baseScore += combo * 50 * level;
+            baseScore += combo * GameConstants.COMBO_BONUS_PER_LEVEL * level;
         }
 
         // 퍼펙트 클리어 보너스
         if (perfectClear) {
-            baseScore += lines == 1 ? 800 : lines == 2 ? 1200 : lines == 3? 1800 : 2000;
+            baseScore += lines == 1 ? GameConstants.PERFECT_CLEAR_SINGLE 
+                       : lines == 2 ? GameConstants.PERFECT_CLEAR_DOUBLE 
+                       : lines == 3 ? GameConstants.PERFECT_CLEAR_TRIPLE 
+                       : GameConstants.PERFECT_CLEAR_TETRIS;
         }
 
         // 레벨 배수

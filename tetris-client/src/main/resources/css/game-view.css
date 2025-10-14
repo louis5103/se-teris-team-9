@@ -228,3 +228,38 @@
     -fx-background-radius: 0.25em;
 }
 
+/* ========== 팝업 오버레이 ========== */
+.popup-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.85);
+}
+
+.popup-container {
+    -fx-background-color: #2a2a2a;
+    -fx-border-color: #4a4a4a;
+    -fx-border-width: 0.25em;
+    -fx-border-radius: 1em;
+    -fx-background-radius: 1em;
+    -fx-padding: 2em;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 2em, 0, 0, 0);
+}
+
+.popup-title {
+    -fx-font-size: 3em;
+    -fx-font-family: "Impact";
+    -fx-text-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, aqua 0%, red 50%);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 0.833em, 0, 0.25em, 0.25em);
+}
+
+.popup-label {
+    -fx-font-size: 1.3em;
+    -fx-font-family: "Arial Bold";
+    -fx-text-fill: #cccccc;
+}
+
+.popup-score {
+    -fx-font-size: 2.5em;
+    -fx-font-family: "Impact";
+    -fx-text-fill: #00ff00;
+    -fx-effect: dropshadow(gaussian, rgba(0,255,0,0.6), 0.8em, 0, 0, 0);
+}
+
