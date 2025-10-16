@@ -155,6 +155,16 @@ public class MainController extends BaseController {
     }
 
     /**
+     * itemSTART 버튼 액션 - 아이템 모드 게임 화면으로 전환
+     * 구현 필요
+     */
+
+    public void handleItemStartButtonAction(ActionEvent event) {
+
+    }
+
+
+    /**
      * EXIT 버튼 액션 - 애플리케이션 종료
      * 
      * Platform.exit()는 JavaFX 애플리케이션을 정상적으로 종료합니다.
