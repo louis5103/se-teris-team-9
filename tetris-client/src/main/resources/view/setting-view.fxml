@@ -37,6 +37,17 @@
                   <RadioButton fx:id="screenSizeXL" styleClass="radio-label" onAction="#handleScreenSizeChange" text="XL" toggleGroup="$screenSize" />
                </children>
             </HBox>
+            <HBox fx:id="difficultyBox" styleClass="radio-box" alignment="CENTER_LEFT">
+               <children>
+                  <Label styleClass="setting-label" text="Difficulty" />
+                  <RadioButton fx:id="difficultyEasy" styleClass="radio-label" onAction="#handleDifficultyChange" text="Easy">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="difficulty" />
+                     </toggleGroup></RadioButton>
+                  <RadioButton fx:id="difficultyNormal" styleClass="radio-label" onAction="#handleDifficultyChange" text="Normal" toggleGroup="$difficulty" />
+                  <RadioButton fx:id="difficultyHard" styleClass="radio-label" onAction="#handleDifficultyChange" text="Hard" toggleGroup="$difficulty" />
+               </children>
+            </HBox>
             <HBox fx:id="colorModeBox" styleClass="radio-box" alignment="CENTER_LEFT">
                <children>
                   <Label styleClass="setting-label" text="Color Mode" />

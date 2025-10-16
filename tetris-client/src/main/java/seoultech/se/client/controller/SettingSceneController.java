@@ -36,6 +36,12 @@ public class SettingSceneController extends BaseController {
     @FXML
     private RadioButton screenSizeXL;
     @FXML
+    private RadioButton difficultyEasy;
+    @FXML
+    private RadioButton difficultyNormal;
+    @FXML
+    private RadioButton difficultyHard;
+    @FXML
     private RadioButton colorModeDefault;
     @FXML
     private RadioButton colorModeRGBlind;
@@ -148,6 +154,11 @@ public class SettingSceneController extends BaseController {
         settingsService.applyResolution(width, height);
         settingsService.saveSettings();
         System.out.println("🖥️ Screen size set to: " + selectedRadioButton.getId());
+    }
+
+    @FXML
+    public void handleDifficultyChange(ActionEvent event) {
+        // 난이도 변경 기능 구현 필요
     }
 
     @FXML
