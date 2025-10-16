@@ -263,3 +263,19 @@
     -fx-effect: dropshadow(gaussian, rgba(0,255,0,0.6), 0.8em, 0, 0, 0);
 }
 
+/* 깜빡임 애니메이션 정의 */
+@keyframes blink {
+    0%, 100% { 
+        -fx-background-color: white;
+        -fx-opacity: 1.0; 
+    }
+    50% { 
+        -fx-background-color: white;
+        -fx-opacity: 0.2;
+    }
+}
+
+/* 블럭 사라질 때 깜빡이는 애니메이션 효과 클래스 */
+.erase-motion {
+    -fx-animation: blink 500ms infinite;
+}
