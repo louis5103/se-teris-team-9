@@ -45,6 +45,7 @@ public class MainController extends BaseController {
      * FXML 파일이 로드된 후 자동으로 호출됩니다
      */
     public void initialize() {
+        super.initialize();
         System.out.println("✅ MainController initialized with Spring DI");
         System.out.println("📊 Service Status: " + gameService.getStatus());
     }
