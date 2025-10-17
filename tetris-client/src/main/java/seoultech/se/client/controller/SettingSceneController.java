@@ -129,23 +129,23 @@ public class SettingSceneController extends BaseController {
         switch (selectedRadioButton.getId()) {
             case "screenSizeXS":
                 width = 300;
-                height = 500;
+                height = width * 1.2;
                 break;
             case "screenSizeS":
                 width = 400;
-                height = 600;
+                height = width * 1.2;
                 break;
             case "screenSizeM":
                 width = 500;
-                height = 700;
+                height = width * 1.2;
                 break;
             case "screenSizeL":
                 width = 600;
-                height = 800;
+                height = width * 1.2;
                 break;
             case "screenSizeXL":
                 width = 700;
-                height = 900;
+                height = width * 1.2;
                 break;
             default:
                 System.out.println("❗ Unknown screen size selected");
