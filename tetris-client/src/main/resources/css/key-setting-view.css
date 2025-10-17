@@ -24,7 +24,6 @@
     -fx-border-width: 0.18em;
     -fx-border-radius: 0.8em;
     -fx-background-radius: 0.8em;
-    -fx-alignment: CENTER;
     -fx-padding: 0 1em 0 1em;
     -fx-spacing: 5em;
 }
@@ -47,7 +46,6 @@
     -fx-font-family: "System Bold";
     -fx-pref-height: 2.5em;
     -fx-pref-width: 16em;
-    -fx-alignment: CENTER;
 }
 
 .key-binding-button:hover {

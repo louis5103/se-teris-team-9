@@ -3,10 +3,16 @@
     -fx-background-color: #1a1a1a;
 }
 
+/* ========== 버튼 및 라벨 최소크기 해제 ========== */
+.button, .label {
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+
 /* ========== 메뉴 버튼 ========== */
 .menu-button {
-    -fx-pref-width: 16.667em;
-    -fx-pref-height: 4.167em;
+    -fx-pref-width: 20em;
+    -fx-pref-height: 4.5em;
     -fx-background-color: #333333;
     -fx-text-fill: white;
     -fx-font-size: 2em;
@@ -18,11 +24,11 @@
 }
 
 .menu-button-middle {
-    -fx-pref-width: 20.833em;
-    -fx-pref-height: 3.75em;
+    -fx-pref-width: 22em;
+    -fx-pref-height: 4em;
     -fx-background-color: #333333;
     -fx-text-fill: white;
-    -fx-font-size: 1.667em;
+    -fx-font-size: 1.5em;
     -fx-font-family: "Arial Black";
     -fx-border-color: #555555;
     -fx-border-width: 0.167em;
@@ -31,8 +37,8 @@
 }
 
 .menu-button-small {
-    -fx-pref-width: 8.333em;
-    -fx-pref-height: 3.333em;
+    -fx-pref-width: 12em;
+    -fx-pref-height: 3em;
     -fx-background-color: #333333;
     -fx-text-fill: white;
     -fx-font-size: 1.5em;
@@ -61,9 +67,8 @@
 
 /* ========== 하단 버튼 박스 ========== */
 .bottom-box {
-    -fx-padding: 1.25em 1.667em 1.25em 1.667em;
+    -fx-padding: 0.5em 1.667em 1.25em 1.667em;
     -fx-spacing: 0.833em;
-    -fx-background-color: rgba(30, 30, 30, 0.5);
     -fx-alignment: CENTER_RIGHT;
 }
 
