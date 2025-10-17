@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.Region?>
 
-<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700" prefWidth="500.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seoultech.se.client.controller.SettingSceneController" stylesheets="@../css/application.css, @../css/setting-view.css">
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seoultech.se.client.controller.SettingSceneController" stylesheets="@../css/application.css, @../css/setting-view.css">
    <top>
       <Label styleClass="title-label" text="Setting" BorderPane.alignment="TOP_CENTER"/>
    </top>

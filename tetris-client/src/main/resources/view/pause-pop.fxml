@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="rootPane" prefHeight="300" prefWidth="400" 
+<BorderPane fx:id="rootPane" 
             stylesheets="@../css/application.css, @../css/pause-pop.css" 
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="seoultech.se.client.controller.PausePopController">

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.stage.Stage;
 
 @Service
@@ -17,7 +17,7 @@ public class SettingsService {
 
     private Stage primaryStage;
     private final DoubleProperty stageWidth = new SimpleDoubleProperty(500);
-    private final DoubleProperty stageHeight = new SimpleDoubleProperty(700);
+    private final DoubleProperty stageHeight = new SimpleDoubleProperty(600);
 
     private final DoubleProperty soundVolume = new SimpleDoubleProperty(80); // Default volume is 80
     private final StringProperty colorMode = new SimpleStringProperty("colorModeDefault"); // default, rg_blind, yb_blind
@@ -56,7 +56,7 @@ public class SettingsService {
             colorMode.set(props.getProperty("colorMode", "colorModeDefault"));
             screenSize.set(props.getProperty("screenSize", "screenSizeM"));
             double width = Double.parseDouble(props.getProperty("stageWidth", "500"));
-            double height = Double.parseDouble(props.getProperty("stageHeight", "700"));
+            double height = Double.parseDouble(props.getProperty("stageHeight", "600"));
             applyResolution(width, height);
             System.out.println("✅ Settings loaded successfully.");
         } catch (Exception e) {

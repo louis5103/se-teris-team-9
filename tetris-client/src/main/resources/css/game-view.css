@@ -40,12 +40,58 @@
     -fx-background-color: #1a1a1a;
 }
 
+/* ========== 레이아웃 스타일 ========== */
+/* 메인 컨테이너 여백 */
+.game-main-container {
+    -fx-spacing: 3.333em;
+    -fx-padding: 1.667em;
+}
+
+/* Hold 영역 */
+.hold-container {
+    -fx-spacing: 0.833em;
+}
+
+/* 이벤트 알림 영역 */
+.event-notification-container {
+    -fx-spacing: 0.667em;
+    -fx-padding: 2.5em 0 0 0;
+}
+
+.event-line-container {
+    -fx-spacing: 2.5em;
+}
+
+/* 팝업 오버레이 */
+.popup-content {
+    -fx-spacing: 1.25em;
+}
+
+.gameover-buttons {
+    -fx-spacing: 1.25em;
+}
+
+/* 오른쪽 정보 영역 */
+.info-panel {
+    -fx-spacing: 2.5em;
+}
+
+.info-section {
+    -fx-spacing: 0.417em;
+}
+
+.controls-section {
+    -fx-spacing: 0.417em;
+}
+
+
+
 .game-title {
     -fx-font-size: 4em;
     -fx-font-family: "Impact";
     -fx-text-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, aqua 0%, red 50%);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 0.833em, 0, 0.25em, 0.25em);
-    -fx-alignment: center;
+    -fx-padding: 1.667em 0 0 0;
 }
 
 /* ========== 게임 보드 ========== */
@@ -56,7 +102,6 @@
     -fx-padding: 0;
     -fx-hgap: 0;
     -fx-vgap: 0;
-    -fx-alignment: center;
     -fx-grid-lines-visible: false;
 }
 
@@ -132,14 +177,12 @@
     -fx-font-size: 1.333em;
     -fx-font-family: "Arial Black";
     -fx-text-fill: #888888;
-    -fx-alignment: center;
 }
 
 .info-label-value {
     -fx-font-size: 2.667em;
     -fx-font-family: "Arial Black";
     -fx-text-fill: #00ff00;
-    -fx-alignment: center;
     -fx-effect: dropshadow(gaussian, rgba(0,255,0,0.5), 0.417em, 0, 0, 0);
 }
 
@@ -148,6 +191,7 @@
     -fx-background-color: rgba(50, 50, 50, 0.5);
     -fx-padding: 0.833em;
     -fx-background-radius: 0.417em;
+    -fx-spacing: 0.25em;
 }
 
 .control-text {
@@ -162,7 +206,6 @@
     -fx-font-family: "Impact";
     -fx-text-fill: #ff0000;
     -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.8), 1.667em, 0, 0, 0);
-    -fx-alignment: center;
     -fx-background-color: rgba(0, 0, 0, 0.8);
     -fx-padding: 1.667em;
     -fx-background-radius: 0.833em;
@@ -176,7 +219,6 @@
     -fx-padding: 0.417em;
     -fx-hgap: 0;
     -fx-vgap: 0;
-    -fx-alignment: center;
     -fx-grid-lines-visible: false;
 }
 
@@ -186,7 +228,6 @@
     -fx-font-family: "Impact";
     -fx-text-fill: #FFD700;
     -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.6), 0.5em, 0, 0, 0);
-    -fx-alignment: center;
     -fx-background-color: rgba(0, 0, 0, 0.5);
     -fx-padding: 0.3em 0.8em;
     -fx-background-radius: 0.25em;
@@ -198,7 +239,6 @@
     -fx-font-family: "Impact";
     -fx-text-fill: #FFFFFF;
     -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.7), 0.6em, 0, 0, 0);
-    -fx-alignment: center;
     -fx-background-color: rgba(0, 0, 0, 0.5);
     -fx-padding: 0.4em 1em;
     -fx-background-radius: 0.25em;
@@ -210,7 +250,6 @@
     -fx-font-family: "Arial Black";
     -fx-text-fill: #FF6B6B;
     -fx-effect: dropshadow(gaussian, rgba(255,107,107,0.6), 0.5em, 0, 0, 0);
-    -fx-alignment: center;
     -fx-background-color: rgba(0, 0, 0, 0.5);
     -fx-padding: 0.3em 0.8em;
     -fx-background-radius: 0.25em;
@@ -222,7 +261,6 @@
     -fx-font-family: "Arial Black";
     -fx-text-fill: #4ECDC4;
     -fx-effect: dropshadow(gaussian, rgba(78,205,196,0.6), 0.5em, 0, 0, 0);
-    -fx-alignment: center;
     -fx-background-color: rgba(0, 0, 0, 0.5);
     -fx-padding: 0.3em 0.8em;
     -fx-background-radius: 0.25em;
@@ -231,6 +269,7 @@
 /* ========== 팝업 오버레이 ========== */
 .popup-overlay {
     -fx-background-color: rgba(0, 0, 0, 0.85);
+    -fx-spacing: 1.667em;
 }
 
 .popup-container {
@@ -241,6 +280,7 @@
     -fx-background-radius: 1em;
     -fx-padding: 2em;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 2em, 0, 0, 0);
+    -fx-spacing: 1.25em;
 }
 
 .popup-title {

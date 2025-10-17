@@ -15,36 +15,28 @@
     - 오른쪽: 점수, 레벨, 라인 정보
     - 중앙: 게임 오버 메시지 (평소에는 숨김)
 -->
-<BorderPane xmlns="http://javafx.com/javafx/21" 
+<BorderPane fx:id="rootPane"
+            xmlns="http://javafx.com/javafx/21" 
             xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="seoultech.se.client.controller.GameController"
-            prefHeight="800.0" prefWidth="900.0"
             styleClass="game-background"
             stylesheets="@../css/application.css, @../css/game-view.css">
     
     <!-- 상단: 제목 -->
     <top>
-        <Label text="TETRIS" styleClass="game-title">
-            <BorderPane.margin>
-                <Insets top="20.0" />
-            </BorderPane.margin>
-        </Label>
+        <Label text="TETRIS" styleClass="game-title" alignment="CENTER" />
     </top>
     
     <!-- 중앙: 게임 보드와 정보 -->
     <center>
-        <HBox spacing="40.0" alignment="CENTER" BorderPane.alignment="CENTER">
-            <BorderPane.margin>
-                <Insets top="20.0" bottom="20.0" left="20.0" right="20.0" />
-            </BorderPane.margin>
+        <HBox styleClass="game-main-container" alignment="CENTER" BorderPane.alignment="CENTER">
             
             <!-- 왼쪽: Hold 영역 -->
-            <VBox spacing="10.0" alignment="TOP_CENTER" minWidth="120.0">
-                <Label text="HOLD" styleClass="info-label-title"/>
+            <VBox styleClass="hold-container" alignment="TOP_CENTER">
+                <Label text="HOLD" styleClass="info-label-title" alignment="CENTER"/>
                 <GridPane fx:id="holdGridPane" 
                          styleClass="preview-board"
-                         prefWidth="120.0" 
-                         prefHeight="120.0">
+                         alignment="CENTER">
                 </GridPane>
             </VBox>
             
@@ -53,7 +45,8 @@
                 <!-- 실제 테트리스 보드 (10x20 그리드) - 배경 -->
                 <GridPane fx:id="boardGridPane" 
                          styleClass="game-board"
-                         focusTraversable="true">
+                         focusTraversable="true"
+                         alignment="CENTER">
                     <!-- 
                         이 GridPane은 GameController의 initializeGridPane()에서 
                         Rectangle들로 채워집니다 (10열 x 20행)
@@ -65,30 +58,30 @@
                        text="GAME OVER" 
                        styleClass="game-over-label" 
                        StackPane.alignment="CENTER"
+                       alignment="CENTER"
                        visible="false"
                        managed="false"
                        mouseTransparent="false"/>
                 
                 <!-- 상단 이벤트 알림 영역 -->
-                <VBox alignment="TOP_CENTER" spacing="8.0" 
+                <VBox alignment="TOP_CENTER" styleClass="event-notification-container"
                       pickOnBounds="false"
                       mouseTransparent="true"
                       StackPane.alignment="TOP_CENTER">
-                    <StackPane.margin>
-                        <Insets top="30.0" />
-                    </StackPane.margin>
                     
                     <!-- 첫 번째 라인: Combo + Back-to-Back -->
-                    <HBox fx:id="topEventLine" alignment="CENTER" spacing="30.0" 
+                    <HBox fx:id="topEventLine" alignment="CENTER" styleClass="event-line-container"
                           visible="false" managed="false">
                         <Label fx:id="comboLabel" 
                                text="" 
                                styleClass="combo-label" 
+                               alignment="CENTER"
                                visible="false"
                                managed="false"/>
                         <Label fx:id="backToBackLabel" 
                                text="" 
                                styleClass="back-to-back-label" 
+                               alignment="CENTER"
                                visible="false"
                                managed="false"/>
                     </HBox>
@@ -97,6 +90,7 @@
                     <Label fx:id="lineClearTypeLabel" 
                            text="" 
                            styleClass="line-clear-type-label" 
+                           alignment="CENTER"
                            visible="false"
                            managed="false"/>
                     
@@ -104,6 +98,7 @@
                     <Label fx:id="lineClearNotificationLabel" 
                            text="" 
                            styleClass="line-clear-notification-label" 
+                           alignment="CENTER"
                            visible="false"
                            managed="false"/>
                 </VBox>
@@ -111,12 +106,11 @@
                 <!-- Pause 팝업 오버레이 (평소에는 숨김) -->
                 <VBox fx:id="pauseOverlay" 
                       alignment="CENTER" 
-                      spacing="20.0"
                       styleClass="popup-overlay"
                       visible="false"
                       managed="false"
                       StackPane.alignment="CENTER">
-                    <VBox alignment="CENTER" spacing="15.0" styleClass="popup-container">
+                    <VBox alignment="CENTER" styleClass="popup-container">
                         <Label text="PAUSED" styleClass="popup-title"/>
                         <Button text="Resume" styleClass="menu-button-middle" onAction="#handleResumeFromOverlay"/>
                         <Button text="Quit" styleClass="menu-button-middle" onAction="#handleQuitFromOverlay"/>
@@ -126,16 +120,15 @@
                 <!-- Game Over 팝업 오버레이 (평소에는 숨김) -->
                 <VBox fx:id="gameOverOverlay" 
                       alignment="CENTER" 
-                      spacing="20.0"
                       styleClass="popup-overlay"
                       visible="false"
                       managed="false"
                       StackPane.alignment="CENTER">
-                    <VBox alignment="CENTER" spacing="15.0" styleClass="popup-container">
+                    <VBox alignment="CENTER" styleClass="popup-container">
                         <Label text="GAME OVER" styleClass="popup-title"/>
                         <Label text="Your Score" styleClass="popup-label"/>
                         <Label fx:id="finalScoreLabel" text="0" styleClass="popup-score"/>
-                        <HBox spacing="15.0" alignment="CENTER">
+                        <HBox styleClass="gameover-buttons" alignment="CENTER">
                             <Button text="Main" styleClass="menu-button-small" onAction="#handleMainFromOverlay"/>
                             <Button text="Restart" styleClass="menu-button-small" onAction="#handleRestartFromOverlay"/>
                         </HBox>
@@ -144,39 +137,38 @@
             </StackPane>
             
             <!-- 오른쪽: 게임 정보 -->
-            <VBox spacing="30.0" alignment="TOP_CENTER" minWidth="150.0">
+            <VBox styleClass="info-panel" alignment="TOP_CENTER">
                 <!-- Next 영역 -->
-                <VBox spacing="5.0" alignment="CENTER">
-                    <Label text="NEXT" styleClass="info-label-title"/>
+                <VBox styleClass="info-section" alignment="CENTER">
+                    <Label text="NEXT" styleClass="info-label-title" alignment="CENTER"/>
                     <GridPane fx:id="nextGridPane" 
                              styleClass="preview-board"
-                             prefWidth="120.0" 
-                             prefHeight="120.0">
+                             alignment="CENTER">
                     </GridPane>
                 </VBox>
                 
                 <!-- 점수 -->
-                <VBox spacing="5.0" alignment="CENTER">
-                    <Label text="SCORE" styleClass="info-label-title"/>
-                    <Label fx:id="scoreLabel" text="0" styleClass="info-label-value"/>
+                <VBox styleClass="info-section" alignment="CENTER">
+                    <Label text="SCORE" styleClass="info-label-title" alignment="CENTER"/>
+                    <Label fx:id="scoreLabel" text="0" styleClass="info-label-value" alignment="CENTER"/>
                 </VBox>
                 
                 <!-- 레벨 -->
-                <VBox spacing="5.0" alignment="CENTER">
-                    <Label text="LEVEL" styleClass="info-label-title"/>
-                    <Label fx:id="levelLabel" text="1" styleClass="info-label-value"/>
+                <VBox styleClass="info-section" alignment="CENTER">
+                    <Label text="LEVEL" styleClass="info-label-title" alignment="CENTER"/>
+                    <Label fx:id="levelLabel" text="1" styleClass="info-label-value" alignment="CENTER"/>
                 </VBox>
                 
                 <!-- 지운 줄 수 -->
-                <VBox spacing="5.0" alignment="CENTER" minHeight="60.0" prefHeight="60.0">
-                    <Label text="LINES" styleClass="info-label-title"/>
-                    <Label fx:id="linesLabel" text="0" styleClass="info-label-value" minWidth="80.0" alignment="CENTER"/>
+                <VBox styleClass="info-section" alignment="CENTER">
+                    <Label text="LINES" styleClass="info-label-title" alignment="CENTER"/>
+                    <Label fx:id="linesLabel" text="0" styleClass="info-label-value" alignment="CENTER"/>
                 </VBox>
                 
                 <!-- 조작법 안내 -->
-                <VBox spacing="5.0" alignment="CENTER">
+                <VBox styleClass="controls-section" alignment="CENTER">
                     <Label text="CONTROLS" styleClass="info-label-title"/>
-                    <VBox spacing="3.0" styleClass="controls-info">
+                    <VBox styleClass="controls-info">
                         <Label text="← → : Move" styleClass="control-text"/>
                         <Label text="↓ : Soft Drop" styleClass="control-text"/>
                         <Label text="↑ : Rotate CW" styleClass="control-text"/>
