@@ -7,6 +7,7 @@ import java.util.Random;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import seoultech.se.client.mapper.EventMapper;
 import seoultech.se.core.BoardObserver;
 import seoultech.se.core.GameEngine;
 import seoultech.se.core.GameState;
@@ -14,9 +15,6 @@ import seoultech.se.core.command.Direction;
 import seoultech.se.core.command.GameCommand;
 import seoultech.se.core.command.MoveCommand;
 import seoultech.se.core.command.RotateCommand;
-import seoultech.se.core.event.BackToBackEvent;
-import seoultech.se.core.event.ComboBreakEvent;
-import seoultech.se.core.event.ComboEvent;
 import seoultech.se.core.event.GameEvent;
 import seoultech.se.core.event.GameOverEvent;
 import seoultech.se.core.event.GameStateChangedEvent;
@@ -28,7 +26,6 @@ import seoultech.se.core.event.TetrominoRotatedEvent;
 import seoultech.se.core.event.TetrominoSpawnedEvent;
 import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.TetrominoType;
-import seoultech.se.core.result.LineClearResult;
 import seoultech.se.core.result.LockResult;
 import seoultech.se.core.result.MoveResult;
 import seoultech.se.core.result.RotationResult;
@@ -74,6 +71,7 @@ public class BoardController {
 
     // 7-bag 시스템을 위한 상태
     private List<TetrominoType> currentBag = new ArrayList<>();
+    private List<TetrominoType> nextBag = new ArrayList<>();  // 다음 가방 미리 준비
     private int bagIndex = 0;
     
     // 플레이 시간 추적
@@ -123,6 +121,13 @@ public class BoardController {
     public List<GameEvent> executeCommand(GameCommand command) {
         if (gameState.isGameOver()) {
             return List.of(); // 게임 오버 상태에서는 Command 무시
+        }
+
+        // 일시정지 상태에서는 PAUSE/RESUME 명령만 허용
+        if (gameState.isPaused() && 
+            command.getType() != seoultech.se.core.command.CommandType.RESUME &&
+            command.getType() != seoultech.se.core.command.CommandType.PAUSE) {
+            return List.of(); // 일시정지 중이면 다른 명령 무시
         }
 
         List<GameEvent> events = new ArrayList<>();
@@ -189,7 +194,7 @@ public class BoardController {
                 result = GameEngine.tryMoveRight(gameState);
                 break;
             case DOWN:
-                result = GameEngine.tryMoveDown(gameState);
+                result = GameEngine.tryMoveDown(gameState, command.isSoftDrop());
                 break;
             default:
                 return events; // 알 수 없는 방향
@@ -300,6 +305,13 @@ public class BoardController {
         if (result.isSuccess()) {
             gameState = result.getNewState();
             
+            // Hold가 비어있었던 경우, Next Queue를 7-bag 시스템으로 업데이트
+            // GameEngine.tryHold()는 nextQueue[0]을 읽기만 하고 제거하지 않으므로
+            // 여기서 명시적으로 큐를 업데이트하여 7-bag 시스템과 동기화합니다
+            if (result.getPreviousHeldPiece() == null) {
+                updateNextQueue();
+            }
+            
             // Hold 변경 Event
             events.add(new seoultech.se.core.event.HoldChangedEvent(
                 result.getNewHeldPiece(),
@@ -331,10 +343,21 @@ public class BoardController {
             events.add(new GameStateChangedEvent(gameState));
             
         } else {
-            // Hold 실패 Event
-            events.add(new seoultech.se.core.event.HoldFailedEvent(
-                result.getFailureReason()
-            ));
+            // Hold 실패 처리
+            // 게임 오버 상태인지 확인
+            if (gameState.isGameOver()) {
+                // 게임 오버 Event 발생
+                events.add(new GameOverEvent(result.getFailureReason(), 
+                    gameState.getScore(), 
+                    gameState.getLevel(), 
+                    gameState.getLinesCleared(), 
+                    (System.currentTimeMillis() - gameStartTime) / 1000));
+            } else {
+                // 일반 Hold 실패 (이미 사용함 등)
+                events.add(new seoultech.se.core.event.HoldFailedEvent(
+                    result.getFailureReason()
+                ));
+            }
         }
         
         return events;
@@ -402,100 +425,25 @@ public class BoardController {
     /**
      * LockResult를 처리하고 적절한 Event들을 생성합니다
      * 
-     * 이 메서드가 Result → Event 변환의 핵심입니다.
-     * LockResult는 GameEngine의 언어이고, Event는 도메인의 언어입니다.
+     * 이제 EventMapper를 사용하여 Result → Event 변환을 수행합니다.
+     * 이를 통해 BoardController의 복잡도가 크게 감소했습니다.
      * 
-     * LockResult에는 다음 정보가 포함되어 있습니다:
-     * - 게임 오버 여부
-     * - LineClearResult (지워진 라인 정보)
-     * - 새로운 GameState
-     * 
-     * 우리는 이것을 여러 Event로 분해합니다:
-     * - TetrominoLockedEvent: 블록이 고정되었다
-     * - LineClearedEvent: 라인이 지워졌다 (있다면)
-     * - ScoreAddedEvent: 점수를 얻었다 (있다면)
-     * - GameOverEvent: 게임이 끝났다 (게임 오버라면)
-     * - TetrominoSpawnedEvent: 새 블록이 생성되었다 (게임 오버가 아니라면)
-     * - GameStateChangedEvent: 게임 상태가 변경되었다
+     * @param result 고정 결과
+     * @return 발생한 이벤트들의 리스트
      */
     private List<GameEvent> processLockResult(LockResult result) {
-        List<GameEvent> events = new ArrayList<>();
+        // EventMapper를 사용하여 LockResult를 Event 리스트로 변환
+        List<GameEvent> events = EventMapper.fromLockResult(
+            result,
+            gameState,
+            gameStartTime
+        );
 
-        // 1. 블록 고정 Event
-        events.add(new TetrominoLockedEvent(
-            gameState.getCurrentTetromino(),
-            gameState.getCurrentX(),
-            gameState.getCurrentY()
-        ));
-
-        // 2. 게임 오버 체크
-        if (result.isGameOver()) {
-            long playTimeMillis = System.currentTimeMillis() - gameStartTime;
-            events.add(new GameOverEvent(
-                result.getGameOverReason(),
-                gameState.getScore(),
-                gameState.getLevel(),
-                gameState.getLinesCleared(),
-                playTimeMillis
-            ));
-            
-            // GameState 업데이트 Event
-            events.add(new GameStateChangedEvent(gameState));
-            
-            return events; // 게임 오버면 여기서 종료
+        // 게임 오버가 아니면 새 블록 생성
+        if (!result.isGameOver()) {
+            spawnNewTetromino();
+            events.addAll(EventMapper.createTetrominoSpawnEvents(gameState));
         }
-
-        // 3. 라인 클리어 처리
-        LineClearResult clearResult = result.getLineClearResult();
-        if (clearResult.getLinesCleared() > 0) {
-            // LineClearedEvent
-            events.add(new LineClearedEvent(
-                clearResult.getLinesCleared(),
-                clearResult.getClearedRows(),
-                clearResult.isTSpin(),
-                clearResult.isTSpinMini(),
-                clearResult.isPerfectClear()
-            ));
-
-            // ScoreAddedEvent
-            events.add(new ScoreAddedEvent(
-                clearResult.getScoreEarned(),
-                getScoreReason(clearResult)
-            ));
-
-            // Combo Event
-            if (gameState.getComboCount() > 0) {
-                events.add(new ComboEvent(gameState.getComboCount()));
-            }
-            
-            // Back-to-Back Event
-            if (gameState.getBackToBackCount() > 0) {
-                events.add(new BackToBackEvent(gameState.getBackToBackCount()));
-            }
-        } else {
-            // 라인을 지우지 못했으면 콤보 종료
-            if (gameState.getComboCount() > 0) {
-                events.add(new ComboBreakEvent(gameState.getComboCount()));
-            }
-        }
-
-        // 4. GameState 변경 Event
-        events.add(new GameStateChangedEvent(gameState));
-
-        // 5. 새 블록 생성
-        spawnNewTetromino();
-        events.add(new TetrominoSpawnedEvent(
-            gameState.getCurrentTetromino(),
-            gameState.getCurrentX(),
-            gameState.getCurrentY()
-        ));
-        
-        // 새 블록의 위치 Event
-        events.add(new TetrominoMovedEvent(
-            gameState.getCurrentX(),
-            gameState.getCurrentY(),
-            gameState.getCurrentTetromino()
-        ));
 
         return events;
     }
@@ -521,7 +469,10 @@ public class BoardController {
 
     private TetrominoType getNextTetrominoType() {
         if (currentBag.isEmpty() || bagIndex >= currentBag.size()) {
-            refillBag();
+            // 현재 가방이 비었으면 다음 가방을 현재 가방으로 교체
+            currentBag = nextBag;
+            nextBag = createAndShuffleBag();
+            bagIndex = 0;
         }
 
         TetrominoType nextType = currentBag.get(bagIndex);
@@ -530,21 +481,32 @@ public class BoardController {
         return nextType;
     }
 
-    private void refillBag() {
-        currentBag.clear();
-        bagIndex = 0;
-
+    /**
+     * 새로운 7-bag을 생성하고 섞습니다
+     */
+    private List<TetrominoType> createAndShuffleBag() {
+        List<TetrominoType> bag = new ArrayList<>();
+        
+        // 7가지 블록을 모두 추가
         for (TetrominoType type : TetrominoType.values()) {
-            currentBag.add(type);
+            bag.add(type);
         }
 
-        // 셔플 (Fisher-Yates 알고리즘)
-        for (int i = currentBag.size() - 1; i > 0; i--) {
+        // Fisher-Yates 셔플
+        for (int i = bag.size() - 1; i > 0; i--) {
             int j = random.nextInt(i + 1);
-            TetrominoType temp = currentBag.get(i);
-            currentBag.set(i, currentBag.get(j));
-            currentBag.set(j, temp);
+            TetrominoType temp = bag.get(i);
+            bag.set(i, bag.get(j));
+            bag.set(j, temp);
         }
+        
+        return bag;
+    }
+
+    private void refillBag() {
+        currentBag = createAndShuffleBag();
+        nextBag = createAndShuffleBag();  // 다음 가방도 미리 준비
+        bagIndex = 0;
     }
 
     private void initializeNextQueue() {
@@ -553,6 +515,12 @@ public class BoardController {
         spawnNewTetromino();
     }
 
+    /**
+     * Next Queue를 업데이트합니다
+     * 
+     * 현재 가방과 다음 가방에서 정확하게 6개의 블록을 미리보기로 제공합니다.
+     * 이제 다음 가방이 미리 준비되어 있으므로 정확한 예측이 가능합니다.
+     */
     private void updateNextQueue() {
         TetrominoType[] queue = new TetrominoType[6];
 
@@ -560,43 +528,18 @@ public class BoardController {
             int index = bagIndex + i;
 
             if (index < currentBag.size()) {
+                // 현재 가방에서 가져오기
                 queue[i] = currentBag.get(index);
             } else {
-                // 다음 가방의 블록 예측 (아직 섞이지 않았으므로 순서대로)
+                // 다음 가방에서 가져오기 (이미 섞여있음)
                 int nextBagIndex = index - currentBag.size();
-                if (nextBagIndex < 7) {
-                    queue[i] = TetrominoType.values()[nextBagIndex % 7];
+                if (nextBagIndex < nextBag.size()) {
+                    queue[i] = nextBag.get(nextBagIndex);
                 }
             }
         }
         
         gameState.setNextQueue(queue);
-    }
-
-    // ========== 헬퍼 메서드들 ==========
-    
-    private String getScoreReason(LineClearResult result) {
-        if (result.isPerfectClear()) {
-            return "PERFECT_CLEAR";
-        }
-        if (result.isTSpin()) {
-            if (result.isTSpinMini()) {
-                return "T-SPIN_MINI_" + lineCountToName(result.getLinesCleared());
-            } else {
-                return "T-SPIN_" + lineCountToName(result.getLinesCleared());
-            }
-        }
-        return lineCountToName(result.getLinesCleared());
-    }
-
-    private String lineCountToName(int lines) {
-        switch (lines) {
-            case 1: return "SINGLE";
-            case 2: return "DOUBLE";
-            case 3: return "TRIPLE";
-            case 4: return "TETRIS";
-            default: return "UNKNOWN";
-        }
     }
 
     // ========== Observer 알림 ==========
@@ -689,6 +632,25 @@ public class BoardController {
                 GameOverEvent gameOverEvent = (GameOverEvent) event;
                 for (BoardObserver observer : observers) {
                     observer.onGameOver(gameOverEvent.getReason());
+                }
+                break;
+                
+            case LEVEL_UP:
+                seoultech.se.core.event.LevelUpEvent levelUpEvent = (seoultech.se.core.event.LevelUpEvent) event;
+                for (BoardObserver observer : observers) {
+                    observer.onLevelUp(levelUpEvent.getNewLevel());
+                }
+                break;
+
+            case GAME_PAUSED:
+                for (BoardObserver observer : observers) {
+                    observer.onGamePaused();
+                }
+                break;
+
+            case GAME_RESUMED:
+                for (BoardObserver observer : observers) {
+                    observer.onGameResumed();
                 }
                 break;
 

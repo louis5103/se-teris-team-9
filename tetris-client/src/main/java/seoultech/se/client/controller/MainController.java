@@ -45,6 +45,7 @@ public class MainController extends BaseController {
      * FXML 파일이 로드된 후 자동으로 호출됩니다
      */
     public void initialize() {
+        super.initialize();
         System.out.println("✅ MainController initialized with Spring DI");
         System.out.println("📊 Service Status: " + gameService.getStatus());
     }
@@ -60,9 +61,9 @@ public class MainController extends BaseController {
     /**
      * SCORE 버튼 액션 (향후 구현 예정)
      */
-    public void handleScoreButtonAction() {
+    public void handleScoreButtonAction() throws IOException {
         System.out.println("🏆 Score button clicked");
-        // TODO: 점수판 화면 구현
+        navigationService.navigateTo("/view/score-board.fxml");
     }
 
     /**
@@ -153,6 +154,16 @@ public class MainController extends BaseController {
             // 예: Alert 다이얼로그 표시
         }
     }
+
+    /**
+     * itemSTART 버튼 액션 - 아이템 모드 게임 화면으로 전환
+     * 구현 필요
+     */
+
+    public void handleItemStartButtonAction(ActionEvent event) {
+
+    }
+
 
     /**
      * EXIT 버튼 액션 - 애플리케이션 종료
