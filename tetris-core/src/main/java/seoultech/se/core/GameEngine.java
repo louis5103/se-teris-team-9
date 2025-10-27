@@ -281,7 +281,7 @@ public class GameEngine {
      * @param state 현재 게임 상태
      * @return 고정 결과 (게임 오버 여부, 라인 클리어 정보 포함)
      */
-    public static LockResult lockTetromino(GameState state) {
+    public static GameState lockTetromino(GameState state) {
         return lockTetrominoInternal(state, true);
     }
     
