@@ -517,7 +517,7 @@ public class BoardController {
         // - SingleMode: 추가 이벤트 없음
         // - ItemMode: 아이템 드롭 이벤트
         // - MultiMode: 공격 전송 이벤트
-        if (result.getLinesCleared() > 0 && gameMode != null) {
+        if (result.getLineClearResult().getLinesCleared() > 0 && gameMode != null) {
             List<GameEvent> modeEvents = gameMode.onLineClear(result, gameState);
             events.addAll(modeEvents);
         }

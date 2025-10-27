@@ -115,10 +115,10 @@ public class SingleMode implements GameMode {
         // 라인 클리어에 대한 추가 처리 없음
         
         // 디버그 로그 (선택적)
-        if (result.getLinesCleared() > 0) {
+        if (result.getLineClearResult().getLinesCleared() > 0) {
             System.out.println(String.format(
                 "[SingleMode] %d줄 클리어 (점수: %d, 레벨: %d)",
-                result.getLinesCleared(),
+                result.getLineClearResult().getLinesCleared(),
                 state.getScore(),
                 state.getLevel()
             ));
@@ -144,18 +144,6 @@ public class SingleMode implements GameMode {
     // ========== 편의 메서드 ==========
     
     /**
-     * 현재 플레이 시간 조회 (초 단위)
-     * 
-     * @return 플레이 시간 (초)
-     */
-    public long getPlayTimeSeconds() {
-        if (gameState == null) {
-            return 0;
-        }
-        return gameState.getPlayTime() / 1000;
-    }
-    
-    /**
      * 통계 정보 출력
      * 
      * 싱글플레이어 세션 종료 시 통계를 출력합니다.
@@ -169,8 +157,7 @@ public class SingleMode implements GameMode {
         System.out.println("\n========== 싱글플레이어 통계 ==========");
         System.out.println("최종 점수: " + gameState.getScore());
         System.out.println("최종 레벨: " + gameState.getLevel());
-        System.out.println("클리어한 라인: " + gameState.getTotalLinesCleared());
-        System.out.println("플레이 시간: " + getPlayTimeSeconds() + "초");
+        System.out.println("클리어한 라인: " + gameState.getLinesCleared());
         System.out.println("=====================================\n");
     }
 }
