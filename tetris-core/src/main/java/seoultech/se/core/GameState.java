@@ -48,6 +48,11 @@ public class GameState {
     
     // T-Spin 감지를 위한 정보
     private boolean lastActionWasRotation;  // 마지막 액션이 회전이었는지
+    private int lastRotationKickIndex;  // 회전 시 사용한 Wall Kick 인덱스 (0-4)
+    
+    // T-Spin 결과 메타데이터 (마지막 고정 블록에 대한 정보)
+    private boolean lastLockWasTSpin;  // 마지막 고정이 T-Spin이었는지
+    private boolean lastLockWasTSpinMini;  // 마지막 고정이 T-Spin Mini였는지
 
 
     // 생성자
@@ -92,6 +97,9 @@ public class GameState {
         
         // T-Spin 감지 초기화
         this.lastActionWasRotation = false;
+        this.lastRotationKickIndex = 0;
+        this.lastLockWasTSpin = false;
+        this.lastLockWasTSpinMini = false;
     }
     
     // 깊은 복사.
@@ -138,8 +146,14 @@ public class GameState {
         copy.isLockDelayActive = this.isLockDelayActive;
         copy.lockDelayResets = this.lockDelayResets;
         
+        // 게임 상태 복사
+        copy.isPaused = this.isPaused;
+        
         // T-Spin 관련 복사
         copy.lastActionWasRotation = this.lastActionWasRotation;
+        copy.lastRotationKickIndex = this.lastRotationKickIndex;
+        copy.lastLockWasTSpin = this.lastLockWasTSpin;
+        copy.lastLockWasTSpinMini = this.lastLockWasTSpinMini;
         
         return copy;
     }
