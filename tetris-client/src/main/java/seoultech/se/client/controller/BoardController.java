@@ -7,7 +7,9 @@ import java.util.Random;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import lombok.Setter;
 import seoultech.se.client.mapper.EventMapper;
+import seoultech.se.client.mode.SingleMode;
 import seoultech.se.core.BoardObserver;
 import seoultech.se.core.GameEngine;
 import seoultech.se.core.GameState;
@@ -29,6 +31,8 @@ import seoultech.se.core.model.enumType.TetrominoType;
 import seoultech.se.core.result.LockResult;
 import seoultech.se.core.result.MoveResult;
 import seoultech.se.core.result.RotationResult;
+import seoultech.se.core.mode.GameMode;
+import seoultech.se.core.config.GameModeConfig;
 
 /**
  * Command를 받아서 처리하고 Event를 발행하는 컨트롤러
@@ -68,6 +72,18 @@ public class BoardController {
     private GameState gameState;
     private final List<BoardObserver> observers = new ArrayList<>();
     private final Random random = new Random();
+    
+    /**
+     * ⭐ 게임 모드 (Strategy Pattern)
+     * 
+     * 런타임에 다른 모드로 교체 가능합니다.
+     * - SingleMode: 싱글플레이어
+     * - ItemMode: 아이템 모드
+     * - MultiMode: 멀티플레이어
+     * 
+     * 기본값은 SingleMode이며, setGameMode()로 변경 가능합니다.
+     */
+    private GameMode gameMode;
 
     // 7-bag 시스템을 위한 상태
     private List<TetrominoType> currentBag = new ArrayList<>();
@@ -80,7 +96,42 @@ public class BoardController {
     public BoardController(){
         this.gameState = new GameState(10, 20);
         this.gameStartTime = System.currentTimeMillis();
+        
+        // ⭐ 기본 게임 모드 설정 (SingleMode)
+        this.gameMode = new SingleMode();
+        this.gameMode.initialize(this.gameState);
+        
         initializeNextQueue();
+    }
+    
+    /**
+     * ⭐ 게임 모드 설정 (Strategy Pattern 핵심)
+     * 
+     * 런타임에 게임 모드를 변경할 수 있습니다.
+     * 
+     * 사용 예시:
+     * - boardController.setGameMode(singleMode);
+     * - boardController.setGameMode(itemMode);
+     * - boardController.setGameMode(multiMode);
+     * 
+     * @param gameMode 설정할 게임 모드
+     */
+    public void setGameMode(GameMode gameMode) {
+        if (this.gameMode != null) {
+            this.gameMode.cleanup(); // 기존 모드 정리
+        }
+        this.gameMode = gameMode;
+        this.gameMode.initialize(this.gameState);
+        System.out.println("[BoardController] 게임 모드 변경: " + gameMode.getType());
+    }
+    
+    /**
+     * 현재 게임 모드의 설정 조회
+     * 
+     * @return 게임 모드 설정
+     */
+    public GameModeConfig getConfig() {
+        return gameMode != null ? gameMode.getConfig() : GameModeConfig.classic();
     }
 
     // ========== Observer 관리 ==========
@@ -271,9 +322,18 @@ public class BoardController {
      * 
      * GameEngine.hardDrop()은 이 모든 과정을 수행하고 LockResult를 반환합니다.
      * 우리는 이 LockResult를 여러 Event로 분해해야 합니다.
+     * 
+     * ⭐ 설정 확인:
+     * - config.isHardDropEnabled()가 false이면 명령 무시
      */
     private List<GameEvent> handleHardDropCommand() {
         List<GameEvent> events = new ArrayList<>();
+        
+        // ⭐ 설정 확인: 하드드롭이 비활성화되어 있으면 무시
+        if (!getConfig().isHardDropEnabled()) {
+            System.out.println("[BoardController] 하드드롭이 비활성화되어 있습니다.");
+            return events; // 빈 리스트 반환
+        }
         
         LockResult result = GameEngine.hardDrop(gameState);
         gameState = result.getNewState();
@@ -296,9 +356,19 @@ public class BoardController {
      * 
      * Hold 기능은 현재 블록을 보관하고 보관된 블록이 있으면 교체합니다.
      * 한 턴에 한 번만 사용 가능합니다.
+     * 
+     * ⭐ 설정 확인:
+     * - config.isHoldEnabled()가 false이면 명령 무시
+     * - config.getHoldLimit()에 따라 사용 횟수 제한
      */
     private List<GameEvent> handleHoldCommand() {
         List<GameEvent> events = new ArrayList<>();
+        
+        // ⭐ 설정 확인: 홀드가 비활성화되어 있으면 무시
+        if (!getConfig().isHoldEnabled()) {
+            System.out.println("[BoardController] 홀드 기능이 비활성화되어 있습니다.");
+            return events; // 빈 리스트 반환
+        }
         
         seoultech.se.core.result.HoldResult result = GameEngine.tryHold(gameState);
         
@@ -428,6 +498,10 @@ public class BoardController {
      * 이제 EventMapper를 사용하여 Result → Event 변환을 수행합니다.
      * 이를 통해 BoardController의 복잡도가 크게 감소했습니다.
      * 
+     * ⭐ GameMode 위임:
+     * - 라인 클리어 발생 시 gameMode.onLineClear() 호출
+     * - 각 모드별 추가 처리 수행 (아이템 드롭, 공격 전송 등)
+     * 
      * @param result 고정 결과
      * @return 발생한 이벤트들의 리스트
      */
@@ -438,6 +512,15 @@ public class BoardController {
             gameState,
             gameStartTime
         );
+
+        // ⭐ GameMode에 위임: 라인 클리어 후 추가 처리
+        // - SingleMode: 추가 이벤트 없음
+        // - ItemMode: 아이템 드롭 이벤트
+        // - MultiMode: 공격 전송 이벤트
+        if (result.getLinesCleared() > 0 && gameMode != null) {
+            List<GameEvent> modeEvents = gameMode.onLineClear(result, gameState);
+            events.addAll(modeEvents);
+        }
 
         // 게임 오버가 아니면 새 블록 생성
         if (!result.isGameOver()) {
@@ -659,5 +742,50 @@ public class BoardController {
                 // 조용히 무시 (나중에 필요하면 추가)
                 break;
         }
+    }
+    
+    // ========== 게임 관리 메서드 ==========
+    
+    /**
+     * 게임 초기화
+     * 
+     * 새 게임을 시작하거나 게임을 리셋할 때 사용합니다.
+     * 기존 모드를 정리하고 새로운 게임 상태로 초기화합니다.
+     */
+    public void resetGame() {
+        // 기존 모드 정리
+        if (gameMode != null) {
+            gameMode.cleanup();
+        }
+        
+        // 게임 상태 초기화
+        this.gameState = new GameState(10, 20);
+        this.gameStartTime = System.currentTimeMillis();
+        this.currentBag.clear();
+        this.nextBag.clear();
+        this.bagIndex = 0;
+        
+        // Next Queue 초기화
+        initializeNextQueue();
+        
+        // 모드 재초기화
+        if (gameMode != null) {
+            gameMode.initialize(gameState);
+        }
+        
+        System.out.println("[BoardController] 게임 리셋 완료");
+    }
+    
+    /**
+     * 게임 종료 시 정리
+     * 
+     * 애플리케이션 종료 시 또는 게임 모드 전환 시 호출됩니다.
+     */
+    public void cleanup() {
+        if (gameMode != null) {
+            gameMode.cleanup();
+        }
+        observers.clear();
+        System.out.println("[BoardController] 정리 완료");
     }
 }
