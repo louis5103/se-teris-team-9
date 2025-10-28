@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -184,6 +185,7 @@ public class GameController {
                     navigationService.navigateTo("/view/main-view.fxml");
                 } catch (Exception e) {
                     System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
+                    showError("화면 전환 실패", "메인 화면으로 이동하지 못했습니다: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -194,6 +196,7 @@ public class GameController {
                     navigationService.navigateTo("/view/main-view.fxml");
                 } catch (Exception e) {
                     System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
+                    showError("화면 전환 실패", "메인 화면으로 이동하지 못했습니다: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -204,6 +207,7 @@ public class GameController {
                     navigationService.navigateTo("/view/game-view.fxml");
                 } catch (Exception e) {
                     System.err.println("❌ Failed to restart game: " + e.getMessage());
+                    showError("재시작 실패", "게임을 재시작하지 못했습니다: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -499,8 +503,25 @@ public class GameController {
         popupManager.handleMainMenuAction();
     }
 
+
     @FXML
     private void handleRestartFromOverlay() {
         popupManager.handleRestartAction();
     }
+    
+    // ========== UI 알림 메서드 ==========
+    
+    /**
+     * 오류 알림 표시
+     */
+    private void showError(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
 }
+
