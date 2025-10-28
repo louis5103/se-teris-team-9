@@ -1,14 +1,11 @@
 package seoultech.se.client.mode;
 
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.Setter;
 import seoultech.se.core.GameState;
 import seoultech.se.core.config.GameModeConfig;
-import seoultech.se.core.event.GameEvent;
 import seoultech.se.core.mode.GameMode;
 import seoultech.se.core.mode.GameModeType;
 
@@ -107,10 +104,9 @@ public class SingleMode implements GameMode {
      * 여기서는 추가로 할 일이 없습니다.
      * 
      * @param state 현재 게임 상태 (Lock 메타데이터 포함)
-     * @return 빈 리스트 (추가 이벤트 없음)
      */
     @Override
-    public List<GameEvent> onLineClear(GameState state) {
+    public void onLineClear(GameState state) {
         // 싱글플레이어는 순수한 로컬 게임
         // 라인 클리어에 대한 추가 처리 없음
         
@@ -123,8 +119,6 @@ public class SingleMode implements GameMode {
                 state.getLevel()
             ));
         }
-        
-        return List.of(); // 추가 이벤트 없음
     }
     
     /**

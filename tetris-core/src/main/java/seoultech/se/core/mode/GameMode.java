@@ -1,11 +1,8 @@
 package seoultech.se.core.mode;
 
-import java.util.List;
-
 import seoultech.se.core.GameState;
 import seoultech.se.core.command.GameCommand;
 import seoultech.se.core.config.GameModeConfig;
-import seoultech.se.core.event.GameEvent;
 
 /**
  * 게임 모드 인터페이스 (Strategy Pattern)
@@ -70,22 +67,20 @@ public interface GameMode {
     void initialize(GameState initialState);
     
     /**
-     * ⭐ 라인 클리어 후 추가 처리 (핵심 확장 포인트)
+     * 라인 클리어 후 모드별 추가 처리 (핵심 확장 포인트)
      * 
-     * Phase 2: LockResult 제거 - GameState만으로 모든 정보 전달
+     * Lock 이후 라인이 클리어되면 호출됩니다.
+     * 각 모드는 이 메서드를 오버라이드하여 고유 동작을 추가합니다.
      * 
-     * 라인이 클리어된 후 모드별 추가 동작을 정의합니다.
-     * 
-     * 구현 예시:
-     * - SingleMode: 추가 로직 없음 (빈 리스트 반환)
-     * - ItemMode: 확률적으로 아이템 드롭 (ItemDroppedEvent 반환)
-     * - MultiMode: 공격 계산 및 전송 (AttackSentEvent 반환)
+     * 사용 예시:
+     * - SingleMode: 추가 로직 없음
+     * - ItemMode: 확률적으로 아이템 드롭
+     * - MultiMode: 공격 계산 및 전송
      * 
      * @param state 현재 게임 상태 (Lock 메타데이터 포함)
-     * @return 추가로 발생한 이벤트 리스트
      */
-    default List<GameEvent> onLineClear(GameState state) {
-        return List.of(); // 기본 구현: 추가 이벤트 없음
+    default void onLineClear(GameState state) {
+        // 기본 구현: 아무것도 하지 않음
     }
     
     /**
@@ -114,10 +109,9 @@ public interface GameMode {
      * 
      * @param command 실행된 명령
      * @param state 명령 실행 후 게임 상태
-     * @return 추가로 발생한 이벤트 리스트
      */
-    default List<GameEvent> afterCommand(GameCommand command, GameState state) {
-        return List.of(); // 기본 구현: 추가 이벤트 없음
+    default void afterCommand(GameCommand command, GameState state) {
+        // 기본 구현: 아무것도 하지 않음
     }
     
     /**
