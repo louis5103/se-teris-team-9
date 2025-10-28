@@ -10,14 +10,13 @@ import lombok.Getter;
 import seoultech.se.client.mode.SingleMode;
 import seoultech.se.core.GameEngine;
 import seoultech.se.core.GameState;
-import seoultech.se.core.command.Direction;
 import seoultech.se.core.command.GameCommand;
 import seoultech.se.core.command.MoveCommand;
 import seoultech.se.core.command.RotateCommand;
+import seoultech.se.core.config.GameModeConfig;
+import seoultech.se.core.mode.GameMode;
 import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.TetrominoType;
-import seoultech.se.core.mode.GameMode;
-import seoultech.se.core.config.GameModeConfig;
 
 @Getter
 @Component
@@ -210,17 +209,32 @@ public class BoardController {
 
     private void updateNextQueue(GameState state) {
         TetrominoType[] queue = new TetrominoType[6];
+        
         for (int i = 0; i < 6; i++) {
             int index = bagIndex + i;
+            
             if (index < currentBag.size()) {
                 queue[i] = currentBag.get(index);
             } else {
                 int nextBagIndex = index - currentBag.size();
+                
+                // ✅ nextBag 검증 추가
+                if (nextBag == null || nextBag.isEmpty()) {
+                    System.err.println("⚠️ [BoardController] nextBag is not initialized! Refilling bags...");
+                    refillBag();
+                }
+                
                 if (nextBagIndex < nextBag.size()) {
                     queue[i] = nextBag.get(nextBagIndex);
+                } else {
+                    // ✅ 범위 초과 시 기본값 (fallback)
+                    System.err.println("⚠️ [BoardController] nextBag index out of bounds (" + 
+                        nextBagIndex + " >= " + nextBag.size() + "). Using I block as fallback.");
+                    queue[i] = TetrominoType.I;
                 }
             }
         }
+        
         state.setNextQueue(queue);
     }
     

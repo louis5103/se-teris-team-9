@@ -60,8 +60,12 @@ public class PopupManager {
         this.pauseOverlay = pauseOverlay;
         this.gameOverOverlay = gameOverOverlay;
         this.finalScoreLabel = finalScoreLabel;
-        
-        // 초기 상태: 모든 팝업 숨김
+    }
+    
+    /**
+     * 초기화: 모든 팝업을 숨김 상태로 설정
+     */
+    public void init() {
         hideAllPopups();
     }
     

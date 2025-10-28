@@ -10,7 +10,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
-import javafx.stage.Stage;
 import seoultech.se.client.config.ApplicationContextProvider;
 import seoultech.se.client.service.KeyMappingService;
 import seoultech.se.client.service.NavigationService;
@@ -120,7 +119,6 @@ public class SettingSceneController extends BaseController {
     @FXML
     public void handleScreenSizeChange(ActionEvent event) {
         RadioButton selectedRadioButton = (RadioButton) event.getSource();
-        Stage stage = (Stage) selectedRadioButton.getScene().getWindow();
 
         double width = 500;
         double height = 700;
