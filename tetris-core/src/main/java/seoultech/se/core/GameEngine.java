@@ -798,9 +798,21 @@ public class GameEngine {
      */
     private static boolean isValidPosition(GameState state, Tetromino tetromino, int x, int y){
         int[][] shape = tetromino.getCurrentShape();
+        
+        // ✅ 방어적 검사: shape이 비어있거나 null인 경우
+        if (shape == null || shape.length == 0) {
+            System.err.println("⚠️ [GameEngine] isValidPosition(): shape is null or empty!");
+            return false;
+        }
 
         for(int row = 0; row < shape.length; row++){
-            for(int col = 0; col < shape[0].length; col++){
+            // ✅ 방어적 검사: 각 행이 비어있거나 null인 경우
+            if (shape[row] == null || shape[row].length == 0) {
+                System.err.println("⚠️ [GameEngine] isValidPosition(): shape[" + row + "] is null or empty!");
+                continue;  // 빈 행은 건너뛰기
+            }
+            
+            for(int col = 0; col < shape[row].length; col++){
                 if(shape[row][col] == 1) {
                     int absX = x + (col - tetromino.getPivotX());
                     int absY = y + (row - tetromino.getPivotY());
