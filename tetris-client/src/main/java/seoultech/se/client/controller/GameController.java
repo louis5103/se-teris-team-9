@@ -19,6 +19,7 @@ import seoultech.se.client.ui.InputHandler;
 import seoultech.se.client.ui.NotificationManager;
 import seoultech.se.client.ui.PopupManager;
 import seoultech.se.client.util.ColorMapper;
+import seoultech.se.client.util.MessageFormatter;
 import seoultech.se.core.GameState;
 import seoultech.se.core.command.Direction;
 import seoultech.se.core.command.MoveCommand;
@@ -92,6 +93,23 @@ public class GameController {
     private Rectangle[][] nextCellRectangles;
 
     /**
+     * Command를 실행하고 UI를 업데이트하는 헬퍼 메서드
+     * GameLoopManager와 InputHandler에서 중복되던 코드를 통합
+     * 
+     * @param command 실행할 게임 커맨드
+     */
+    private void executeAndUpdateUi(seoultech.se.core.command.GameCommand command) {
+        GameState oldState = boardController.getGameState().deepCopy();
+        GameState newState = boardController.executeCommand(command);
+        
+        // GameState 비교하여 UI 힌트 추출 및 업데이트
+        showUiHints(oldState, newState);
+        
+        // 이전 상태 업데이트
+        previousState = newState.deepCopy();
+    }
+    
+    /**
      * FXML이 로드된 후 자동으로 호출됩니다
      */
     @FXML
@@ -161,12 +179,7 @@ public class GameController {
             }
             
             // 블록 자동 낙하
-            GameState oldState = gameState.deepCopy();
-            GameState newState = boardController.executeCommand(new MoveCommand(Direction.DOWN));
-            
-            // GameState 비교하여 UI 힌트 추출 및 업데이트
-            showUiHints(oldState, newState);
-            previousState = newState.deepCopy();
+            executeAndUpdateUi(new MoveCommand(Direction.DOWN));
             
             return true; // 게임 루프 계속
         });
@@ -219,14 +232,7 @@ public class GameController {
         // InputHandler 초기화
         inputHandler = new InputHandler(keyMappingService);
         inputHandler.setCallback(command -> {
-            GameState oldState = boardController.getGameState().deepCopy();
-            GameState newState = boardController.executeCommand(command);
-            
-            // GameState 비교하여 UI 힌트 추출 및 업데이트
-            showUiHints(oldState, newState);
-            
-            // 이전 상태 업데이트
-            previousState = newState.deepCopy();
+            executeAndUpdateUi(command);
         });
         inputHandler.setGameStateProvider(new InputHandler.GameStateProvider() {
             @Override
@@ -391,32 +397,12 @@ public class GameController {
                 boolean isTSpin = newState.isLastLockWasTSpin();
                 boolean isTSpinMini = newState.isLastLockWasTSpinMini();
                 
-                StringBuilder message = new StringBuilder();
-                
-                // T-Spin 표시
-                if (isTSpin) {
-                    message.append(isTSpinMini ? "T-SPIN MINI " : "T-SPIN ");
-                }
-                
-                // 라인 타입 표시
-                switch (linesCleared) {
-                    case 1:
-                        message.append("SINGLE");
-                        break;
-                    case 2:
-                        message.append("DOUBLE");
-                        break;
-                    case 3:
-                        message.append("TRIPLE");
-                        break;
-                    case 4:
-                        message.append("TETRIS");
-                        break;
-                }
+                // MessageFormatter를 사용하여 메시지 생성
+                String message = MessageFormatter.formatLineClearMessage(linesCleared, isTSpin, isTSpinMini);
                 
                 // 중앙에 라인 클리어 타입 표시
-                if (message.length() > 0) {
-                    notificationManager.showLineClearType(message.toString());
+                if (!message.isEmpty()) {
+                    notificationManager.showLineClearType(message);
                 }
                 
                 // 우측에 라인 클리어 수 표시
@@ -427,21 +413,24 @@ public class GameController {
             int oldCombo = oldState.getComboCount();
             int newCombo = newState.getComboCount();
             if (newCombo > oldCombo) {
-                notificationManager.showCombo("🔥 COMBO x" + newCombo);
+                String comboMessage = MessageFormatter.formatComboMessage(newCombo);
+                notificationManager.showCombo(comboMessage);
             }
             
             // 7. Back-to-Back 감지
             int oldB2B = oldState.getBackToBackCount();
             int newB2B = newState.getBackToBackCount();
             if (newB2B > oldB2B) {
-                notificationManager.showBackToBack("⚡ B2B x" + newB2B);
+                String b2bMessage = MessageFormatter.formatBackToBackMessage(newB2B);
+                notificationManager.showBackToBack(b2bMessage);
             }
             
             // 8. 레벨 업 감지
             int oldLevel = oldState.getLevel();
             int newLevel = newState.getLevel();
             if (newLevel > oldLevel) {
-                notificationManager.showLineClearType("📈 LEVEL UP! - Level " + newLevel);
+                String levelUpMessage = MessageFormatter.formatLevelUpMessage(newLevel);
+                notificationManager.showLineClearType(levelUpMessage);
             }
             
             // 9. 일시정지 감지
