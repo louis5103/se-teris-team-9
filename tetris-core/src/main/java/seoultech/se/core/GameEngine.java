@@ -194,6 +194,12 @@ public class GameEngine {
             return state;  // 실패 시 원본 상태 반환
         }
         
+        // ✅ Next Queue 검증 추가
+        if (state.getNextQueue() == null || state.getNextQueue().length == 0) {
+            System.err.println("⚠️ [GameEngine] tryHold() failed: Next Queue is not initialized!");
+            return state;  // Hold 실패 - 원본 상태 반환
+        }
+        
         GameState newState = state.deepCopy();
         TetrominoType currentType = newState.getCurrentTetromino().getType();
         TetrominoType previousHeld = newState.getHeldPiece();
@@ -201,6 +207,12 @@ public class GameEngine {
         if (previousHeld == null) {
             // Hold가 비어있음: 현재 블록을 보관하고 Next에서 새 블록 가져오기
             newState.setHeldPiece(currentType);
+            
+            // ✅ Next Queue 첫 번째 요소 검증
+            if (newState.getNextQueue()[0] == null) {
+                System.err.println("⚠️ [GameEngine] tryHold() failed: Next Queue[0] is null!");
+                return state;  // Hold 실패 - 원본 상태 반환
+            }
             
             // Next Queue에서 새 블록 가져오기 (읽기만 함, 제거는 BoardController에서)
             // 주의: nextQueue[0]은 BoardController의 spawnNextTetromino()에서 제거됩니다
@@ -372,14 +384,12 @@ public class GameEngine {
 
         // 4. 점수 및 통계 업데이트
         boolean leveledUp = false;
-        int newLevel = newState.getLevel();
         
         if(newState.getLastLinesCleared() > 0) {
             newState.addScore(newState.getLastScoreEarned());
             
             // 라인 클리어 추가 및 레벨업 체크
             leveledUp = newState.addLinesCleared(newState.getLastLinesCleared());
-            newLevel = newState.getLevel();
 
             // 콤보 업데이트 (연속 라인 클리어 횟수)
             // 0 → 1 (첫 콤보), 1 → 2 (콤보 계속), 2 → 3, ...
