@@ -1,10 +1,12 @@
 package seoultech.se.client.ui;
 
 import javafx.animation.AnimationTimer;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.util.Duration;
 import seoultech.se.client.constants.UIConstants;
 
 /**
@@ -155,26 +157,23 @@ public class NotificationManager {
     
     /**
      * Label을 일정 시간 후 숨깁니다
+     * PauseTransition을 사용하여 JavaFX 타이머로 효율적으로 처리
      * 
      * @param label 숨길 Label
      * @param afterHideCallback 숨긴 후 실행할 콜백 (nullable)
      */
     private void scheduleHide(Label label, Runnable afterHideCallback) {
-        new Thread(() -> {
-            try {
-                Thread.sleep(UIConstants.NOTIFICATION_DISPLAY_DURATION_MS);
-                Platform.runLater(() -> {
-                    label.setVisible(false);
-                    label.setManaged(false);
-                    if (afterHideCallback != null) {
-                        afterHideCallback.run();
-                    }
-                });
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
+        PauseTransition pause = new PauseTransition(
+            Duration.millis(UIConstants.NOTIFICATION_DISPLAY_DURATION_MS)
+        );
+        pause.setOnFinished(event -> {
+            label.setVisible(false);
+            label.setManaged(false);
+            if (afterHideCallback != null) {
+                afterHideCallback.run();
             }
-        }).start();
+        });
+        pause.play();
     }
     
     /**

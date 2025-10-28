@@ -54,20 +54,29 @@ public class BoardRenderer {
      */
     public void updateCell(int row, int col, Cell cell) {
         Platform.runLater(() -> {
-            Rectangle rect = cellRectangles[row][col];
-            
-            if (cell.isOccupied()) {
-                rect.setFill(ColorMapper.toJavaFXColor(cell.getColor()));
-                String colorClass = ColorMapper.toCssClass(cell.getColor());
-                rect.getStyleClass().removeAll(UIConstants.ALL_TETROMINO_COLOR_CLASSES);
-                if (colorClass != null) {
-                    rect.getStyleClass().add(colorClass);
-                }
-            } else {
-                rect.setFill(ColorMapper.getEmptyCellColor());
-                rect.getStyleClass().removeAll(UIConstants.ALL_TETROMINO_COLOR_CLASSES);
-            }
+            applyColorToRectangle(cellRectangles[row][col], cell);
         });
+    }
+    
+    /**
+     * Rectangle에 셀의 색상을 적용합니다
+     * updateCell과 updateCellInternal에서 공통으로 사용되는 로직을 추출
+     * 
+     * @param rect 업데이트할 Rectangle
+     * @param cell 셀 데이터
+     */
+    private void applyColorToRectangle(Rectangle rect, Cell cell) {
+        if (cell.isOccupied()) {
+            rect.setFill(ColorMapper.toJavaFXColor(cell.getColor()));
+            String colorClass = ColorMapper.toCssClass(cell.getColor());
+            rect.getStyleClass().removeAll(UIConstants.ALL_TETROMINO_COLOR_CLASSES);
+            if (colorClass != null) {
+                rect.getStyleClass().add(colorClass);
+            }
+        } else {
+            rect.setFill(ColorMapper.getEmptyCellColor());
+            rect.getStyleClass().removeAll(UIConstants.ALL_TETROMINO_COLOR_CLASSES);
+        }
     }
     
     /**
@@ -135,19 +144,7 @@ public class BoardRenderer {
      * 내부용 셀 업데이트 메서드 (Platform.runLater 없음)
      */
     private void updateCellInternal(int row, int col, Cell cell) {
-        Rectangle rect = cellRectangles[row][col];
-        
-        if (cell.isOccupied()) {
-            rect.setFill(ColorMapper.toJavaFXColor(cell.getColor()));
-            String colorClass = ColorMapper.toCssClass(cell.getColor());
-            rect.getStyleClass().removeAll(UIConstants.ALL_TETROMINO_COLOR_CLASSES);
-            if (colorClass != null) {
-                rect.getStyleClass().add(colorClass);
-            }
-        } else {
-            rect.setFill(ColorMapper.getEmptyCellColor());
-            rect.getStyleClass().removeAll(UIConstants.ALL_TETROMINO_COLOR_CLASSES);
-        }
+        applyColorToRectangle(cellRectangles[row][col], cell);
     }
     
     /**
