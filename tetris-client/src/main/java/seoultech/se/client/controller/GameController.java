@@ -169,8 +169,11 @@ public class GameController {
             nextCellRectangles
         );
         
-        // GameLoopManager 초기화
-        gameLoopManager = new GameLoopManager();
+        // GameLoopManager 초기화 (gameModeConfig의 속도 배율 적용)
+        double dropSpeedMultiplier = (gameModeConfig != null) 
+            ? gameModeConfig.getDropSpeedMultiplier() 
+            : 1.0;
+        gameLoopManager = new GameLoopManager(dropSpeedMultiplier);
         gameLoopManager.setCallback(() -> {
             GameState gameState = boardController.getGameState();
             
