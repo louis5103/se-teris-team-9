@@ -18,5 +18,4 @@ public class GameService {
         return "Service Layer Ready - 팀에서 구현하세요";
     }
     
-    // TODO: 팀에서 필요한 서비스 메서드들을 구현하세요
 }
