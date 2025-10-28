@@ -38,26 +38,69 @@ public class CustomSettingPopController extends BaseController {
     @FXML
     private void handleSaveButton() {
         String settingName = settingNameField.getText().trim();
-        if (!settingName.isEmpty()) {
+        
+        // ✅ 입력 검증
+        if (settingName.isEmpty()) {
+            System.err.println("⚠️ 설정 이름을 입력하세요.");
+            // TODO: 사용자에게 알림 표시 (Toast/Alert)
+            return;
+        }
+        
+        // ✅ 서비스 검증
+        if (settingsService == null) {
+            System.err.println("❌ SettingsService가 초기화되지 않았습니다.");
+            return;
+        }
+        
+        // ✅ mainController 검증
+        if (mainController == null) {
+            System.err.println("❌ MainController가 설정되지 않았습니다.");
+            return;
+        }
+        
+        try {
             Setting newSetting = new Setting(settingName);
             Map<String, String> configurations = new HashMap<>();
 
-            // TODO : results in null pointer exception
-            try{
-                // Get current settings from SettingsService
-                configurations.put("soundVolume", String.valueOf(settingsService.soundVolumeProperty().getValue()));
-                configurations.put("colorMode", settingsService.colorModeProperty().getValue());
-                configurations.put("screenSize", settingsService.screenSizeProperty().getValue());
-                configurations.put("stageWidth", String.valueOf(settingsService.stageWidthProperty().getValue()));
-                configurations.put("stageHeight", String.valueOf(settingsService.stageHeightProperty().getValue()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            // ✅ Null-safe 설정 값 추출
+            configurations.put("soundVolume", 
+                settingsService.soundVolumeProperty().getValue() != null 
+                    ? String.valueOf(settingsService.soundVolumeProperty().getValue()) 
+                    : "50");
+            
+            configurations.put("colorMode", 
+                settingsService.colorModeProperty().getValue() != null 
+                    ? settingsService.colorModeProperty().getValue() 
+                    : "NORMAL");
+            
+            configurations.put("screenSize", 
+                settingsService.screenSizeProperty().getValue() != null 
+                    ? settingsService.screenSizeProperty().getValue() 
+                    : "MEDIUM");
+            
+            configurations.put("stageWidth", 
+                settingsService.stageWidthProperty().getValue() != null 
+                    ? String.valueOf(settingsService.stageWidthProperty().getValue()) 
+                    : "800");
+            
+            configurations.put("stageHeight", 
+                settingsService.stageHeightProperty().getValue() != null 
+                    ? String.valueOf(settingsService.stageHeightProperty().getValue()) 
+                    : "600");
             
             newSetting.setConfigurations(configurations);
-            newSetting.setSelected(true); // Make this the active setting
+            newSetting.setSelected(true);
             mainController.addSetting(newSetting);
+            
+            System.out.println("✅ 설정 저장 완료: " + settingName);
             closeWindow();
+            
+        } catch (NullPointerException e) {
+            System.err.println("❌ NullPointerException 발생: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("❌ 설정 저장 실패: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
