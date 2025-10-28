@@ -22,8 +22,6 @@ import seoultech.se.client.util.ColorMapper;
 import seoultech.se.core.GameState;
 import seoultech.se.core.command.Direction;
 import seoultech.se.core.command.MoveCommand;
-import seoultech.se.core.model.Cell;
-import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.TetrominoType;
 
 /**
@@ -75,9 +73,6 @@ public class GameController {
     // 게임 로직 컨트롤러
     private BoardController boardController;
     
-    // GameState 비교를 위한 이전 상태
-    private GameState previousState;
-    
     // UI 관리 클래스들
     private BoardRenderer boardRenderer;
     private NotificationManager notificationManager;
@@ -110,7 +105,6 @@ public class GameController {
         boardController = new BoardController();
         
         GameState gameState = boardController.getGameState();
-        previousState = gameState.deepCopy();  // 초기 상태 복사
         System.out.println("📊 Board created: " + gameState.getBoardWidth() + "x" + gameState.getBoardHeight());
 
         // UI 초기화
@@ -166,7 +160,6 @@ public class GameController {
             
             // GameState 비교하여 UI 힌트 추출 및 업데이트
             showUiHints(oldState, newState);
-            previousState = newState.deepCopy();
             
             return true; // 게임 루프 계속
         });
@@ -224,9 +217,6 @@ public class GameController {
             
             // GameState 비교하여 UI 힌트 추출 및 업데이트
             showUiHints(oldState, newState);
-            
-            // 이전 상태 업데이트
-            previousState = newState.deepCopy();
         });
         inputHandler.setGameStateProvider(new InputHandler.GameStateProvider() {
             @Override

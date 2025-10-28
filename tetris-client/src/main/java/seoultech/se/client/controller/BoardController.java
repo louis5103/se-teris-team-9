@@ -13,10 +13,10 @@ import seoultech.se.core.GameState;
 import seoultech.se.core.command.GameCommand;
 import seoultech.se.core.command.MoveCommand;
 import seoultech.se.core.command.RotateCommand;
+import seoultech.se.core.config.GameModeConfig;
+import seoultech.se.core.mode.GameMode;
 import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.TetrominoType;
-import seoultech.se.core.mode.GameMode;
-import seoultech.se.core.config.GameModeConfig;
 
 @Getter
 @Component
