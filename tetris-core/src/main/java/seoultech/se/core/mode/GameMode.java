@@ -6,7 +6,6 @@ import seoultech.se.core.GameState;
 import seoultech.se.core.command.GameCommand;
 import seoultech.se.core.config.GameModeConfig;
 import seoultech.se.core.event.GameEvent;
-import seoultech.se.core.result.LockResult;
 
 /**
  * 게임 모드 인터페이스 (Strategy Pattern)
@@ -73,6 +72,8 @@ public interface GameMode {
     /**
      * ⭐ 라인 클리어 후 추가 처리 (핵심 확장 포인트)
      * 
+     * Phase 2: LockResult 제거 - GameState만으로 모든 정보 전달
+     * 
      * 라인이 클리어된 후 모드별 추가 동작을 정의합니다.
      * 
      * 구현 예시:
@@ -80,11 +81,10 @@ public interface GameMode {
      * - ItemMode: 확률적으로 아이템 드롭 (ItemDroppedEvent 반환)
      * - MultiMode: 공격 계산 및 전송 (AttackSentEvent 반환)
      * 
-     * @param result 블록 고정 결과 (라인 클리어 정보 포함)
-     * @param state 현재 게임 상태
+     * @param state 현재 게임 상태 (Lock 메타데이터 포함)
      * @return 추가로 발생한 이벤트 리스트
      */
-    default List<GameEvent> onLineClear(LockResult result, GameState state) {
+    default List<GameEvent> onLineClear(GameState state) {
         return List.of(); // 기본 구현: 추가 이벤트 없음
     }
     

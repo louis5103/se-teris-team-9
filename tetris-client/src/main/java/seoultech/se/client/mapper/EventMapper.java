@@ -17,8 +17,6 @@ import seoultech.se.core.event.ScoreAddedEvent;
 import seoultech.se.core.event.TetrominoLockedEvent;
 import seoultech.se.core.event.TetrominoMovedEvent;
 import seoultech.se.core.event.TetrominoSpawnedEvent;
-import seoultech.se.core.result.LineClearResult;
-import seoultech.se.core.result.LockResult;
 
 /**
  * GameState를 GameEvent 리스트로 변환하는 매퍼 클래스
@@ -112,19 +110,6 @@ public class EventMapper {
         // createTetrominoSpawnEvents() 메서드 사용
 
         return events;
-    }
-    
-    /**
-     * @deprecated Phase 2에서 제거 예정 - fromGameState() 사용 권장
-     */
-    @Deprecated
-    public static List<GameEvent> fromLockResult(
-            LockResult result,
-            GameState gameState,
-            long gameStartTime
-    ) {
-        // 하위 호환성을 위해 남겨둠 - fromGameState()로 위임
-        return fromGameState(gameState, gameStartTime);
     }
 
     /**
@@ -226,7 +211,9 @@ public class EventMapper {
     }
 
     /**
-     * LineClearResult를 기반으로 점수 획득 이유를 문자열로 반환합니다
+     * GameState를 기반으로 점수 획득 이유를 문자열로 반환합니다
+     * 
+     * Phase 2: LineClearResult 대신 GameState의 메타데이터 사용
      * 
      * 반환 가능한 값들:
      * - "PERFECT_CLEAR" - 보드의 모든 블록 제거
@@ -234,23 +221,23 @@ public class EventMapper {
      * - "T-SPIN_SINGLE", "T-SPIN_DOUBLE", "T-SPIN_TRIPLE" - T-Spin
      * - "SINGLE", "DOUBLE", "TRIPLE", "TETRIS" - 일반 라인 클리어
      * 
-     * @param result 라인 클리어 결과
+     * @param gameState 게임 상태 (Lock 메타데이터 포함)
      * @return 점수 이유 문자열
      */
-    public static String getScoreReason(LineClearResult result) {
-        if (result.isPerfectClear()) {
+    public static String getScoreReason(GameState gameState) {
+        if (gameState.isLastIsPerfectClear()) {
             return "PERFECT_CLEAR";
         }
         
-        if (result.isTSpin()) {
-            if (result.isTSpinMini()) {
-                return "T-SPIN_MINI_" + lineCountToName(result.getLinesCleared());
+        if (gameState.isLastLockWasTSpin()) {
+            if (gameState.isLastLockWasTSpinMini()) {
+                return "T-SPIN_MINI_" + lineCountToName(gameState.getLastLinesCleared());
             } else {
-                return "T-SPIN_" + lineCountToName(result.getLinesCleared());
+                return "T-SPIN_" + lineCountToName(gameState.getLastLinesCleared());
             }
         }
         
-        return lineCountToName(result.getLinesCleared());
+        return lineCountToName(gameState.getLastLinesCleared());
     }
 
     /**

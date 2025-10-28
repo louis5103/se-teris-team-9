@@ -11,7 +11,6 @@ import seoultech.se.core.config.GameModeConfig;
 import seoultech.se.core.event.GameEvent;
 import seoultech.se.core.mode.GameMode;
 import seoultech.se.core.mode.GameModeType;
-import seoultech.se.core.result.LockResult;
 
 /**
  * 싱글플레이어 모드
@@ -91,6 +90,8 @@ public class SingleMode implements GameMode {
     /**
      * ⭐ 라인 클리어 후 추가 처리
      * 
+     * Phase 2: LockResult 제거 - GameState만으로 모든 정보 전달
+     * 
      * 싱글플레이어 모드에서는 추가 처리가 없습니다.
      * 
      * 멀티플레이어와의 차이점:
@@ -105,20 +106,19 @@ public class SingleMode implements GameMode {
      * 점수와 레벨은 GameEngine에서 이미 처리되므로
      * 여기서는 추가로 할 일이 없습니다.
      * 
-     * @param result 블록 고정 결과 (라인 클리어 정보 포함)
-     * @param state 현재 게임 상태
+     * @param state 현재 게임 상태 (Lock 메타데이터 포함)
      * @return 빈 리스트 (추가 이벤트 없음)
      */
     @Override
-    public List<GameEvent> onLineClear(LockResult result, GameState state) {
+    public List<GameEvent> onLineClear(GameState state) {
         // 싱글플레이어는 순수한 로컬 게임
         // 라인 클리어에 대한 추가 처리 없음
         
         // 디버그 로그 (선택적)
-        if (result.getLineClearResult().getLinesCleared() > 0) {
+        if (state.getLastLinesCleared() > 0) {
             System.out.println(String.format(
                 "[SingleMode] %d줄 클리어 (점수: %d, 레벨: %d)",
-                result.getLineClearResult().getLinesCleared(),
+                state.getLastLinesCleared(),
                 state.getScore(),
                 state.getLevel()
             ));
