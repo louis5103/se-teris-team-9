@@ -43,6 +43,10 @@ public class SettingService {
     public void updateSettings(String email, SettingsUpdateDto dto) {
         SettingEntity entity = settingRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
 
+        if (dto.getGameLevel() != null) {
+            entity.setGameLevel(dto.getGameLevel());
+        }
+
         if (dto.getScreenSize() != null) { 
             entity.setScreenSize(dto.getScreenSize());
         }
@@ -80,6 +84,7 @@ public class SettingService {
 
     private SettingEntity fromDtoToEntity(SettingRequestDto dto) {
         SettingEntity entity = new SettingEntity();
+        entity.setGameLevel(dto.getGameLevel());
         entity.setSettingsName(dto.getSettingsName());
         entity.setEmail(dto.getEmail());
         entity.setScreenSize(dto.getScreenSize());
@@ -96,6 +101,7 @@ public class SettingService {
     private SettingResponseDto fromEntityToDto(SettingEntity entity) {
         SettingResponseDto dto = new SettingResponseDto();
 
+        dto.setGameLevel(entity.getGameLevel());
         dto.setSettingsName(entity.getSettingsName());
         dto.setScreenSize(entity.getScreenSize());
         dto.setColorMode(entity.getColorMode());

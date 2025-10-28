@@ -31,6 +31,9 @@ public class SettingEntity {
     private String email;
 
     @Enumerated(EnumType.STRING)
+    private GameLevel gameLevel = GameLevel.NORAML;
+
+    @Enumerated(EnumType.STRING)
     private ScreenSize screenSize = ScreenSize.MEDIUM;
 
     @Enumerated(EnumType.STRING)

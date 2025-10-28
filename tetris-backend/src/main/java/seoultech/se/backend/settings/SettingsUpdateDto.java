@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SettingsUpdateDto {
+    private GameLevel gameLevel;
     private ScreenSize screenSize;
     private ColorMode colorMode;
     private String leftKey;
