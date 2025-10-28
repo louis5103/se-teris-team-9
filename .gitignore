@@ -381,3 +381,9 @@ docker-compose.override.yml
 
 # Obsidian 메모
 .obsidian
+
+# macOS 자동 복제 파일 제외
+* 2/
+*2/
+* 2
+*2
