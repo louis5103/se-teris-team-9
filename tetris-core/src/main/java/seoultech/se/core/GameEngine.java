@@ -372,14 +372,12 @@ public class GameEngine {
 
         // 4. 점수 및 통계 업데이트
         boolean leveledUp = false;
-        int newLevel = newState.getLevel();
         
         if(newState.getLastLinesCleared() > 0) {
             newState.addScore(newState.getLastScoreEarned());
             
             // 라인 클리어 추가 및 레벨업 체크
             leveledUp = newState.addLinesCleared(newState.getLastLinesCleared());
-            newLevel = newState.getLevel();
 
             // 콤보 업데이트 (연속 라인 클리어 횟수)
             // 0 → 1 (첫 콤보), 1 → 2 (콤보 계속), 2 → 3, ...

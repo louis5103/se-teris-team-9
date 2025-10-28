@@ -1,6 +1,4 @@
-package seoultech.se.client.mode;
-
-import org.springframework.stereotype.Component;
+package seoultech.se.core.mode.impl;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -34,19 +32,18 @@ import seoultech.se.core.mode.GameModeType;
  *    - GameMode 인터페이스 구현
  *    - 필요시 커스텀 설정 추가 가능
  * 
+ * 위치 변경:
+ * - 이전: seoultech.se.client.mode.SingleMode (잘못된 위치)
+ * - 현재: seoultech.se.core.mode.impl.SingleMode (올바른 위치)
+ * - 이유: GameMode 구현은 핵심 로직이므로 core 모듈에 위치해야 함
+ * 
  * 사용 예시:
  * 
- * // Spring에서 자동 주입
- * @Autowired
- * private SingleMode singleMode;
- * 
- * // 설정 적용
+ * // BoardController에서 사용
+ * SingleMode singleMode = new SingleMode();
  * singleMode.setConfig(GameModeConfig.classic());
- * 
- * // BoardController에 설정
  * boardController.setGameMode(singleMode);
  */
-@Component
 @Getter
 @Setter
 public class SingleMode implements GameMode {

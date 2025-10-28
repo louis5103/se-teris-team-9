@@ -61,6 +61,16 @@ public class PopupManager {
         this.gameOverOverlay = gameOverOverlay;
         this.finalScoreLabel = finalScoreLabel;
         
+        // this-escape 경고를 피하기 위해 초기화를 별도 메서드로 분리
+        // GameController에서 생성 직후 init() 호출 필요
+    }
+    
+    /**
+     * PopupManager 초기화
+     * 생성자에서 hideAllPopups()를 호출하면 this-escape 경고가 발생하므로
+     * 생성 직후 이 메서드를 명시적으로 호출해야 합니다.
+     */
+    public void init() {
         // 초기 상태: 모든 팝업 숨김
         hideAllPopups();
     }

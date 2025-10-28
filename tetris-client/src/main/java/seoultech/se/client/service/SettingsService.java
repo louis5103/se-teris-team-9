@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -26,6 +27,15 @@ public class SettingsService {
     private static final String SETTINGS_FILE = "tetris_settings";
 
     public SettingsService() {
+        // Properties 초기화만 수행
+    }
+    
+    /**
+     * Spring 초기화 후 실행
+     * this-escape 경고를 피하기 위해 @PostConstruct 사용
+     */
+    @PostConstruct
+    private void init() {
         // Load settings from file or set defaults
         loadSettings();
     }

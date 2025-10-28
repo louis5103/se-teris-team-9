@@ -190,6 +190,7 @@ public class GameController {
             gameOverOverlay,
             finalScoreLabel
         );
+        popupManager.init(); // this-escape 경고 방지를 위해 명시적 초기화
         
         // PopupManager 콜백 설정
         popupManager.setCallback(new PopupManager.PopupActionCallback() {
