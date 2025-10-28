@@ -44,6 +44,11 @@ public class SettingsService {
     @PostConstruct
     public void init() {
         loadSettings();
+        
+        // 화면 크기 변경 리스너 추가
+        screenSize.addListener((observable, oldValue, newValue) -> {
+            applyScreenSizeClass();
+        });
     }
 
     public void setPrimaryStage(Stage primaryStage) {
@@ -63,6 +68,28 @@ public class SettingsService {
             primaryStage.centerOnScreen();
         }
     }
+    
+    /**
+     * 화면 크기 설정을 CSS 클래스로 적용
+     * Scene의 루트 노드에 화면 크기별 CSS 클래스를 적용합니다.
+     */
+    public void applyScreenSizeClass() {
+        if (primaryStage != null && primaryStage.getScene() != null) {
+            javafx.scene.Parent root = primaryStage.getScene().getRoot();
+            if (root != null) {
+                // 기존 화면 크기 클래스 제거
+                root.getStyleClass().removeIf(styleClass -> 
+                    styleClass.startsWith("screenSize"));
+                
+                // 새로운 화면 크기 클래스 추가
+                String sizeClass = screenSize.get();
+                if (sizeClass != null && !sizeClass.isEmpty()) {
+                    root.getStyleClass().add(sizeClass);
+                    System.out.println("✅ Applied screen size class: " + sizeClass);
+                }
+            }
+        }
+    }
 
     public void loadSettings() {
         Properties props = new Properties();
@@ -74,6 +101,7 @@ public class SettingsService {
             double width = Double.parseDouble(props.getProperty("stageWidth", "500"));
             double height = Double.parseDouble(props.getProperty("stageHeight", "600"));
             applyResolution(width, height);
+            applyScreenSizeClass();
             System.out.println("✅ Settings loaded successfully.");
         } catch (Exception e) {
             System.out.println("❗ Failed to load settings, using defaults.");
