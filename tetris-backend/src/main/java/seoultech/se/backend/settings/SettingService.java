@@ -46,7 +46,7 @@ public class SettingService {
         if (dto.getGameLevel() != null) {
             entity.setGameLevel(dto.getGameLevel());
         }
-
+      
         if (dto.getScreenSize() != null) { 
             entity.setScreenSize(dto.getScreenSize());
         }
@@ -84,6 +84,7 @@ public class SettingService {
 
     private SettingEntity fromDtoToEntity(SettingRequestDto dto) {
         SettingEntity entity = new SettingEntity();
+
         entity.setGameLevel(dto.getGameLevel());
         entity.setSettingsName(dto.getSettingsName());
         entity.setEmail(dto.getEmail());
