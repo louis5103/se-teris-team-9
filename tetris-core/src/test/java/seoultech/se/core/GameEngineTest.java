@@ -336,20 +336,40 @@ class GameEngineTest {
         // Given: T-Spin Mini 상황 (1줄 클리어)
         Tetromino tBlock = new Tetromino(TetrominoType.T);
         state.setCurrentTetromino(tBlock);
-        state.setCurrentX(5);
-        state.setCurrentY(17);
         
-        // 바닥 1줄을 거의 채움 (T 블록 들어갈 공간만 남김)
+        // T 블록 Spawn 상태:
+        //   1      (row 0, col 1)
+        // 1 1 1    (row 1, col 0,1,2)
+        // pivot은 (1, 1)
+        
+        // T 블록을 19번째 줄을 채우도록 배치
+        // pivot을 (5, 18)에 놓으면:
+        // - (5, 17): 위쪽 돌출 부분
+        // - (4, 18), (5, 18), (6, 18): 아래쪽 가로줄
+        state.setCurrentX(5);
+        state.setCurrentY(18);
+        
+        // 19번째 줄을 거의 채움 (4, 5, 6번만 비워둠)
         for (int x = 0; x < 10; x++) {
-            if (x != 5) {
+            if (x < 4 || x > 6) {
                 state.getGrid()[19][x].setOccupied(true);
             }
         }
         
-        // 3-Corner Rule 만족, 정면 1개 비어있음
-        state.getGrid()[16][4].setOccupied(true);
-        state.getGrid()[18][4].setOccupied(true);
-        state.getGrid()[18][6].setOccupied(true);
+        // T 블록이 고정되면 18번째 줄이 채워짐
+        // 18번째 줄을 거의 채움 (4, 5, 6번만 비워둠)
+        for (int x = 0; x < 10; x++) {
+            if (x < 4 || x > 6) {
+                state.getGrid()[18][x].setOccupied(true);
+            }
+        }
+        
+        // 3-Corner Rule 만족 + 정면 1개 비어있음
+        // pivot (5, 18) 기준 코너: (4,17), (6,17), (4,19), (6,19)
+        state.getGrid()[17][4].setOccupied(true);  // 좌상
+        // state.getGrid()[17][6] - 우상 (정면 코너 - 비워둠!)
+        state.getGrid()[19][4].setOccupied(true);  // 좌하
+        state.getGrid()[19][6].setOccupied(true);  // 우하
         
         // When: T-Spin Mini로 고정 (1줄 클리어)
         state.setLastActionWasRotation(true);

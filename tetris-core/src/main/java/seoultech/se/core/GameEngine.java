@@ -618,11 +618,23 @@ public class GameEngine {
         }
 
         if (clearedRowsList.isEmpty()){
-            // 라인 클리어 없음 - GameState에 기본값 저장
+            // 라인 클리어 없음
             state.setLastLinesCleared(0);
             state.setLastClearedRows(new int[0]);
-            state.setLastScoreEarned(0);
             state.setLastIsPerfectClear(false);
+            
+            // T-Spin Mini (라인 없음)는 점수를 받아야 함!
+            if (isTSpin && isTSpinMini) {
+                long score = GameConstants.TSPIN_MINI_NO_LINE * state.getLevel();
+                state.setLastScoreEarned(score);
+            } else if (isTSpin && !isTSpinMini) {
+                // 일반 T-Spin (라인 없음)도 점수를 받음
+                long score = GameConstants.TSPIN_NO_LINE * state.getLevel();
+                state.setLastScoreEarned(score);
+            } else {
+                // 일반 고정 (라인 없음, T-Spin 아님)
+                state.setLastScoreEarned(0);
+            }
             return;
         }
 
