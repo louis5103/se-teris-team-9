@@ -21,10 +21,12 @@ import seoultech.se.core.result.LineClearResult;
 import seoultech.se.core.result.LockResult;
 
 /**
- * Result 객체를 GameEvent 리스트로 변환하는 매퍼 클래스
+ * GameState를 GameEvent 리스트로 변환하는 매퍼 클래스
+ * 
+ * Phase 2: Result 객체 제거 - GameState만으로 모든 정보 전달
  * 
  * 이 클래스는 BoardController의 복잡도를 줄이기 위해 도입되었습니다.
- * Result → Event 변환 로직을 한 곳에 모아서 관리합니다.
+ * GameState → Event 변환 로직을 한 곳에 모아서 관리합니다.
  * 
  * 설계 원칙:
  * - Single Responsibility: Event 변환에만 집중
@@ -33,12 +35,10 @@ import seoultech.se.core.result.LockResult;
  * 
  * 사용 예시:
  * <pre>
- * LockResult lockResult = GameEngine.lockTetromino(gameState);
- * List&lt;GameEvent&gt; events = EventMapper.fromLockResult(
- *     lockResult, 
- *     gameState, 
- *     gameStartTime,
- *     this::spawnNewTetromino  // 새 블록 생성 콜백
+ * GameState newState = GameEngine.lockTetromino(gameState);
+ * List&lt;GameEvent&gt; events = EventMapper.fromGameState(
+ *     newState, 
+ *     gameStartTime
  * );
  * </pre>
  * 
@@ -53,7 +53,7 @@ import seoultech.se.core.result.LockResult;
 public class EventMapper {
 
     /**
-     * LockResult를 GameEvent 리스트로 변환합니다
+     * Phase 2: GameState를 GameEvent 리스트로 변환합니다
      * 
      * 이 메서드는 테트로미노 고정 후 발생하는 모든 이벤트를 생성합니다:
      * 1. TetrominoLockedEvent - 블록이 고정됨
@@ -63,45 +63,46 @@ public class EventMapper {
      * 5. ComboEvent / ComboBreakEvent - 콤보 관련
      * 6. BackToBackEvent - B2B 관련
      * 7. GameStateChangedEvent - 상태 변경
-     * 8. TetrominoSpawnedEvent - 새 블록 생성 (게임 오버가 아닌 경우)
-     * 9. TetrominoMovedEvent - 새 블록 위치
+     * 8. LevelUpEvent - 레벨업 (해당하는 경우)
      * 
-     * @param result 고정 결과
-     * @param gameState 현재 게임 상태 (새 블록 생성 후)
+     * GameState의 Lock 메타데이터를 사용하여 이벤트를 생성합니다:
+     * - lastLockedTetromino, lastLockedX, lastLockedY
+     * - lastLinesCleared, lastClearedRows, lastScoreEarned
+     * - lastIsPerfectClear, lastLeveledUp
+     * 
+     * @param gameState Lock이 완료된 게임 상태 (메타데이터 포함)
      * @param gameStartTime 게임 시작 시간 (게임 오버 시 플레이 타임 계산용)
      * @return 발생한 이벤트들의 리스트
      */
-    public static List<GameEvent> fromLockResult(
-            LockResult result,
+    public static List<GameEvent> fromGameState(
             GameState gameState,
             long gameStartTime
     ) {
         List<GameEvent> events = new ArrayList<>();
 
-        // 1. 블록 고정 Event - LockResult에서 고정된 블록 정보 사용
+        // 1. 블록 고정 Event - GameState의 메타데이터 사용
         events.add(new TetrominoLockedEvent(
-            result.getLockedTetromino(),  // ✅ 수정됨: 실제 고정된 블록
-            result.getLockedX(),           // ✅ 수정됨: 고정된 X 위치
-            result.getLockedY()            // ✅ 수정됨: 고정된 Y 위치
+            gameState.getLastLockedTetromino(),
+            gameState.getLastLockedX(),
+            gameState.getLastLockedY()
         ));
 
         // 2. 게임 오버 체크
-        if (result.isGameOver()) {
-            events.addAll(createGameOverEvents(result, gameState, gameStartTime));
+        if (gameState.isGameOver()) {
+            events.addAll(createGameOverEvents(gameState, gameStartTime));
             return events; // 게임 오버면 여기서 종료
         }
 
         // 3. 라인 클리어 처리
-        LineClearResult clearResult = result.getLineClearResult();
-        if (clearResult.getLinesCleared() > 0) {
-            events.addAll(createLineClearEvents(clearResult, gameState));
+        if (gameState.getLastLinesCleared() > 0) {
+            events.addAll(createLineClearEvents(gameState));
         } else {
             events.addAll(createNoLineClearEvents(gameState));
         }
         
         // 4. 레벨업 체크
-        if (result.isLeveledUp()) {
-            events.add(new seoultech.se.core.event.LevelUpEvent(result.getNewLevel()));
+        if (gameState.isLastLeveledUp()) {
+            events.add(new seoultech.se.core.event.LevelUpEvent(gameState.getLevel()));
         }
 
         // 5. GameState 변경 Event
@@ -112,12 +113,26 @@ public class EventMapper {
 
         return events;
     }
+    
+    /**
+     * @deprecated Phase 2에서 제거 예정 - fromGameState() 사용 권장
+     */
+    @Deprecated
+    public static List<GameEvent> fromLockResult(
+            LockResult result,
+            GameState gameState,
+            long gameStartTime
+    ) {
+        // 하위 호환성을 위해 남겨둠 - fromGameState()로 위임
+        return fromGameState(gameState, gameStartTime);
+    }
 
     /**
      * 게임 오버 관련 이벤트들을 생성합니다
+     * 
+     * Phase 2: GameState에서 직접 정보를 읽습니다
      */
     private static List<GameEvent> createGameOverEvents(
-            LockResult result,
             GameState gameState,
             long gameStartTime
     ) {
@@ -125,7 +140,7 @@ public class EventMapper {
 
         long playTimeMillis = System.currentTimeMillis() - gameStartTime;
         events.add(new GameOverEvent(
-            result.getGameOverReason(),
+            gameState.getGameOverReason(),
             gameState.getScore(),
             gameState.getLevel(),
             gameState.getLinesCleared(),
@@ -139,26 +154,25 @@ public class EventMapper {
 
     /**
      * 라인 클리어 관련 이벤트들을 생성합니다
+     * 
+     * Phase 2: GameState의 메타데이터를 사용합니다
      */
-    private static List<GameEvent> createLineClearEvents(
-            LineClearResult clearResult,
-            GameState gameState
-    ) {
+    private static List<GameEvent> createLineClearEvents(GameState gameState) {
         List<GameEvent> events = new ArrayList<>();
 
         // LineClearedEvent
         events.add(new LineClearedEvent(
-            clearResult.getLinesCleared(),
-            clearResult.getClearedRows(),
-            clearResult.isTSpin(),
-            clearResult.isTSpinMini(),
-            clearResult.isPerfectClear()
+            gameState.getLastLinesCleared(),
+            gameState.getLastClearedRows(),
+            gameState.isLastLockWasTSpin(),
+            gameState.isLastLockWasTSpinMini(),
+            gameState.isLastIsPerfectClear()
         ));
 
         // ScoreAddedEvent
         events.add(new ScoreAddedEvent(
-            clearResult.getScoreEarned(),
-            getScoreReason(clearResult)
+            gameState.getLastScoreEarned(),
+            getScoreReason(gameState)
         ));
 
         // Combo Event

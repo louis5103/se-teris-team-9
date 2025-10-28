@@ -24,28 +24,6 @@ public class GameEngine {
         {-1, 1},   // 좌하
         {1, 1}     // 우하
     };
-    
-    /**
-     * 라인 클리어 정보를 담는 내부 클래스
-     * LineClearResult 대체용
-     */
-    private static class LineClearInfo {
-        final int linesCleared;
-        final long scoreEarned;
-        final boolean isTSpin;
-        final boolean isPerfectClear;
-        
-        LineClearInfo(int linesCleared, long scoreEarned, boolean isTSpin, boolean isPerfectClear) {
-            this.linesCleared = linesCleared;
-            this.scoreEarned = scoreEarned;
-            this.isTSpin = isTSpin;
-            this.isPerfectClear = isPerfectClear;
-        }
-        
-        static LineClearInfo none() {
-            return new LineClearInfo(0, 0, false, false);
-        }
-    }
 
     public static GameState tryMoveLeft(GameState state) {
         int newX = state.getCurrentX() - 1;
@@ -306,17 +284,20 @@ public class GameEngine {
     /**
      * 테트로미노를 보드에 고정하는 내부 메서드
      * 
+     * Phase 2: Result 객체 제거 - GameState만으로 모든 정보 전달
+     * 
      * 실행 순서:
      * 1. 게임 오버 체크 (먼저!)
      * 2. 블록 고정
      * 3. 라인 클리어
      * 4. 점수 계산
+     * 5. Lock 메타데이터를 GameState에 저장 (EventMapper가 사용)
      * 
      * @param state 현재 게임 상태
      * @param needsCopy deepCopy가 필요한지 여부 (false면 이미 복사된 상태로 간주)
-     * @return 고정 결과
+     * @return 고정이 완료된 새로운 게임 상태 (메타데이터 포함)
      */
-    private static LockResult lockTetrominoInternal(GameState state, boolean needsCopy) {
+    private static GameState lockTetrominoInternal(GameState state, boolean needsCopy) {
         GameState newState = needsCopy ? state.deepCopy() : state;
         
         // 고정하기 전에 블록 정보 저장! (EventMapper에서 사용)
@@ -348,13 +329,19 @@ public class GameEngine {
                     if(absY < 0) {
                         // 게임 오버 - 블록이 보드 위쪽에 고정됨
                         newState.setGameOver(true);
-                        return LockResult.gameOver(
-                            newState, 
-                            "[GameEngine] (Method: lockTetromino) Game Over: Block locked above the board.",
-                            lockedTetromino,
-                            lockedX,
-                            lockedY
-                        );
+                        newState.setGameOverReason("[GameEngine] (Method: lockTetromino) Game Over: Block locked above the board.");
+                        
+                        // Phase 2: 게임 오버 시에도 Lock 메타데이터 저장
+                        newState.setLastLockedTetromino(lockedTetromino);
+                        newState.setLastLockedX(lockedX);
+                        newState.setLastLockedY(lockedY);
+                        newState.setLastLinesCleared(0);
+                        newState.setLastClearedRows(new int[0]);
+                        newState.setLastScoreEarned(0);
+                        newState.setLastIsPerfectClear(false);
+                        newState.setLastLeveledUp(false);
+                        
+                        return newState;
                     }
                 }
             }
@@ -380,17 +367,18 @@ public class GameEngine {
         }
 
         // 3. 라인 클리어 체크 및 실행 (T-Spin 정보 전달)
-        LineClearResult clearResult = checkAndClearLines(newState, isTSpin, isTSpinMini);
+        // Phase 2: GameState에 직접 라인 클리어 정보를 저장
+        checkAndClearLines(newState, isTSpin, isTSpinMini);
 
         // 4. 점수 및 통계 업데이트
         boolean leveledUp = false;
         int newLevel = newState.getLevel();
         
-        if(clearResult.getLinesCleared() > 0) {
-            newState.addScore(clearResult.getScoreEarned());
+        if(newState.getLastLinesCleared() > 0) {
+            newState.addScore(newState.getLastScoreEarned());
             
             // 라인 클리어 추가 및 레벨업 체크
-            leveledUp = newState.addLinesCleared(clearResult.getLinesCleared());
+            leveledUp = newState.addLinesCleared(newState.getLastLinesCleared());
             newLevel = newState.getLevel();
 
             // 콤보 업데이트 (연속 라인 클리어 횟수)
@@ -400,8 +388,8 @@ public class GameEngine {
 
             // B2B (Back-to-Back) 업데이트
             // Tetris(4줄) 또는 T-Spin을 연속으로 성공하면 B2B 카운트 증가
-            boolean isDifficult = clearResult.getLinesCleared() == GameConstants.TETRIS_LINE_COUNT 
-                                || clearResult.isTSpin();
+            boolean isDifficult = newState.getLastLinesCleared() == GameConstants.TETRIS_LINE_COUNT 
+                                || newState.isLastLockWasTSpin();
             if (isDifficult && newState.isLastClearWasDifficult()) {
                 // 이전에도 difficult였고 지금도 difficult → B2B 계속
                 newState.setBackToBackCount(newState.getBackToBackCount() + 1);
@@ -427,15 +415,13 @@ public class GameEngine {
         // 6. 회전 플래그 리셋 (다음 블록을 위해)
         newState.setLastActionWasRotation(false);
         
-        return LockResult.success(
-            newState, 
-            clearResult,
-            lockedTetromino,  // 고정된 블록 정보 전달!
-            lockedX,
-            lockedY,
-            leveledUp,
-            newLevel
-        );
+        // Phase 2: Lock 메타데이터를 GameState에 저장
+        newState.setLastLockedTetromino(lockedTetromino);
+        newState.setLastLockedX(lockedX);
+        newState.setLastLockedY(lockedY);
+        newState.setLastLeveledUp(leveledUp);
+        
+        return newState;
     }
 
     // ========== T-Spin 감지 ==========
@@ -606,13 +592,13 @@ public class GameEngine {
     // ========== 라인 클리어 ===================
     /**
      * 라인 클리어를 체크하고 실행합니다
+     * Phase 2: GameState에 직접 라인 클리어 정보를 저장 (반환값 없음)
      * 
      * @param state 현재 게임 상태
      * @param isTSpin T-Spin 여부 (블록 고정 전에 미리 감지된 값)
      * @param isTSpinMini T-Spin Mini 여부 (블록 고정 전에 미리 감지된 값)
-     * @return 라인 클리어 정보
      */
-    private static LineClearInfo checkAndClearLines(GameState state, boolean isTSpin, boolean isTSpinMini) {
+    private static void checkAndClearLines(GameState state, boolean isTSpin, boolean isTSpinMini) {
         List<Integer> clearedRowsList = new ArrayList<>();
 
         // 라인 체크 (아래에서 위로)
@@ -632,7 +618,12 @@ public class GameEngine {
         }
 
         if (clearedRowsList.isEmpty()){
-            return LineClearInfo.none();
+            // 라인 클리어 없음 - GameState에 기본값 저장
+            state.setLastLinesCleared(0);
+            state.setLastClearedRows(new int[0]);
+            state.setLastScoreEarned(0);
+            state.setLastIsPerfectClear(false);
+            return;
         }
 
         // 라인 클리어 실행 (수정된 버전)
@@ -685,7 +676,18 @@ public class GameEngine {
                 state.getLevel(), state.getComboCount(), state.getBackToBackCount()
         );
 
-        return new LineClearInfo(linesCleared, score, isTSpin, isPerfectClear);
+        // Phase 2: GameState에 라인 클리어 정보 직접 저장
+        state.setLastLinesCleared(linesCleared);
+        
+        // clearedRowsList를 int[] 배열로 변환
+        int[] clearedRowsArray = new int[clearedRowsList.size()];
+        for (int i = 0; i < clearedRowsList.size(); i++) {
+            clearedRowsArray[i] = clearedRowsList.get(i);
+        }
+        state.setLastClearedRows(clearedRowsArray);
+        
+        state.setLastScoreEarned(score);
+        state.setLastIsPerfectClear(isPerfectClear);
     }
 
     private static boolean checkPerfectClear(GameState state) {
