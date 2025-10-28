@@ -10,6 +10,7 @@ import lombok.Setter;
 public class SettingResponseDto {
     private String settingsName;
 
+    private GameLevel gameLevel;
     private ScreenSize screenSize;
     private ColorMode colorMode;
     private int musicVolume;

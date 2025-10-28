@@ -1,5 +1,5 @@
 package seoultech.se.backend.settings;
 
 public enum ScreenSize {
-    SMALL, MEDIUM, LARGE
+    XSMALL, SMALL, MEDIUM, LARGE, XLARGE
 }

@@ -10,6 +10,7 @@ public class SettingRequestDto {
     private String settingsName;
     private String email;
 
+    private GameLevel gameLevel;
     private ScreenSize screenSize;
     private ColorMode colorMode;
     private int musicVolume;
