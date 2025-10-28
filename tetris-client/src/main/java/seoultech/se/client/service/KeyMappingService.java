@@ -7,6 +7,7 @@ import java.util.prefs.Preferences;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
 import javafx.scene.input.KeyCode;
 import seoultech.se.client.model.GameAction;
 
@@ -43,8 +44,13 @@ public class KeyMappingService {
         this.preferences = Preferences.userRoot().node(PREFS_NODE);
         this.actionToKey = new HashMap<>();
         this.keyToAction = new HashMap<>();
-        
-        // 저장된 설정 로드 또는 기본값 사용
+    }
+    
+    /**
+     * 초기화: 저장된 키 매핑을 로드하거나 기본값 설정
+     */
+    @PostConstruct
+    public void init() {
         loadMappings();
     }
     

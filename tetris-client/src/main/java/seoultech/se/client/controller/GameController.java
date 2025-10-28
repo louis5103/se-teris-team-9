@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -22,8 +23,6 @@ import seoultech.se.client.util.ColorMapper;
 import seoultech.se.core.GameState;
 import seoultech.se.core.command.Direction;
 import seoultech.se.core.command.MoveCommand;
-import seoultech.se.core.model.Cell;
-import seoultech.se.core.model.Tetromino;
 import seoultech.se.core.model.enumType.TetrominoType;
 
 /**
@@ -75,9 +74,6 @@ public class GameController {
     // 게임 로직 컨트롤러
     private BoardController boardController;
     
-    // GameState 비교를 위한 이전 상태
-    private GameState previousState;
-    
     // UI 관리 클래스들
     private BoardRenderer boardRenderer;
     private NotificationManager notificationManager;
@@ -110,7 +106,6 @@ public class GameController {
         boardController = new BoardController();
         
         GameState gameState = boardController.getGameState();
-        previousState = gameState.deepCopy();  // 초기 상태 복사
         System.out.println("📊 Board created: " + gameState.getBoardWidth() + "x" + gameState.getBoardHeight());
 
         // UI 초기화
@@ -166,7 +161,6 @@ public class GameController {
             
             // GameState 비교하여 UI 힌트 추출 및 업데이트
             showUiHints(oldState, newState);
-            previousState = newState.deepCopy();
             
             return true; // 게임 루프 계속
         });
@@ -191,6 +185,7 @@ public class GameController {
                     navigationService.navigateTo("/view/main-view.fxml");
                 } catch (Exception e) {
                     System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
+                    showError("화면 전환 실패", "메인 화면으로 이동하지 못했습니다: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -201,6 +196,7 @@ public class GameController {
                     navigationService.navigateTo("/view/main-view.fxml");
                 } catch (Exception e) {
                     System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
+                    showError("화면 전환 실패", "메인 화면으로 이동하지 못했습니다: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -211,6 +207,7 @@ public class GameController {
                     navigationService.navigateTo("/view/game-view.fxml");
                 } catch (Exception e) {
                     System.err.println("❌ Failed to restart game: " + e.getMessage());
+                    showError("재시작 실패", "게임을 재시작하지 못했습니다: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -224,9 +221,6 @@ public class GameController {
             
             // GameState 비교하여 UI 힌트 추출 및 업데이트
             showUiHints(oldState, newState);
-            
-            // 이전 상태 업데이트
-            previousState = newState.deepCopy();
         });
         inputHandler.setGameStateProvider(new InputHandler.GameStateProvider() {
             @Override
@@ -509,8 +503,25 @@ public class GameController {
         popupManager.handleMainMenuAction();
     }
 
+
     @FXML
     private void handleRestartFromOverlay() {
         popupManager.handleRestartAction();
     }
+    
+    // ========== UI 알림 메서드 ==========
+    
+    /**
+     * 오류 알림 표시
+     */
+    private void showError(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
 }
+
