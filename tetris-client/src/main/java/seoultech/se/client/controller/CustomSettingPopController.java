@@ -89,15 +89,10 @@ public class CustomSettingPopController extends BaseController {
                     : "600");
             
             newSetting.setConfigurations(configurations);
-<<<<<<< HEAD
-            newSetting.setSelected(true); // Make this the active setting
-            mainController.addCustomSetting(newSetting);
-=======
             newSetting.setSelected(true);
-            mainController.addSetting(newSetting);
+            mainController.addCustomSetting(newSetting);
             
             showInfo("저장 완료", "설정 '" + settingName + "'이(가) 저장되었습니다.");
->>>>>>> 16bfed4 (Feat/117/fix bug file (#118))
             closeWindow();
             
         } catch (NullPointerException e) {

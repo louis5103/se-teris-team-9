@@ -119,12 +119,8 @@ public class SettingsService {
     public DoubleProperty stageHeightProperty() {
         return stageHeight;
     }
-<<<<<<< HEAD
 
     public StringProperty difficultyProperty() {
         return difficulty;
     }
 }
-=======
-}
->>>>>>> 16bfed4 (Feat/117/fix bug file (#118))

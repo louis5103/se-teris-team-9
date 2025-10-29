@@ -16,14 +16,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
-<<<<<<< HEAD
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-=======
->>>>>>> 16bfed4 (Feat/117/fix bug file (#118))
 import seoultech.se.client.config.ApplicationContextProvider;
 import seoultech.se.client.model.*;
 import seoultech.se.client.repository.*;
