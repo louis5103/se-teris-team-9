@@ -1,16 +1,29 @@
 package seoultech.se.client.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import seoultech.se.client.config.ApplicationContextProvider;
+import seoultech.se.client.model.*;
+import seoultech.se.client.repository.*;
 import seoultech.se.client.service.KeyMappingService;
 import seoultech.se.client.service.NavigationService;
 
@@ -21,6 +34,8 @@ public class SettingSceneController extends BaseController {
     private NavigationService navigationService;
     @Autowired
     private KeyMappingService keyMappingService;
+    @Autowired
+    private SettingsRepository settingsRepository;
 
     @FXML
     private Slider soundSlider;
@@ -47,11 +62,24 @@ public class SettingSceneController extends BaseController {
     @FXML
     private RadioButton colorModeBYBlind;
     @FXML
-    private Button keySettingButton;
-    @FXML
     private Button clearScoreBoardButton;
+    // @FXML
+    // private Button keySettingButton;
+    // @FXML
+    // private Button customSettingButton;
+
+    // Key Binding
     @FXML
-    private Button customSettingButton;
+    private Button leftButton, rightButton, rotateButton, downButton, floorButton;
+    private GameAction waitingForKey = null;
+    private Button activeButton = null;
+
+    // Custom Settings
+    @FXML private VBox settingContainer;
+    @FXML private Button saveCustomButton, deleteCustomButton;
+    private List<Setting> settings = new ArrayList<>();
+    private Setting selectedSetting = null;
+
     @FXML
     private Button resetButton;
     @FXML
@@ -72,6 +100,8 @@ public class SettingSceneController extends BaseController {
             settingsService.saveSettings();
             //TODO : 사운드 볼륨 조절 기능 구현
         });
+        updateButtonLabels();
+        loadCustomSettings();
     }
 
     private void loadSettingsToUI() {
@@ -80,6 +110,7 @@ public class SettingSceneController extends BaseController {
         soundSlider.setValue(settingsService.soundVolumeProperty().getValue());
         String screenSize = settingsService.screenSizeProperty().getValue();
         String colorMode = settingsService.colorModeProperty().getValue();
+        String difficulty = settingsService.difficultyProperty().getValue();
 
         switch (screenSize) {
             case "screenSizeXS":
@@ -99,6 +130,20 @@ public class SettingSceneController extends BaseController {
                 break;
             default:
                 System.out.println("❗ Unknown screen size in settings: " + screenSize);
+        }
+
+        switch (difficulty) {
+            case "Easy":
+                difficultyEasy.setSelected(true);
+                break;
+            case "Normal":
+                difficultyNormal.setSelected(true);
+                break;
+            case "Hard":
+                difficultyHard.setSelected(true);
+                break;
+            default:
+                System.out.println("❗ Unknown difficulty in settings: " + difficulty);
         }
 
         switch (colorMode) {
@@ -156,7 +201,11 @@ public class SettingSceneController extends BaseController {
 
     @FXML
     public void handleDifficultyChange(ActionEvent event) {
-        // 난이도 변경 기능 구현 필요
+        RadioButton selectedRadioButton = (RadioButton) event.getSource();
+        settingsService.difficultyProperty().setValue(selectedRadioButton.getText());
+        settingsService.saveSettings();
+        System.out.println("🎯 Difficulty set to: " + selectedRadioButton.getText());
+        //TODO : 난이도 변경 기능 구현
     }
 
     @FXML
@@ -213,5 +262,233 @@ public class SettingSceneController extends BaseController {
     public void handleBackButton(ActionEvent event) throws IOException {
         navigationService.navigateTo("/view/main-view.fxml");
         //다른곳에서 setting으로 이동시에는 이전 페이지로 돌아가도록 수정 필요
+    }
+
+        
+    /**
+     * 모든 버튼의 레이블을 현재 키 매핑으로 업데이트
+     */
+    private void updateButtonLabels() {
+        updateButtonLabel(leftButton, GameAction.MOVE_LEFT, "Left");
+        updateButtonLabel(rightButton, GameAction.MOVE_RIGHT, "Right");
+        updateButtonLabel(downButton, GameAction.MOVE_DOWN, "Down");
+        updateButtonLabel(floorButton, GameAction.HARD_DROP, "Hard Drop");
+        updateButtonLabel(rotateButton, GameAction.ROTATE_CLOCKWISE, "Rotate");
+    }
+    
+    /**
+     * 버튼 레이블 업데이트 (액션명 + 현재 키)
+     */
+    private void updateButtonLabel(Button button, GameAction action, String actionName) {
+        keyMappingService.getKey(action).ifPresentOrElse(
+            key -> button.setText(actionName + ": " + key.getName()),
+            () -> button.setText(actionName + ": (NONE)")
+        );
+    }
+
+    @FXML
+    private void handleLeftButton() {
+        startKeyCapture(GameAction.MOVE_LEFT, leftButton);
+    }
+    
+    @FXML
+    private void handleRightButton() {
+        startKeyCapture(GameAction.MOVE_RIGHT, rightButton);
+    }
+    
+    @FXML
+    private void handleDownButton() {
+        startKeyCapture(GameAction.MOVE_DOWN, downButton);
+    }
+    
+    @FXML
+    private void handleFloorButton() {
+        startKeyCapture(GameAction.HARD_DROP, floorButton);
+    }
+    
+    @FXML
+    private void handleRotateButton() {
+        startKeyCapture(GameAction.ROTATE_CLOCKWISE, rotateButton);
+    }
+    
+    /**
+     * 키 입력 대기 모드 시작
+     */
+    private void startKeyCapture(GameAction action, Button button) {
+        waitingForKey = action;
+        activeButton = button;
+        button.setText("Press any key...");
+        button.setStyle("-fx-background-color: #4CAF50;");
+        
+        // 키 입력 리스너 등록
+        rootPane.setOnKeyPressed(this::handleKeyCaptured);
+        rootPane.requestFocus();
+    }
+    
+    /**
+     * 키 입력 감지 및 매핑 저장
+     */
+    private void handleKeyCaptured(KeyEvent event) {
+        if (waitingForKey == null) {
+            return;
+        }
+        
+        KeyCode key = event.getCode();
+        
+        // ESC는 취소
+        if (key == KeyCode.ESCAPE) {
+            cancelKeyCapture();
+            return;
+        }
+        
+        // 키 매핑 저장
+        boolean success = keyMappingService.setKeyMapping(waitingForKey, key);
+        
+        if (success) {
+            System.out.println("✅ Key mapped: " + waitingForKey + " → " + key);
+            updateButtonLabels();
+        } else {
+            System.err.println("❌ Failed to map key: " + key);
+        }
+        
+        cancelKeyCapture();
+        event.consume();
+    }
+    
+    /**
+     * 키 입력 대기 취소
+     */
+    private void cancelKeyCapture() {
+        if (activeButton != null) {
+            activeButton.setStyle("");
+        }
+        waitingForKey = null;
+        activeButton = null;
+        rootPane.setOnKeyPressed(null);
+        updateButtonLabels();
+    }
+
+
+    private void loadCustomSettings() {
+        settings = settingsRepository.loadSettings();
+        settingContainer.getChildren().clear();
+        
+        for (Setting setting : settings) {
+            Button button = createCustomSettingButton(setting);
+            if (setting.isSelected()) {
+                button.getStyleClass().add("custom-setting-button-selected");
+                selectedSetting = setting;
+            }
+            settingContainer.getChildren().add(button);
+        }
+    }
+
+    public void addCustomSetting(Setting setting) {
+        settings.add(setting);
+        settingsRepository.saveSettings(settings);
+        Button button = createCustomSettingButton(setting);
+        settingContainer.getChildren().add(button);
+    }
+
+    private Button createCustomSettingButton(Setting setting) {
+        Button button = new Button(setting.getName());
+        button.getStyleClass().add("menu-button-middle");
+        button.setMaxWidth(Double.MAX_VALUE);
+        
+        button.setOnAction(event -> {
+            // Deselect all settings first
+            settings.forEach(s -> s.setSelected(false));
+            
+            settingContainer.getChildren().forEach(node -> {
+                if (node instanceof Button) {
+                    node.getStyleClass().remove("custom-setting-button-selected");
+                }
+            });
+
+            // Select current setting
+            setting.setSelected(true);
+            button.getStyleClass().add("custom-setting-button-selected");
+            selectedSetting = setting;
+
+            applyCustomSettings(setting);
+            
+            // Save the changes
+            settingsRepository.saveSettings(settings);
+        });
+
+        return button;
+    }
+
+    private void applyCustomSettings(Setting setting) {
+        Map<String, String> configs = setting.getConfigurations();
+        if (configs != null) {
+            double soundVolume = Double.parseDouble(configs.getOrDefault("soundVolume", "80"));
+            settingsService.soundVolumeProperty().set(soundVolume);
+            settingsService.colorModeProperty().set(configs.getOrDefault("colorMode", "colorModeDefault"));
+            settingsService.screenSizeProperty().set(configs.getOrDefault("screenSize", "screenSizeM"));
+            settingsService.stageHeightProperty().set(Double.parseDouble(configs.getOrDefault("stageHeight", "700")));
+            settingsService.stageWidthProperty().set(Double.parseDouble(configs.getOrDefault("stageWidth", "500")));
+            double width = Double.parseDouble(configs.getOrDefault("stageWidth", "500"));
+            double height = Double.parseDouble(configs.getOrDefault("stageHeight", "700"));
+            settingsService.saveSettings();
+            settingsService.applyResolution(width, height);
+        }
+        
+    }
+
+    @FXML
+    private void handleSaveCustomButton() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/custom-setting-pop.fxml"));
+            Parent root = loader.load();
+            
+            CustomSettingPopController popController = loader.getController();
+            popController.setMainController(this);
+
+            Stage popupStage = new Stage();
+            popupStage.initModality(Modality.APPLICATION_MODAL);
+            popupStage.setTitle("Save Setting");
+            popupStage.setScene(new Scene(root));
+            
+            popupStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleDeleteCustomButton(){
+        if (selectedSetting != null){
+            settings.remove(selectedSetting);
+            settingsRepository.saveSettings(settings);
+            loadCustomSettings();
+            settingContainer.getChildren().forEach(node -> {
+                if (node instanceof Button) {
+                    Button btn = (Button) node;
+                    btn.getStyleClass().remove("custom-setting-button-selected");
+                }
+            });
+            selectedSetting = null;
+        }
+    }
+
+    public void selectCustomSetting(Setting setting) {
+        // Deselect all settings
+        settings.forEach(s -> s.setSelected(false));
+        
+        // Select the chosen setting
+        setting.setSelected(true);
+        settingsRepository.saveSettings(settings);
+        
+        // Update UI
+        settingContainer.getChildren().forEach(node -> {
+            if (node instanceof Button) {
+                Button btn = (Button) node;
+                btn.getStyleClass().remove("custom-setting-button-selected");
+                if (btn.getText().equals(setting.getName())) {
+                    btn.getStyleClass().add("custom-setting-button-selected");
+                }
+            }
+        });
     }
 }

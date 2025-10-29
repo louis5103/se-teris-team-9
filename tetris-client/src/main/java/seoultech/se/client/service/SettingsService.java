@@ -23,6 +23,7 @@ public class SettingsService {
     private final DoubleProperty soundVolume = new SimpleDoubleProperty(80); // Default volume is 80
     private final StringProperty colorMode = new SimpleStringProperty("colorModeDefault"); // default, rg_blind, yb_blind
     private final StringProperty screenSize = new SimpleStringProperty("screenSizeM"); // XS, S, M, L, XL
+    private final StringProperty difficulty = new SimpleStringProperty("Normal"); // Easy, Normal, Hard
 
     private static final String SETTINGS_FILE = "tetris_settings";
 
@@ -63,6 +64,7 @@ public class SettingsService {
             soundVolume.set(Double.parseDouble(props.getProperty("soundVolume", "80")));
             colorMode.set(props.getProperty("colorMode", "colorModeDefault"));
             screenSize.set(props.getProperty("screenSize", "screenSizeM"));
+            difficulty.set(props.getProperty("difficulty", "Normal"));
             double width = Double.parseDouble(props.getProperty("stageWidth", "500"));
             double height = Double.parseDouble(props.getProperty("stageHeight", "600"));
             applyResolution(width, height);
@@ -77,6 +79,7 @@ public class SettingsService {
         Properties props = new Properties();
         props.setProperty("soundVolume", String.valueOf(soundVolume.get()));
         props.setProperty("colorMode", colorMode.get());
+        props.setProperty("difficulty", difficulty.get());
         props.setProperty("screenSize", screenSize.get());
         props.setProperty("stageWidth", String.valueOf(stageWidth.get()));
         props.setProperty("stageHeight", String.valueOf(stageHeight.get()));
@@ -92,6 +95,7 @@ public class SettingsService {
         soundVolume.set(80);
         colorMode.set("colorModeDefault");
         screenSize.set("screenSizeM");
+        difficulty.set("Normal");
         applyResolution(500, 700);
         saveSettings();
     }
@@ -114,5 +118,9 @@ public class SettingsService {
 
     public DoubleProperty stageHeightProperty() {
         return stageHeight;
+    }
+
+    public StringProperty difficultyProperty() {
+        return difficulty;
     }
 }
