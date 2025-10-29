@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane fx:id="rootPane" stylesheets="@../css/application.css, @../css/key-setting-view.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seoultech.se.client.controller.KeySettingSceneController">
+   <top>
+      <Label styleClass="title-label" text="Key" BorderPane.alignment="CENTER" />
+   </top>
+   <center>
+      <GridPane styleClass="center-pane" BorderPane.alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints halignment="LEFT" />
+          <ColumnConstraints hgrow="ALWAYS" />
+          <ColumnConstraints halignment="RIGHT" />
+        </columnConstraints>
+         
+         <Label styleClass="key-label" text="left: " GridPane.rowIndex="0" GridPane.columnIndex="0" />
+         <Button fx:id="leftButton" onAction="#handleLeftButton" styleClass="key-binding-button" text="default" alignment="CENTER" GridPane.rowIndex="0" GridPane.columnIndex="2" />
+
+         <Label styleClass="key-label" text="right: " GridPane.rowIndex="1" GridPane.columnIndex="0" />
+         <Button fx:id="rightButton" onAction="#handleRightButton" styleClass="key-binding-button" text="default" alignment="CENTER" GridPane.rowIndex="1" GridPane.columnIndex="2" />
+
+         <Label styleClass="key-label" text="down: " GridPane.rowIndex="2" GridPane.columnIndex="0" />
+         <Button fx:id="downButton" onAction="#handleDownButton" styleClass="key-binding-button" text="default" alignment="CENTER" GridPane.rowIndex="2" GridPane.columnIndex="2" />
+
+         <Label styleClass="key-label" text="floor: " GridPane.rowIndex="3" GridPane.columnIndex="0" />
+         <Button fx:id="floorButton" onAction="#handleFloorButton" styleClass="key-binding-button" text="default" alignment="CENTER" GridPane.rowIndex="3" GridPane.columnIndex="2" />
+
+         <Label styleClass="key-label" text="rotate: " GridPane.rowIndex="4" GridPane.columnIndex="0" />
+         <Button fx:id="rotateButton" onAction="#handleRotateButton" styleClass="key-binding-button" text="default" alignment="CENTER" GridPane.rowIndex="4" GridPane.columnIndex="2" />
+
+      </GridPane>
+   </center>
+   <bottom>
+      <HBox fx:id="bottomBox" alignment="CENTER_RIGHT" spacing="10" styleClass="bottom-box">
+         <children>
+            <Button fx:id="resetButton" onAction="#handleResetButton" styleClass="menu-button-small" text="Reset" />
+            <Button fx:id="backButton" onAction="#handleBackButton" styleClass="menu-button-small" text="Back" />
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>

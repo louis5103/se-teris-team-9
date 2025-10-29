@@ -16,7 +16,7 @@ import seoultech.se.client.model.Setting;
 
 @Component
 public class CustomSettingPopController extends BaseController {
-    private SettingSceneController mainController;
+    private CustomSettingSceneController mainController;
 
     @FXML
     private TextField settingNameField;
@@ -32,7 +32,7 @@ public class CustomSettingPopController extends BaseController {
         this.settingsService = ApplicationContextProvider.getApplicationContext().getBean(seoultech.se.client.service.SettingsService.class);
     }
 
-    public void setMainController(SettingSceneController controller) {
+    public void setMainController(CustomSettingSceneController controller) {
         this.mainController = controller;
     }
 
@@ -89,8 +89,6 @@ public class CustomSettingPopController extends BaseController {
                     : "600");
             
             newSetting.setConfigurations(configurations);
-            newSetting.setSelected(true); // Make this the active setting
-            mainController.addCustomSetting(newSetting);
             newSetting.setSelected(true);
             mainController.addSetting(newSetting);
             
