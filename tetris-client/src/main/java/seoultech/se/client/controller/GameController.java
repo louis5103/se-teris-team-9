@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -19,23 +20,20 @@ import seoultech.se.client.ui.InputHandler;
 import seoultech.se.client.ui.NotificationManager;
 import seoultech.se.client.ui.PopupManager;
 import seoultech.se.client.util.ColorMapper;
-import seoultech.se.core.BoardObserver;
 import seoultech.se.core.GameState;
 import seoultech.se.core.command.Direction;
 import seoultech.se.core.command.MoveCommand;
-import seoultech.se.core.model.Cell;
-import seoultech.se.core.model.Tetromino;
-import seoultech.se.core.model.enumType.RotationDirection;
 import seoultech.se.core.model.enumType.TetrominoType;
 
 /**
  * JavaFX UI를 제어하는 컨트롤러
  * 
- * 리팩토링을 통해 책임이 더욱 명확해졌습니다:
+ * Phase 3: Observer 패턴 제거 완료
  * 
+ * 이 클래스의 역할:
  * 1. 사용자 입력을 Command로 변환
- * 2. Command를 BoardController에 전달
- * 3. BoardObserver로서 Event를 받아 UI 업데이트 위임
+ * 2. Command를 BoardController에 전달하고 GameState 수신
+ * 3. GameState 비교하여 UI 힌트 추출 및 업데이트
  * 
  * UI 관련 세부 작업은 다음 클래스들에 위임됩니다:
  * - NotificationManager: 알림 메시지 관리
@@ -46,7 +44,7 @@ import seoultech.se.core.model.enumType.TetrominoType;
  * - GameInfoManager: 게임 정보 레이블 업데이트
  */
 @Component
-public class GameController implements BoardObserver {
+public class GameController {
 
     // FXML UI 요소들
     @FXML private GridPane boardGridPane;
@@ -104,10 +102,9 @@ public class GameController implements BoardObserver {
             System.err.println("❌ KeyMappingService is null!");
         }
 
-        // BoardController 생성 및 Observer 등록
+        // BoardController 생성
         boardController = new BoardController();
-        boardController.addObserver(this);
-
+        
         GameState gameState = boardController.getGameState();
         System.out.println("📊 Board created: " + gameState.getBoardWidth() + "x" + gameState.getBoardHeight());
 
@@ -159,7 +156,12 @@ public class GameController implements BoardObserver {
             }
             
             // 블록 자동 낙하
-            boardController.executeCommand(new MoveCommand(Direction.DOWN));
+            GameState oldState = gameState.deepCopy();
+            GameState newState = boardController.executeCommand(new MoveCommand(Direction.DOWN));
+            
+            // GameState 비교하여 UI 힌트 추출 및 업데이트
+            showUiHints(oldState, newState);
+            
             return true; // 게임 루프 계속
         });
         
@@ -183,6 +185,7 @@ public class GameController implements BoardObserver {
                     navigationService.navigateTo("/view/main-view.fxml");
                 } catch (Exception e) {
                     System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
+                    showError("화면 전환 실패", "메인 화면으로 이동하지 못했습니다: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -193,6 +196,7 @@ public class GameController implements BoardObserver {
                     navigationService.navigateTo("/view/main-view.fxml");
                 } catch (Exception e) {
                     System.err.println("❌ Failed to navigate to main view: " + e.getMessage());
+                    showError("화면 전환 실패", "메인 화면으로 이동하지 못했습니다: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -203,6 +207,7 @@ public class GameController implements BoardObserver {
                     navigationService.navigateTo("/view/game-view.fxml");
                 } catch (Exception e) {
                     System.err.println("❌ Failed to restart game: " + e.getMessage());
+                    showError("재시작 실패", "게임을 재시작하지 못했습니다: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -211,7 +216,11 @@ public class GameController implements BoardObserver {
         // InputHandler 초기화
         inputHandler = new InputHandler(keyMappingService);
         inputHandler.setCallback(command -> {
-            boardController.executeCommand(command);
+            GameState oldState = boardController.getGameState().deepCopy();
+            GameState newState = boardController.executeCommand(command);
+            
+            // GameState 비교하여 UI 힌트 추출 및 업데이트
+            showUiHints(oldState, newState);
         });
         inputHandler.setGameStateProvider(new InputHandler.GameStateProvider() {
             @Override
@@ -338,194 +347,119 @@ public class GameController implements BoardObserver {
         inputHandler.setupKeyboardControls(boardGridPane);
     }
 
-    // ========== BoardObserver 구현 ==========
+    // ========== GameState 비교하여 UI 힌트 추출 ==========
     
-    @Override
-    public void onCellChanged(int row, int col, Cell cell) {
-        boardRenderer.updateCell(row, col, cell);
-    }
-
-    @Override
-    public void onMultipleCellsChanged(int[] rows, int[] cols, Cell[][] cells) {
-        // 대량 셀 업데이트 (필요시 성능 최적화 구현)
-    }
-
-    @Override
-    public void onTetrominoMoved(int x, int y, Tetromino tetromino) {
-        boardRenderer.drawBoard(boardController.getGameState());
-    }
-
-    @Override
-    public void onTetrominoRotated(RotationDirection direction, int kickIndex, Tetromino tetromino) {
-        boardRenderer.drawBoard(boardController.getGameState());
-    }
-
-    @Override
-    public void onTetrominoRotationFailed(RotationDirection direction) {
-        // 실패 사운드나 시각 효과 추가 가능
-    }
-
-    @Override
-    public void onTetrominoLocked(Tetromino tetromino) {
-        // 블록 고정 애니메이션 효과 추가 가능
-    }
-
-    @Override
-    public void onTetrominoLockDelayStarted() {
-        // Lock Delay 시각적 표시 (예: 블록 깜빡임)
-    }
-
-    @Override
-    public void onTetrominoLockDelayReset(int remainingResets) {
-        // Lock Delay 리셋 횟수 표시
-    }
-
-    @Override
-    public void onTetrominoSpawned(Tetromino tetromino) {
-        boardRenderer.drawBoard(boardController.getGameState());
-    }
-
-    @Override
-    public void onNextQueueUpdated(TetrominoType[] nextPieces) {
-        if (nextPieces != null && nextPieces.length > 0) {
-            boardRenderer.drawNextPiece(nextPieces[0]);
-        }
-    }
-
-    @Override
-    public void onHoldChanged(TetrominoType heldPiece, TetrominoType previousPiece) {
-        boardRenderer.drawHoldPiece(heldPiece);
-    }
-
-    @Override
-    public void onHoldFailed() {
-        notificationManager.showLineClearType("⚠️ Hold already used!");
-    }
-
-    @Override
-    public void onLineCleared(int linesCleared, int[] clearedRows,
-                              boolean isTSpin, boolean isTSpinMini, boolean isPerfectClear) {
-        StringBuilder message = new StringBuilder();
-        
-        // T-Spin 표시
-        if (isTSpin) {
-            message.append(isTSpinMini ? "T-SPIN MINI " : "T-SPIN ");
-        }
-        
-        // 라인 타입 표시
-        switch (linesCleared) {
-            case 1:
-                message.append("SINGLE");
-                break;
-            case 2:
-                message.append("DOUBLE");
-                break;
-            case 3:
-                message.append("TRIPLE");
-                break;
-            case 4:
-                message.append("TETRIS");
-                break;
-        }
-        
-        // Perfect Clear 표시
-        if (isPerfectClear) {
-            message.append(" 🌟 PERFECT CLEAR!");
-        }
-        
-        // 중앙에 라인 클리어 타입 표시
-        if (message.length() > 0) {
-            notificationManager.showLineClearType(message.toString());
-        }
-        
-        // 우측에 라인 클리어 수 표시
-        GameState state = boardController.getGameState();
-        notificationManager.showLineClearCount(linesCleared, state.getLinesCleared());
-    }
-
-    @Override
-    public void onCombo(int comboCount) {
-        notificationManager.showCombo("🔥 COMBO x" + comboCount);
-    }
-
-    @Override
-    public void onComboBreak(int finalComboCount) {
-        // Combo 종료는 메시지 표시 안 함
-    }
-
-    @Override
-    public void onBackToBack(int backToBackCount) {
-        notificationManager.showBackToBack("⚡ B2B x" + backToBackCount);
-    }
-
-    @Override
-    public void onBackToBackBreak(int finalBackToBackCount) {
-        // B2B 종료는 메시지 표시 안 함
-    }
-
-    @Override
-    public void onScoreAdded(long points, String reason) {
-        // 점수는 onGameStateChanged에서 자동 업데이트됨
-    }
-
-    @Override
-    public void onGameStateChanged(GameState gameState) {
+    /**
+     * GameState를 비교하여 필요한 UI 힌트를 추출하고 업데이트합니다
+     * 
+     * Phase 3: Observer 패턴 대체 메서드
+     * 
+     * @param oldState 이전 GameState
+     * @param newState 새로운 GameState
+     */
+    private void showUiHints(GameState oldState, GameState newState) {
         Platform.runLater(() -> {
-            gameInfoManager.updateAll(gameState);
-            gameLoopManager.updateDropSpeed(gameState);
+            // 1. 보드 전체 렌더링
+            boardRenderer.drawBoard(newState);
+            
+            // 2. Next Queue 업데이트
+            TetrominoType[] nextQueue = newState.getNextQueue();
+            if (nextQueue != null && nextQueue.length > 0) {
+                boardRenderer.drawNextPiece(nextQueue[0]);
+            }
+            
+            // 3. Hold 업데이트
+            if (oldState.getHeldPiece() != newState.getHeldPiece()) {
+                boardRenderer.drawHoldPiece(newState.getHeldPiece());
+            }
+            
+            // 4. 점수/레벨/라인 업데이트
+            gameInfoManager.updateAll(newState);
+            gameLoopManager.updateDropSpeed(newState);
+            
+            // 5. 라인 클리어 감지
+            int oldLines = oldState.getLinesCleared();
+            int newLines = newState.getLinesCleared();
+            if (newLines > oldLines) {
+                int linesCleared = newState.getLastLinesCleared();
+                boolean isTSpin = newState.isLastLockWasTSpin();
+                boolean isTSpinMini = newState.isLastLockWasTSpinMini();
+                
+                StringBuilder message = new StringBuilder();
+                
+                // T-Spin 표시
+                if (isTSpin) {
+                    message.append(isTSpinMini ? "T-SPIN MINI " : "T-SPIN ");
+                }
+                
+                // 라인 타입 표시
+                switch (linesCleared) {
+                    case 1:
+                        message.append("SINGLE");
+                        break;
+                    case 2:
+                        message.append("DOUBLE");
+                        break;
+                    case 3:
+                        message.append("TRIPLE");
+                        break;
+                    case 4:
+                        message.append("TETRIS");
+                        break;
+                }
+                
+                // 중앙에 라인 클리어 타입 표시
+                if (message.length() > 0) {
+                    notificationManager.showLineClearType(message.toString());
+                }
+                
+                // 우측에 라인 클리어 수 표시
+                notificationManager.showLineClearCount(linesCleared, newLines);
+            }
+            
+            // 6. 콤보 감지
+            int oldCombo = oldState.getComboCount();
+            int newCombo = newState.getComboCount();
+            if (newCombo > oldCombo) {
+                notificationManager.showCombo("🔥 COMBO x" + newCombo);
+            }
+            
+            // 7. Back-to-Back 감지
+            int oldB2B = oldState.getBackToBackCount();
+            int newB2B = newState.getBackToBackCount();
+            if (newB2B > oldB2B) {
+                notificationManager.showBackToBack("⚡ B2B x" + newB2B);
+            }
+            
+            // 8. 레벨 업 감지
+            int oldLevel = oldState.getLevel();
+            int newLevel = newState.getLevel();
+            if (newLevel > oldLevel) {
+                notificationManager.showLineClearType("📈 LEVEL UP! - Level " + newLevel);
+            }
+            
+            // 9. 일시정지 감지
+            boolean wasPaused = oldState.isPaused();
+            boolean isPaused = newState.isPaused();
+            if (!wasPaused && isPaused) {
+                pauseGame();
+                popupManager.showPausePopup();
+            } else if (wasPaused && !isPaused) {
+                gameLoopManager.resume();
+                notificationManager.hideAllNotifications();
+            }
+            
+            // 10. 게임 오버 감지
+            boolean wasGameOver = oldState.isGameOver();
+            boolean isGameOver = newState.isGameOver();
+            if (!wasGameOver && isGameOver) {
+                gameOverLabel.setVisible(true);
+                System.out.println("💀 GAME OVER");
+                System.out.println("   Final Score: " + newState.getScore());
+                System.out.println("   Lines Cleared: " + newState.getLinesCleared());
+                popupManager.showGameOverPopup(newState.getScore());
+            }
         });
-    }
-
-    @Override
-    public void onLevelUp(int newLevel) {
-        notificationManager.showLineClearType("📈 LEVEL UP! - Level " + newLevel);
-    }
-
-    @Override
-    public void onGamePaused() {
-        pauseGame();
-        popupManager.showPausePopup();
-    }
-
-    @Override
-    public void onGameResumed() {
-        // 게임 재개 후 UI를 업데이트합니다. (ResumeCommand는 별도의 위치에서 실행됨)
-        gameLoopManager.resume();
-        notificationManager.hideAllNotifications();
-    }
-
-    @Override
-    public void onGameOver(String reason) {
-        Platform.runLater(() -> {
-            gameOverLabel.setVisible(true);
-            GameState gameState = boardController.getGameState();
-            System.out.println("💀 GAME OVER (" + reason + ")");
-            System.out.println("   Final Score: " + gameState.getScore());
-            System.out.println("   Lines Cleared: " + gameState.getLinesCleared());
-            popupManager.showGameOverPopup(gameState.getScore());
-        });
-    }
-
-    @Override
-    public void onGarbageLinesAdded(int lines, String sourcePlayerId) {
-        System.out.println("💥 Received " + lines + " garbage lines from " + sourcePlayerId);
-    }
-
-    @Override
-    public void onGarbageLinesCleared(int lines) {
-        System.out.println("🛡️ Cleared " + lines + " incoming garbage lines");
-    }
-
-    @Override
-    public void onAttackSent(String targetPlayerId, int lines) {
-        System.out.println("⚔️ Sent " + lines + " lines to " + targetPlayerId);
-    }
-
-    @Override
-    public void onDebugInfoUpdated(String debugInfo) {
-        if (System.getProperty("debug.mode") != null) {
-            System.out.println("🐛 " + debugInfo);
-        }
     }
 
     // ========== UI 업데이트 헬퍼 메서드들 ==========
@@ -569,8 +503,25 @@ public class GameController implements BoardObserver {
         popupManager.handleMainMenuAction();
     }
 
+
     @FXML
     private void handleRestartFromOverlay() {
         popupManager.handleRestartAction();
     }
+    
+    // ========== UI 알림 메서드 ==========
+    
+    /**
+     * 오류 알림 표시
+     */
+    private void showError(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
 }
+

@@ -43,4 +43,5 @@ public class UserController {
         String message = userService.logout(email);
         return message;
     }
+
 }

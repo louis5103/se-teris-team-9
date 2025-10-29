@@ -48,6 +48,21 @@ public class GameState {
     
     // T-Spin 감지를 위한 정보
     private boolean lastActionWasRotation;  // 마지막 액션이 회전이었는지
+    private int lastRotationKickIndex;  // 회전 시 사용한 Wall Kick 인덱스 (0-4)
+    
+    // T-Spin 결과 메타데이터 (마지막 고정 블록에 대한 정보)
+    private boolean lastLockWasTSpin;  // 마지막 고정이 T-Spin이었는지
+    private boolean lastLockWasTSpinMini;  // 마지막 고정이 T-Spin Mini였는지
+    
+    // Phase 2: Lock 관련 메타데이터 (EventMapper가 이벤트 생성 시 사용)
+    private Tetromino lastLockedTetromino;  // 마지막으로 고정된 블록
+    private int lastLockedX;  // 마지막으로 고정된 블록의 X 위치
+    private int lastLockedY;  // 마지막으로 고정된 블록의 Y 위치
+    private int lastLinesCleared;  // 마지막 액션에서 지워진 라인 수
+    private int[] lastClearedRows;  // 마지막 액션에서 지워진 라인들의 행 번호
+    private long lastScoreEarned;  // 마지막 액션에서 획득한 점수
+    private boolean lastIsPerfectClear;  // 마지막 액션이 Perfect Clear였는지
+    private boolean lastLeveledUp;  // 마지막 액션에서 레벨업이 발생했는지
 
 
     // 생성자
@@ -92,6 +107,19 @@ public class GameState {
         
         // T-Spin 감지 초기화
         this.lastActionWasRotation = false;
+        this.lastRotationKickIndex = 0;
+        this.lastLockWasTSpin = false;
+        this.lastLockWasTSpinMini = false;
+        
+        // Phase 2: Lock 메타데이터 초기화
+        this.lastLockedTetromino = null;
+        this.lastLockedX = 0;
+        this.lastLockedY = 0;
+        this.lastLinesCleared = 0;
+        this.lastClearedRows = new int[0];
+        this.lastScoreEarned = 0;
+        this.lastIsPerfectClear = false;
+        this.lastLeveledUp = false;
     }
     
     // 깊은 복사.
@@ -138,8 +166,24 @@ public class GameState {
         copy.isLockDelayActive = this.isLockDelayActive;
         copy.lockDelayResets = this.lockDelayResets;
         
+        // 게임 상태 복사
+        copy.isPaused = this.isPaused;
+        
         // T-Spin 관련 복사
         copy.lastActionWasRotation = this.lastActionWasRotation;
+        copy.lastRotationKickIndex = this.lastRotationKickIndex;
+        copy.lastLockWasTSpin = this.lastLockWasTSpin;
+        copy.lastLockWasTSpinMini = this.lastLockWasTSpinMini;
+        
+        // Phase 2: Lock 메타데이터 복사
+        copy.lastLockedTetromino = this.lastLockedTetromino;
+        copy.lastLockedX = this.lastLockedX;
+        copy.lastLockedY = this.lastLockedY;
+        copy.lastLinesCleared = this.lastLinesCleared;
+        copy.lastClearedRows = this.lastClearedRows != null ? this.lastClearedRows.clone() : new int[0];
+        copy.lastScoreEarned = this.lastScoreEarned;
+        copy.lastIsPerfectClear = this.lastIsPerfectClear;
+        copy.lastLeveledUp = this.lastLeveledUp;
         
         return copy;
     }

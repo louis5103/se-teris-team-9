@@ -164,7 +164,6 @@ public class SettingSceneController extends BaseController {
     @FXML
     public void handleScreenSizeChange(ActionEvent event) {
         RadioButton selectedRadioButton = (RadioButton) event.getSource();
-        Stage stage = (Stage) selectedRadioButton.getScene().getWindow();
 
         double width = 500;
         double height = 700;
