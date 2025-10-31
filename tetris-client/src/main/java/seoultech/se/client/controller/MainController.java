@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.control.Button;
 import seoultech.se.backend.service.GameService;
 import seoultech.se.client.TetrisApplication;
 import seoultech.se.client.config.ApplicationContextProvider;
@@ -39,6 +41,23 @@ public class MainController extends BaseController {
 
     @Autowired
     private NavigationService navigationService;
+
+   @FXML
+    private Button startButton;
+    @FXML
+    private Button itemStartButton;
+    @FXML
+    private Button scoreButton;
+    @FXML
+    private Button endButton;
+    @FXML   
+    private Button settingsButton;
+
+    @FXML
+    private javafx.scene.layout.BorderPane rootPane;
+
+    private Button[] buttons;
+    private int currentButtonIndex = 0;
     
     /**
      * UI 초기화 메서드
@@ -48,6 +67,91 @@ public class MainController extends BaseController {
         super.initialize();
         System.out.println("✅ MainController initialized with Spring DI");
         System.out.println("📊 Service Status: " + gameService.getStatus());
+
+        buttons = new Button[] {
+            startButton,
+            itemStartButton,
+            scoreButton,
+            endButton
+        };
+
+        rootPane.setFocusTraversable(true);
+        
+        // Scene이 준비된 후에 키 리스너를 설정
+        rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                System.out.println("🎬 Scene ready - Setting up key listener");
+                newScene.setOnKeyPressed(this::handleKeyPressed);
+                newScene.getRoot().requestFocus();
+            }
+        });
+        
+        setupKeyNavigation();
+    }
+
+    /**
+     * 키 입력 이벤트를 처리하는 메서드
+     */
+    private void handleKeyPressed(javafx.scene.input.KeyEvent event) {
+        System.out.println("🔑 Key pressed: " + event.getCode());
+        
+        switch (event.getCode()) {
+            case UP:
+            case W:
+                currentButtonIndex = (currentButtonIndex - 1 + buttons.length) % buttons.length;
+                updateButtonHighlight();
+                System.out.println("⬆️ Moved to button: " + currentButtonIndex);
+                event.consume();
+                break;
+            case DOWN:
+            case S:
+                currentButtonIndex = (currentButtonIndex + 1) % buttons.length;
+                updateButtonHighlight();
+                System.out.println("⬇️ Moved to button: " + currentButtonIndex);
+                event.consume();
+                break;
+            case ENTER:
+                System.out.println("✅ Enter pressed - Firing button: " + currentButtonIndex);
+                buttons[currentButtonIndex].fire();
+                event.consume();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 현재 선택된 버튼을 시각적으로 강조
+     */
+    private void updateButtonHighlight() {
+        for (int i = 0; i < buttons.length; i++) {
+            if (i == currentButtonIndex) {
+                // 선택된 버튼 스타일
+                buttons[i].setStyle(
+                    "-fx-border-color: #00ffff; " +
+                    "-fx-border-width: 2; " +
+                    "-fx-background-color: #333333; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-effect: dropshadow(gaussian, rgba(0, 255, 255, 0.8), 15, 0, 0, 0);"
+                );
+            } else {
+                // 기본 스타일로 복원 (CSS에서 정의한 스타일 사용)
+                buttons[i].setStyle("");
+            }
+        }
+    }
+
+    private void setupKeyNavigation() {
+        // 버튼 클릭 후 포커스를 Scene root로 되돌리기
+        for (Button button : buttons) {
+            button.setFocusTraversable(true);
+            button.setOnMouseClicked(e -> {
+                javafx.scene.Scene scene = rootPane.getScene();
+                if (scene != null) {
+                    scene.getRoot().requestFocus();
+                }
+            });
+        }
     }
 
     /**
