@@ -16,7 +16,7 @@ import seoultech.se.client.model.Setting;
 
 @Component
 public class CustomSettingPopController extends BaseController {
-    private CustomSettingSceneController mainController;
+    private SettingSceneController mainController;
 
     @FXML
     private TextField settingNameField;
@@ -32,7 +32,7 @@ public class CustomSettingPopController extends BaseController {
         this.settingsService = ApplicationContextProvider.getApplicationContext().getBean(seoultech.se.client.service.SettingsService.class);
     }
 
-    public void setMainController(CustomSettingSceneController controller) {
+    public void setMainController(SettingSceneController controller) {
         this.mainController = controller;
     }
 
@@ -90,7 +90,7 @@ public class CustomSettingPopController extends BaseController {
             
             newSetting.setConfigurations(configurations);
             newSetting.setSelected(true);
-            mainController.addSetting(newSetting);
+            mainController.addCustomSetting(newSetting);
             
             showInfo("저장 완료", "설정 '" + settingName + "'이(가) 저장되었습니다.");
             closeWindow();
