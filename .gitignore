@@ -367,6 +367,7 @@ logs/
 # 기타 설정 파일들
 tetris_settings
 
+
 # Docker Compose 파일 (실제 설정 포함)
 docker-compose.yml
 docker-compose.override.yml
@@ -387,3 +388,4 @@ docker-compose.override.yml
 *2/
 * 2
 *2
+tetris-client/custom_settings.properties
