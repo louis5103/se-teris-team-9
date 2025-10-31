@@ -75,50 +75,82 @@ public class MainController extends BaseController {
             endButton
         };
 
-        // rootPane이 포커스를 받을 수 있도록 설정 (setStyle 제거)
         rootPane.setFocusTraversable(true);
         
+        // Scene이 준비된 후에 키 리스너를 설정
+        rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                System.out.println("🎬 Scene ready - Setting up key listener");
+                newScene.setOnKeyPressed(this::handleKeyPressed);
+                newScene.getRoot().requestFocus();
+            }
+        });
+        
         setupKeyNavigation();
+    }
 
-        if (buttons.length > 0) {
-            rootPane.requestFocus();  // rootPane에 포커스 설정
+    /**
+     * 키 입력 이벤트를 처리하는 메서드
+     */
+    private void handleKeyPressed(javafx.scene.input.KeyEvent event) {
+        System.out.println("🔑 Key pressed: " + event.getCode());
+        
+        switch (event.getCode()) {
+            case UP:
+            case W:
+                currentButtonIndex = (currentButtonIndex - 1 + buttons.length) % buttons.length;
+                updateButtonHighlight();
+                System.out.println("⬆️ Moved to button: " + currentButtonIndex);
+                event.consume();
+                break;
+            case DOWN:
+            case S:
+                currentButtonIndex = (currentButtonIndex + 1) % buttons.length;
+                updateButtonHighlight();
+                System.out.println("⬇️ Moved to button: " + currentButtonIndex);
+                event.consume();
+                break;
+            case ENTER:
+                System.out.println("✅ Enter pressed - Firing button: " + currentButtonIndex);
+                buttons[currentButtonIndex].fire();
+                event.consume();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 현재 선택된 버튼을 시각적으로 강조
+     */
+    private void updateButtonHighlight() {
+        for (int i = 0; i < buttons.length; i++) {
+            if (i == currentButtonIndex) {
+                // 선택된 버튼 스타일
+                buttons[i].setStyle(
+                    "-fx-border-color: #00ffff; " +
+                    "-fx-border-width: 2; " +
+                    "-fx-background-color: #333333; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-effect: dropshadow(gaussian, rgba(0, 255, 255, 0.8), 15, 0, 0, 0);"
+                );
+            } else {
+                // 기본 스타일로 복원 (CSS에서 정의한 스타일 사용)
+                buttons[i].setStyle("");
+            }
         }
     }
 
     private void setupKeyNavigation() {
-        // rootPane에 키 리스너 설정
-        rootPane.setOnKeyPressed(event -> {
-            System.out.println("🔑 Key pressed: " + event.getCode());
-            
-            switch (event.getCode()) {
-                case UP:
-                case W:
-                    currentButtonIndex = (currentButtonIndex - 1 + buttons.length) % buttons.length;
-                    buttons[currentButtonIndex].requestFocus();
-                    System.out.println("⬆️ Moved to button: " + currentButtonIndex);
-                    event.consume();
-                    break;
-                case DOWN:
-                case S:
-                    currentButtonIndex = (currentButtonIndex + 1) % buttons.length;
-                    buttons[currentButtonIndex].requestFocus();
-                    System.out.println("⬇️ Moved to button: " + currentButtonIndex);
-                    event.consume();
-                    break;
-                case ENTER:
-                    System.out.println("✅ Enter pressed - Firing button: " + currentButtonIndex);
-                    buttons[currentButtonIndex].fire();
-                    event.consume();
-                    break;
-                default:
-                    break;
-            }
-        });
-        
-        // 버튼 클릭 후 포커스를 rootPane으로 되돌리기
+        // 버튼 클릭 후 포커스를 Scene root로 되돌리기
         for (Button button : buttons) {
             button.setFocusTraversable(true);
-            button.setOnMouseClicked(e -> rootPane.requestFocus());
+            button.setOnMouseClicked(e -> {
+                javafx.scene.Scene scene = rootPane.getScene();
+                if (scene != null) {
+                    scene.getRoot().requestFocus();
+                }
+            });
         }
     }
 
