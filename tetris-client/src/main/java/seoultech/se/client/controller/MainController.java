@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.control.Button;
 import seoultech.se.backend.service.GameService;
 import seoultech.se.client.TetrisApplication;
 import seoultech.se.client.config.ApplicationContextProvider;
@@ -39,6 +41,23 @@ public class MainController extends BaseController {
 
     @Autowired
     private NavigationService navigationService;
+
+   @FXML
+    private Button startButton;
+    @FXML
+    private Button itemStartButton;
+    @FXML
+    private Button scoreButton;
+    @FXML
+    private Button endButton;
+    @FXML   
+    private Button settingsButton;
+
+    @FXML
+    private javafx.scene.layout.BorderPane rootPane;
+
+    private Button[] buttons;
+    private int currentButtonIndex = 0;
     
     /**
      * UI 초기화 메서드
@@ -48,6 +67,59 @@ public class MainController extends BaseController {
         super.initialize();
         System.out.println("✅ MainController initialized with Spring DI");
         System.out.println("📊 Service Status: " + gameService.getStatus());
+
+        buttons = new Button[] {
+            startButton,
+            itemStartButton,
+            scoreButton,
+            endButton
+        };
+
+        // rootPane이 포커스를 받을 수 있도록 설정 (setStyle 제거)
+        rootPane.setFocusTraversable(true);
+        
+        setupKeyNavigation();
+
+        if (buttons.length > 0) {
+            rootPane.requestFocus();  // rootPane에 포커스 설정
+        }
+    }
+
+    private void setupKeyNavigation() {
+        // rootPane에 키 리스너 설정
+        rootPane.setOnKeyPressed(event -> {
+            System.out.println("🔑 Key pressed: " + event.getCode());
+            
+            switch (event.getCode()) {
+                case UP:
+                case W:
+                    currentButtonIndex = (currentButtonIndex - 1 + buttons.length) % buttons.length;
+                    buttons[currentButtonIndex].requestFocus();
+                    System.out.println("⬆️ Moved to button: " + currentButtonIndex);
+                    event.consume();
+                    break;
+                case DOWN:
+                case S:
+                    currentButtonIndex = (currentButtonIndex + 1) % buttons.length;
+                    buttons[currentButtonIndex].requestFocus();
+                    System.out.println("⬇️ Moved to button: " + currentButtonIndex);
+                    event.consume();
+                    break;
+                case ENTER:
+                    System.out.println("✅ Enter pressed - Firing button: " + currentButtonIndex);
+                    buttons[currentButtonIndex].fire();
+                    event.consume();
+                    break;
+                default:
+                    break;
+            }
+        });
+        
+        // 버튼 클릭 후 포커스를 rootPane으로 되돌리기
+        for (Button button : buttons) {
+            button.setFocusTraversable(true);
+            button.setOnMouseClicked(e -> rootPane.requestFocus());
+        }
     }
 
     /**
