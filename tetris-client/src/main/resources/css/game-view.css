@@ -172,7 +172,139 @@
     -fx-smooth: false;
 }
 
-/* ========== 게임 정보 라벨 ========== */
+/* ========== 적록 색맹 모드 (Red-Green Blind Mode) ========== */
+/* Red/Green, Blue/Magenta, Red/Orange 혼동 방지 */
+
+.tetromino-rgblind-red {
+    /* (유지) Red */
+    -fx-fill: linear-gradient(to bottom, #ff4444, #cc0000);
+    -fx-stroke: #ff6666;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-rgblind-green {
+    /* (변경) Green -> Cyan (기존 Cyan 색상) */
+    -fx-fill: linear-gradient(to bottom, #44ffff, #00cccc);
+    -fx-stroke: #66ffff;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-rgblind-blue {
+    /* (유지) Blue */
+    -fx-fill: linear-gradient(to bottom, #4444ff, #0000cc);
+    -fx-stroke: #6666ff;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-rgblind-yellow {
+    /* (유지) Yellow */
+    -fx-fill: linear-gradient(to bottom, #ffff44, #cccc00);
+    -fx-stroke: #ffff66;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-rgblind-cyan {
+    /* (변경) Cyan -> White/Gray (무채색으로 구분) */
+    -fx-fill: linear-gradient(to bottom, #eeeeee, #bbbbbb);
+    -fx-stroke: #ffffff;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-rgblind-magenta {
+    /* (변경) Magenta -> Orange (기존 Orange 색상) */
+    -fx-fill: linear-gradient(to bottom, #ff8844, #cc4400);
+    -fx-stroke: #ffaa66;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-rgblind-orange {
+    /* (변경) Orange -> Dark Purple (Red/Orange와 구분) */
+    -fx-fill: linear-gradient(to bottom, #8844ff, #4400cc);
+    -fx-stroke: #aa66ff;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+
+/* ========== 청황 색맹 모드 (Blue-Yellow Blind Mode) ========== */
+/* Blue/Green, Yellow/Magenta 혼동 방지 */
+
+.tetromino-byblind-red {
+    /* (유지) Red */
+    -fx-fill: linear-gradient(to bottom, #ff4444, #cc0000);
+    -fx-stroke: #ff6666;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-byblind-green {
+    /* (변경) Green -> Orange (기존 Orange 색상) */
+    -fx-fill: linear-gradient(to bottom, #ff8844, #cc4400);
+    -fx-stroke: #ffaa66;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-byblind-blue {
+    /* (유지) Blue */
+    -fx-fill: linear-gradient(to bottom, #4444ff, #0000cc);
+    -fx-stroke: #6666ff;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-byblind-yellow {
+    /* (변경) Yellow -> White/Gray (무채색으로 구분) */
+    -fx-fill: linear-gradient(to bottom, #eeeeee, #bbbbbb);
+    -fx-stroke: #ffffff;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-byblind-cyan {
+    /* (유지) Cyan */
+    -fx-fill: linear-gradient(to bottom, #44ffff, #00cccc);
+    -fx-stroke: #66ffff;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-byblind-magenta {
+    /* (유지) Magenta */
+    -fx-fill: linear-gradient(to bottom, #ff44ff, #cc00cc);
+    -fx-stroke: #ff66ff;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+}
+
+.tetromino-byblind-orange {
+    /* (변경) Orange -> Brown (Green이 Orange를 사용했으므로) */
+    -fx-fill: linear-gradient(to bottom, #aa6633, #774411);
+    -fx-stroke: #cc8855;
+    -fx-stroke-width: 0.5;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 0.25em, 0, 0, 0.083em);
+    -fx-smooth: false;
+    
+}/* ========== 게임 정보 라벨 ========== */
 .info-label-title {
     -fx-font-size: 1.333em;
     -fx-font-family: "Arial Black";
