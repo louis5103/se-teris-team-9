@@ -23,5 +23,13 @@
 }
 
 .settings-box {
-    -fx-padding: 0 0 1em 1em;
+    -fx-padding: 1em 0em 1em 3em;
+    -fx-spacing: 2em;
+}
+
+/* 메뉴 이동방법 설명 부분 */
+.notice-label {
+    -fx-text-fill: white;
+    -fx-font-size: 1.7em;
+    -fx-font-family: "Arial Black";
 }

@@ -5,6 +5,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
 
 <BorderPane fx:id="rootPane" stylesheets="@../css/application.css, @../css/main-view.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seoultech.se.client.controller.MainController">
     <top>
@@ -25,8 +26,11 @@
     </center>
     
     <bottom>
-        <HBox fx:id="settingsBox" styleClass="settings-box" alignment="BOTTOM_RIGHT">
+        <HBox fx:id="settingsBox" styleClass="settings-box" alignment="CENTER">
             <children>
+                <Label styleClass="notice-label" text="↓, ↑: 메뉴 이동" />
+                <Label styleClass="notice-label" text="Enter: 선택" />
+                <Region HBox.hgrow="ALWAYS" />
                 <Button fx:id="settingsButton" onAction="#handleSettingsButtonAction" styleClass="settings-button" text="⚙️">
                 </Button>
             </children>
