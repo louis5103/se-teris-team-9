@@ -7,6 +7,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import seoultech.se.client.service.NavigationService;
 
@@ -18,6 +20,12 @@ public class OverPopController extends BaseController {
     
     @FXML
     private Label scoreLabel;
+    @FXML
+    private HBox nameInputBox;
+
+    @FXML
+    private TextField usernameInput;
+
 
     /**
      * 점수 설정
