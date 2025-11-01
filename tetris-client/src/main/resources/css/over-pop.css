@@ -20,8 +20,21 @@
     -fx-border-width: 0.167em;
 }
 
+.notice-box {
+    -fx-padding: 2em;
+    -fx-spacing: 2em;
+    -fx-alignment: center-left;
+}
+
 .notice-label {
     -fx-text-fill: white;
     -fx-font-size: 1.5em;
     -fx-font-family: "System Bold";
+}
+
+.score-highlight {
+    -fx-background-color: rgba(255, 215, 0, 0.3);
+    -fx-text-fill: rgb(255, 0, 0);
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255, 215, 0, 0.8), 8, 0.5, 0, 0);
 }

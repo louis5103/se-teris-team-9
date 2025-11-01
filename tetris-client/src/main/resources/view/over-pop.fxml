@@ -25,8 +25,18 @@
     <center>
         <VBox styleClass="center-box">
             <children>
-                <Label text="Your Score" styleClass="notice-label"/>
-                <Label fx:id="scoreLabel" styleClass="notice-label" text="99999" /> 
+                <HBox styleClass="notice-box">
+                    <children>
+                        <Label text="Your Score:" styleClass="notice-label"/>
+                        <Label fx:id="scoreLabel" styleClass="notice-label" text="your real score" />
+                    </children>
+                </HBox>
+                <HBox fx:id="nameInputBox" styleClass="notice-box" visible="false" managed="false">
+                    <children>
+                        <Label text="Your name:" styleClass="notice-label"/>
+                        <TextField fx:id="usernameInput" promptText="Enter your name" />
+                    </children>
+                </HBox>
                 <TableView fx:id="scoreBoardTable" styleClass="score-table">
                     <columns>
                         <TableColumn fx:id="rankColumn" text="RANK">
